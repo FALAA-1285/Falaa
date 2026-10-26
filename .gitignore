@@ -40,7 +40,8 @@ scripts/
 *.cert
 *.crt
 *.pfx
-*credential*
+*.credentials.json
+!src/lib/auth-credentials.ts
 *secret*
 .secrets/
 
