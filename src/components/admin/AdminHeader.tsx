@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useTransition } from "react";
-import { LogOut, Loader2, User, Database } from "lucide-react";
+import { LogOut, Loader2, User } from "lucide-react";
 import { logoutAction } from "@/actions/admin/auth";
 
 interface AdminHeaderProps {
@@ -11,7 +11,7 @@ interface AdminHeaderProps {
 
 export default function AdminHeader({
   title = "Panel Kontrol",
-  subtitle = "Kelola database dan konten portofolio Anda secara real-time",
+  subtitle = "Kelola konten portofolio Anda secara real-time",
 }: AdminHeaderProps) {
   const [isPending, startTransition] = useTransition();
 
@@ -37,12 +37,6 @@ export default function AdminHeader({
       </div>
 
       <div className="flex items-center gap-3">
-        {/* PostgreSQL Active Badge */}
-        <div className="hidden md:flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-neutral-100 text-neutral-800 text-[11px] font-semibold border border-neutral-200">
-          <Database className="w-3 h-3 text-black" />
-          <span>PostgreSQL Active</span>
-        </div>
-
         {/* User Badge */}
         <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-neutral-100 text-neutral-800 text-xs font-semibold border border-neutral-200">
           <User className="w-3.5 h-3.5 text-neutral-600" />

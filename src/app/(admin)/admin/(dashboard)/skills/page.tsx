@@ -12,7 +12,7 @@ export default function AdminSkillsPage() {
     <Suspense
       fallback={
         <div className="bg-white rounded-2xl border border-neutral-200 p-8 text-center text-xs text-neutral-400 font-medium">
-          Memuat data technical skills dari PostgreSQL...
+          Memuat data technical skills...
         </div>
       }
     >

@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Lock, Mail, Loader2, ArrowRight, ShieldCheck, ArrowLeft, Database } from "lucide-react";
+import { Lock, Mail, Loader2, ArrowRight, ShieldCheck, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { loginSchema, LoginFormData } from "@/lib/schemas/auth";
 import { loginAction } from "@/actions/admin/auth";
@@ -146,15 +146,8 @@ export default function AdminLoginPage() {
             </button>
           </form>
 
-          {/* Quick Demo Credentials & Database Status */}
-          <div className="mt-6 pt-5 border-t border-neutral-200 space-y-2">
-            <div className="flex items-center justify-between text-[11px] text-neutral-500">
-              <span className="font-semibold text-neutral-700">Database Engine:</span>
-              <span className="inline-flex items-center gap-1 font-mono text-neutral-900 font-semibold bg-neutral-100 px-2 py-0.5 rounded border border-neutral-200">
-                <Database className="w-3 h-3 text-black" />
-                PostgreSQL 18
-              </span>
-            </div>
+          {/* Demo Credentials */}
+          <div className="mt-6 pt-5 border-t border-neutral-200">
             <div className="flex justify-between font-mono text-xs text-neutral-600 bg-neutral-50 px-3 py-2 rounded-xl border border-neutral-200">
               <span>admin@falah.dev</span>
               <span className="text-black font-bold">admin123</span>
@@ -163,7 +156,7 @@ export default function AdminLoginPage() {
         </div>
 
         <p className="text-center text-xs text-neutral-500 mt-6 font-medium">
-          &copy; 2026 FALAH · Protected PostgreSQL CMS
+          &copy; 2026 FALAH · Protected Admin Panel
         </p>
       </div>
     </div>

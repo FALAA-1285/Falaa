@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef, useState, useEffect } from "react";
+import React, { useRef, useEffect } from "react";
 import { ExperienceItem } from "@/types/portfolio";
 
 export default function Experience({
@@ -9,28 +9,55 @@ export default function Experience({
   initialExperiences?: ExperienceItem[];
 }) {
   const sectionRef = useRef<HTMLDivElement>(null);
-  const [lineHeightPercent, setLineHeightPercent] = useState(0);
+  const fillLineRef = useRef<HTMLDivElement>(null);
+
+  // References for buttery-smooth lerp (Linear Interpolation) loop
+  const targetProgressRef = useRef(0);
+  const currentProgressRef = useRef(0);
 
   const experiences = initialExperiences;
 
   useEffect(() => {
+    let rafId: number;
+
     const handleScroll = () => {
       if (!sectionRef.current) return;
       const rect = sectionRef.current.getBoundingClientRect();
       const windowH = window.innerHeight;
       const sectionH = sectionRef.current.offsetHeight;
 
-      // When section top is at 70% of viewport, start filling line
-      // When section bottom is near bottom of viewport, line reaches 100%
-      const startTrigger = windowH * 0.7;
+      // Start filling line smoothly when section enters 75% of viewport
+      const startTrigger = windowH * 0.75;
       const scrolled = startTrigger - rect.top;
-      const progress = Math.min(Math.max(scrolled / (sectionH * 0.9), 0), 1);
-      setLineHeightPercent(progress * 100);
+      const maxScrollable = sectionH * 0.88;
+      const progress = Math.min(Math.max(scrolled / maxScrollable, 0), 1);
+      targetProgressRef.current = progress;
+    };
+
+    // Smooth physics-based interpolation loop (60/120 FPS without React re-render lag)
+    const animateLine = () => {
+      const diff = targetProgressRef.current - currentProgressRef.current;
+      if (Math.abs(diff) > 0.0003) {
+        currentProgressRef.current += diff * 0.12; // Smooth damped easing
+      } else {
+        currentProgressRef.current = targetProgressRef.current;
+      }
+
+      if (fillLineRef.current) {
+        fillLineRef.current.style.transform = `scaleY(${currentProgressRef.current})`;
+      }
+
+      rafId = requestAnimationFrame(animateLine);
     };
 
     window.addEventListener("scroll", handleScroll, { passive: true });
     handleScroll();
-    return () => window.removeEventListener("scroll", handleScroll);
+    rafId = requestAnimationFrame(animateLine);
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      cancelAnimationFrame(rafId);
+    };
   }, []);
 
   return (
@@ -42,13 +69,14 @@ export default function Experience({
       <div className="max-w-4xl mx-auto px-6">
         <div className="relative">
           {/* Base Background Line */}
-          <div className="absolute left-0 top-0 bottom-0 w-[2px] bg-black/20" />
+          <div className="absolute left-0 top-0 bottom-0 w-[2px] bg-black/15" />
 
-          {/* Dynamic Interactive Fill Line matching Reference: scales down smoothly as you scroll */}
+          {/* Dynamic Interactive Fill Line: GPU-accelerated smooth scaleY with physics easing */}
           <div
-            className="absolute left-0 top-0 w-[2px] bg-black origin-top transition-all duration-100 ease-out"
+            ref={fillLineRef}
+            className="absolute left-0 top-0 w-[2px] h-full bg-black origin-top will-change-transform"
             style={{
-              height: `${lineHeightPercent}%`,
+              transform: "scaleY(0)",
             }}
           />
 

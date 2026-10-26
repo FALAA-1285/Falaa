@@ -12,7 +12,6 @@ import {
   Mail,
   ExternalLink,
   PlusCircle,
-  Database,
 } from "lucide-react";
 
 const NAV_ITEMS = [
@@ -23,19 +22,19 @@ const NAV_ITEMS = [
     exact: true,
   },
   {
-    label: "Projects (CRUD)",
+    label: "Projects",
     href: "/admin/projects",
     icon: FolderKanban,
     exact: false,
   },
   {
-    label: "Experiences (CRUD)",
+    label: "Experiences",
     href: "/admin/experiences",
     icon: Briefcase,
     exact: false,
   },
   {
-    label: "Skills (CRUD)",
+    label: "Skills",
     href: "/admin/skills",
     icon: Layers,
     exact: false,
@@ -93,7 +92,7 @@ export default function AdminSidebar() {
       {/* Main Navigation */}
       <nav className="flex-1 px-3 py-3 space-y-1 overflow-y-auto">
         <div className="px-3 pb-2 text-[10px] font-bold tracking-widest text-neutral-400 uppercase">
-          Menu Manajemen (CRUD)
+          Menu Manajemen
         </div>
         {NAV_ITEMS.map((item) => {
           const isActive = item.exact
@@ -145,26 +144,9 @@ export default function AdminSidebar() {
         </Link>
       </nav>
 
-      {/* Database & Silhouette Accent Footer */}
+      {/* User Info Footer */}
       <div className="p-4 border-t border-neutral-200 bg-white">
-        {/* PostgreSQL Silhouette Card */}
-        <div className="p-3 rounded-xl bg-neutral-100 border border-neutral-200/80 mb-3 relative overflow-hidden">
-          {/* Black Silhouette Vector Accent */}
-          <div className="absolute -right-4 -bottom-4 w-16 h-16 bg-black/5 rounded-full pointer-events-none" />
-          <div className="flex items-center gap-2 mb-1.5">
-            <Database className="w-3.5 h-3.5 text-black" />
-            <span className="text-[11px] font-bold text-neutral-900 tracking-tight">
-              PostgreSQL DB
-            </span>
-            <span className="w-2 h-2 rounded-full bg-black ml-auto animate-ping" />
-          </div>
-          <p className="text-[10px] text-neutral-500 leading-tight">
-            Connected: <code className="font-mono text-neutral-700 font-semibold">falaa @ 5432</code>
-          </p>
-        </div>
-
-        {/* User Info */}
-        <div className="flex items-center gap-3 pt-1">
+        <div className="flex items-center gap-3">
           <div className="w-8 h-8 rounded-full bg-black text-white flex items-center justify-center text-xs font-bold shadow-xs">
             AD
           </div>

@@ -277,7 +277,7 @@ export default function ExperienceTable({
               {editingItem ? "Edit Pengalaman" : "Tambah Pengalaman Baru"}
             </h3>
             <p className="text-xs text-neutral-500 mb-6">
-              Data yang Anda simpan akan langsung terhubung ke database PostgreSQL dan diperbarui di website.
+              Data yang Anda simpan akan langsung diperbarui di website.
             </p>
 
             {formError && (
@@ -409,7 +409,7 @@ export default function ExperienceTable({
                       <span>Menyimpan...</span>
                     </>
                   ) : (
-                    <span>{editingItem ? "Perbarui Pengalaman" : "Simpan ke PostgreSQL"}</span>
+                    <span>{editingItem ? "Perbarui Pengalaman" : "Simpan Pengalaman"}</span>
                   )}
                 </button>
               </div>

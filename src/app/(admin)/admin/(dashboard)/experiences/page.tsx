@@ -12,7 +12,7 @@ export default function AdminExperiencesPage() {
     <Suspense
       fallback={
         <div className="bg-white rounded-2xl border border-neutral-200 p-8 text-center text-xs text-neutral-400 font-medium">
-          Memuat data riwayat pengalaman dari PostgreSQL...
+          Memuat data riwayat pengalaman...
         </div>
       }
     >

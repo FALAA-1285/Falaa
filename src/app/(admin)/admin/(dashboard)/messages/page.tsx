@@ -12,7 +12,7 @@ export default function AdminMessagesPage() {
     <Suspense
       fallback={
         <div className="bg-white rounded-2xl border border-neutral-200 p-8 text-center text-xs text-neutral-400 font-medium">
-          Memuat pesan masuk dari PostgreSQL...
+          Memuat pesan masuk...
         </div>
       }
     >

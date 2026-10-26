@@ -12,7 +12,7 @@ export default function AdminProfilePage() {
     <Suspense
       fallback={
         <div className="bg-white rounded-2xl border border-neutral-200 p-8 text-center text-xs text-neutral-400 font-medium">
-          Memuat data profil dari PostgreSQL...
+          Memuat data profil...
         </div>
       }
     >

@@ -10,7 +10,6 @@ import {
   ArrowRight,
   ExternalLink,
   UserCheck,
-  Database,
   CheckCircle2,
 } from "lucide-react";
 import { getProjects, getExperiences, getSkills, getMessages } from "@/lib/db";
@@ -42,15 +41,11 @@ async function DashboardContent() {
 
         <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
           <div>
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-neutral-100 border border-neutral-200 text-[11px] font-bold text-neutral-800 tracking-wider uppercase mb-2">
-              <Database className="w-3 h-3 text-black" />
-              <span>PostgreSQL Engine Active</span>
-            </div>
             <h2 className="text-2xl sm:text-3xl font-extrabold text-neutral-900 tracking-tight">
               FALAH Portfolio CMS
             </h2>
             <p className="text-sm text-neutral-500 mt-1.5 max-w-2xl leading-relaxed">
-              Sistem manajemen konten monokrom berbasis PostgreSQL. Kelola project, riwayat pengalaman, keahlian teknis, biodata profil, dan pesan kontak secara terpusat.
+              Sistem manajemen konten monokrom. Kelola project, riwayat pengalaman, keahlian teknis, biodata profil, dan pesan kontak secara terpusat.
             </p>
           </div>
 
@@ -264,7 +259,7 @@ async function DashboardContent() {
           <div className="bg-white rounded-2xl border border-neutral-200 shadow-xs p-5">
             <h3 className="text-sm font-bold text-neutral-900 mb-3 flex items-center gap-2">
               <UserCheck className="w-4 h-4 text-black" />
-              <span>Aksi Cepat CRUD</span>
+              <span>Aksi Cepat</span>
             </h3>
             <div className="space-y-2">
               <Link

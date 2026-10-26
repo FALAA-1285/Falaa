@@ -8,7 +8,6 @@ import {
   CheckCircle2,
   AlertCircle,
   Loader2,
-  Globe,
   Quote,
   Eye,
   Plus,
@@ -96,23 +95,18 @@ export default function ProfileForm({ initialProfile }: ProfileFormProps) {
         <div>
           <h2 className="text-lg font-bold text-neutral-900 tracking-tight flex items-center gap-2">
             <UserCheck className="w-5 h-5 text-black" />
-            <span>Manajemen Profil, Headline &amp; Tagline (CRUD)</span>
+            <span>Manajemen Profil, Headline &amp; Tagline</span>
           </h2>
           <p className="text-xs text-neutral-500 font-medium mt-0.5">
             Perbarui teks headline, badge keahlian About, narasi profil, dan bagian CTA yang tampil di portofolio publik.
           </p>
-        </div>
-
-        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-neutral-100 text-neutral-800 text-xs font-bold border border-neutral-200">
-          <Globe className="w-3.5 h-3.5 text-black" />
-          <span>Sinkronisasi Otomatis ke PostgreSQL</span>
         </div>
       </div>
 
       {successMsg && (
         <div className="p-4 rounded-xl bg-neutral-900 text-white flex items-center gap-3 text-xs sm:text-sm animate-fade-in shadow-md">
           <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0" />
-          <span>Profil &amp; Headline berhasil diperbarui dan tersimpan di database PostgreSQL! Perubahan langsung aktif di homepage.</span>
+          <span>Profil &amp; Headline berhasil diperbarui! Perubahan langsung aktif di homepage.</span>
         </div>
       )}
 
@@ -460,7 +454,7 @@ export default function ProfileForm({ initialProfile }: ProfileFormProps) {
               {isSubmitting ? (
                 <>
                   <Loader2 className="w-4 h-4 animate-spin" />
-                  <span>Menyimpan ke PostgreSQL...</span>
+                  <span>Menyimpan...</span>
                 </>
               ) : (
                 <>

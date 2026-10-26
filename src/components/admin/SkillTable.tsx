@@ -149,7 +149,7 @@ export default function SkillTable({ initialSkills }: SkillTableProps) {
   };
 
   const handleDelete = async (id: number) => {
-    if (!confirm("Hapus skill ini dari database PostgreSQL?")) return;
+    if (!confirm("Hapus skill ini?")) return;
     try {
       const res = await deleteSkillAction(id);
       if (res.success) {
@@ -328,7 +328,7 @@ export default function SkillTable({ initialSkills }: SkillTableProps) {
               {editingItem ? "Edit Technical Skill" : "Tambah Skill Baru"}
             </h3>
             <p className="text-xs text-neutral-500 mb-5">
-              Simpan ke PostgreSQL untuk langsung ditampilkan di portofolio dengan efek monokrom otomatis.
+              Simpan untuk langsung ditampilkan di portofolio dengan efek monokrom otomatis.
             </p>
 
             {formError && (
