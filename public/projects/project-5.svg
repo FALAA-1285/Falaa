@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" width="100%" height="100%">
+  <rect width="800" height="600" fill="#171717"/>
+  <!-- Phone Frame Mockup -->
+  <rect x="270" y="40" width="260" height="520" rx="32" fill="#000000" stroke="#404040" stroke-width="4"/>
+  <rect x="280" y="55" width="240" height="490" rx="26" fill="#0a0a0a"/>
+  <!-- Dynamic Island -->
+  <rect x="360" y="65" width="80" height="16" rx="8" fill="#1c1c1c"/>
+
+  <!-- Screen Content -->
+  <text x="305" y="120" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-weight="700" font-size="17" fill="#ffffff">HabitFlow</text>
+  <text x="305" y="140" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="11" fill="#737373">Daily Engineering Streak</text>
+
+  <!-- Streak Widget -->
+  <rect x="300" y="160" width="200" height="70" rx="8" fill="#1c1c1c" stroke="#333333"/>
+  <text x="315" y="185" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="10" fill="#a3a3a3">CURRENT STREAK</text>
+  <text x="315" y="213" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-weight="800" font-size="20" fill="#ffffff">28 Days Active</text>
+
+  <!-- Habit items -->
+  <rect x="300" y="245" width="200" height="46" rx="6" fill="#141414"/>
+  <circle cx="320" cy="268" r="7" fill="#525252"/>
+  <text x="338" y="272" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="11" fill="#ffffff">Web App Development</text>
+
+  <rect x="300" y="300" width="200" height="46" rx="6" fill="#141414"/>
+  <circle cx="320" cy="323" r="7" fill="#525252"/>
+  <text x="338" y="327" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="11" fill="#ffffff">Polinema Sprint Meeting</text>
+
+  <rect x="300" y="355" width="200" height="46" rx="6" fill="#141414"/>
+  <circle cx="320" cy="378" r="7" fill="#525252"/>
+  <text x="338" y="382" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="11" fill="#ffffff">Django API Refactoring</text>
+
+  <rect x="300" y="410" width="200" height="46" rx="6" fill="#141414"/>
+  <circle cx="320" cy="433" r="7" fill="#333333"/>
+  <text x="338" y="437" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="11" fill="#737373">Read Documentation</text>
+</svg>

@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" width="100%" height="100%">
+  <rect width="800" height="600" fill="#171717"/>
+  <!-- Terminal window -->
+  <rect x="60" y="50" width="680" height="500" rx="12" fill="#0a0a0a" stroke="#262626" stroke-width="1.5"/>
+  <rect x="60" y="50" width="680" height="40" rx="12" fill="#141414"/>
+  <circle cx="85" cy="70" r="5" fill="#404040"/>
+  <circle cx="103" cy="70" r="5" fill="#404040"/>
+  <circle cx="121" cy="70" r="5" fill="#404040"/>
+  <text x="290" y="75" font-family="monospace" font-size="11" fill="#737373">api-gateway:8080</text>
+
+  <!-- Route items -->
+  <text x="90" y="130" font-family="monospace" font-size="12" fill="#e5e5e5">[GET] /api/v1/auth/session</text>
+  <text x="500" y="130" font-family="monospace" font-size="12" fill="#a3a3a3">200 OK (8ms)</text>
+
+  <text x="90" y="170" font-family="monospace" font-size="12" fill="#e5e5e5">[POST] /api/v1/users/register</text>
+  <text x="500" y="170" font-family="monospace" font-size="12" fill="#a3a3a3">201 Created (24ms)</text>
+
+  <text x="90" y="210" font-family="monospace" font-size="12" fill="#e5e5e5">[GET] /api/v1/analytics/metrics</text>
+  <text x="500" y="210" font-family="monospace" font-size="12" fill="#a3a3a3">200 OK (12ms)</text>
+
+  <!-- JSON Payload Display -->
+  <rect x="90" y="245" width="620" height="270" rx="8" fill="#121212" stroke="#262626"/>
+  <text x="115" y="280" font-family="monospace" font-size="12" fill="#737373">{</text>
+  <text x="135" y="310" font-family="monospace" font-size="12" fill="#d4d4d4">  &quot;service&quot;: &quot;Ahmad-Falahi-Core-Gateway&quot;,</text>
+  <text x="135" y="340" font-family="monospace" font-size="12" fill="#d4d4d4">  &quot;version&quot;: &quot;2.4.0-stable&quot;,</text>
+  <text x="135" y="370" font-family="monospace" font-size="12" fill="#d4d4d4">  &quot;framework&quot;: [&quot;Laravel 11&quot;, &quot;Django&quot;, &quot;PostgreSQL&quot;],</text>
+  <text x="135" y="400" font-family="monospace" font-size="12" fill="#d4d4d4">  &quot;auth&quot;: &quot;JWT Bearer + Supabase RLS&quot;,</text>
+  <text x="135" y="430" font-family="monospace" font-size="12" fill="#d4d4d4">  &quot;uptime&quot;: &quot;99.98%&quot;,</text>
+  <text x="135" y="460" font-family="monospace" font-size="12" fill="#d4d4d4">  &quot;status&quot;: &quot;HEALTHY_ONLINE&quot;</text>
+  <text x="115" y="490" font-family="monospace" font-size="12" fill="#737373">}</text>
+</svg>

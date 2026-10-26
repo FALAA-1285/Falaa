@@ -1,6 +1,15 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
-# dependencies
+# --- Project Specific Ignores ---
+# Documentation & prompts (private / temporary docs)
+/docs/
+docs/
+
+# Local generation & helper scripts
+/scripts/
+scripts/
+
+# --- Dependencies ---
 /node_modules
 /.pnp
 .pnp.*
@@ -10,32 +19,70 @@
 !.yarn/releases
 !.yarn/versions
 
-# testing
+# --- Testing ---
 /coverage
 
-# next.js
+# --- Next.js Build & Outputs ---
 /.next/
 /out/
-
-# production
 /build
 
-# misc
-.DS_Store
+# --- Sensitive Data & Secrets ---
+.env
+.env.*
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+!.env.example
 *.pem
+*.key
+*.cert
+*.crt
+*.pfx
+*credential*
+*secret*
+.secrets/
 
-# debug
+# --- Debug & Logs ---
+*.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
+logs/
 
-# env files (can opt-in for committing if needed)
-.env*
-
-# vercel
+# --- Vercel & Deployment ---
 .vercel
 
-# typescript
+# --- TypeScript ---
 *.tsbuildinfo
 next-env.d.ts
+
+# --- IDEs & Editors ---
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+.idea/
+*.sublime-project
+*.sublime-workspace
+*.swp
+*.swo
+
+# --- Operating System Files ---
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+[Dd]esktop.ini
+
+# --- Local Databases & Temporary Files ---
+*.sqlite
+*.sqlite3
+*.db
+*.bak
+*.tmp
+*.temp

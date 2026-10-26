@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" width="100%" height="100%">
+  <rect width="800" height="600" fill="#1c1c1c"/>
+  <rect x="80" y="60" width="640" height="480" rx="16" fill="#ffffff"/>
+  
+  <!-- Left Side -->
+  <rect x="80" y="60" width="420" height="480" rx="16" fill="#ffffff"/>
+  <rect x="120" y="100" width="140" height="26" rx="4" fill="#f0f0f0"/>
+  <text x="135" y="118" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-weight="600" font-size="11" fill="#171717">CAMPUS EVENT TECH</text>
+  
+  <text x="120" y="170" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-weight="800" font-size="30" fill="#171717">DevSummit 2026</text>
+  <text x="120" y="202" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="14" fill="#737373">Politeknik Negeri Malang Software Conference</text>
+
+  <rect x="120" y="240" width="340" height="65" rx="6" fill="#f9f9f9" stroke="#e5e5e5"/>
+  <text x="140" y="268" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="11" fill="#737373">Venue</text>
+  <text x="140" y="290" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-weight="600" font-size="13" fill="#171717">Graha Polinema · Malang</text>
+
+  <rect x="120" y="325" width="340" height="65" rx="6" fill="#f9f9f9" stroke="#e5e5e5"/>
+  <text x="140" y="353" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="11" fill="#737373">System</text>
+  <text x="140" y="375" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-weight="600" font-size="13" fill="#171717">Encrypted QR Verification</text>
+
+  <rect x="120" y="420" width="140" height="40" rx="6" fill="#171717"/>
+  <text x="150" y="445" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-weight="600" font-size="13" fill="#ffffff">Pass Details</text>
+
+  <!-- Divider -->
+  <line x1="500" y1="80" x2="500" y2="520" stroke="#d4d4d4" stroke-width="1.5" stroke-dasharray="6 6"/>
+
+  <!-- Right Stub -->
+  <rect x="500" y="60" width="220" height="480" rx="16" fill="#fafafa"/>
+  <text x="540" y="120" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-weight="700" font-size="15" fill="#171717">ACCESS PASS</text>
+  <text x="540" y="142" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="11" fill="#737373">#PLN-2026-88</text>
+
+  <rect x="540" y="180" width="140" height="140" rx="8" fill="#ffffff" stroke="#e5e5e5"/>
+  <rect x="555" y="195" width="35" height="35" fill="#171717"/>
+  <rect x="630" y="195" width="35" height="35" fill="#171717"/>
+  <rect x="555" y="270" width="35" height="35" fill="#171717"/>
+  <rect x="605" y="245" width="20" height="20" fill="#171717"/>
+  <rect x="640" y="275" width="15" height="15" fill="#171717"/>
+
+  <text x="540" y="360" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="11" fill="#737373">Attendee</text>
+  <text x="540" y="385" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-weight="600" font-size="13" fill="#171717">Ahmad Falahi</text>
+</svg>

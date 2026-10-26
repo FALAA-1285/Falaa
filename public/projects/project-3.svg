@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" width="100%" height="100%">
+  <rect width="800" height="600" fill="#0d0d0d"/>
+  <!-- Viewport Grid Lines -->
+  <line x1="0" y1="150" x2="800" y2="150" stroke="#1f1f1f" stroke-dasharray="4 4"/>
+  <line x1="0" y1="300" x2="800" y2="300" stroke="#1f1f1f" stroke-dasharray="4 4"/>
+  <line x1="0" y1="450" x2="800" y2="450" stroke="#1f1f1f" stroke-dasharray="4 4"/>
+  <line x1="200" y1="0" x2="200" y2="600" stroke="#1f1f1f" stroke-dasharray="4 4"/>
+  <line x1="400" y1="0" x2="400" y2="600" stroke="#1f1f1f" stroke-dasharray="4 4"/>
+  <line x1="600" y1="0" x2="600" y2="600" stroke="#1f1f1f" stroke-dasharray="4 4"/>
+
+  <!-- HUD Top -->
+  <rect x="50" y="40" width="700" height="46" rx="6" fill="#171717" stroke="#333333"/>
+  <circle cx="75" cy="63" r="5" fill="#737373"/>
+  <text x="95" y="67" font-family="monospace" font-size="13" fill="#d4d4d4">CV-ENGINE: 60 FPS | OpenCV + PyTorch Pipeline</text>
+  <text x="630" y="67" font-family="monospace" font-size="13" fill="#a3a3a3">TRACKING</text>
+
+  <!-- Bounding Box 1 -->
+  <rect x="120" y="150" width="260" height="320" rx="2" fill="none" stroke="#ffffff" stroke-width="1.5"/>
+  <rect x="120" y="125" width="150" height="25" fill="#ffffff"/>
+  <text x="130" y="142" font-family="monospace" font-weight="700" font-size="12" fill="#000000">object: 98.4%</text>
+  <circle cx="250" cy="310" r="10" fill="none" stroke="#ffffff" stroke-width="1"/>
+  <line x1="250" y1="295" x2="250" y2="325" stroke="#ffffff" stroke-width="0.8"/>
+  <line x1="235" y1="310" x2="265" y2="310" stroke="#ffffff" stroke-width="0.8"/>
+
+  <!-- Bounding Box 2 -->
+  <rect x="440" y="210" width="250" height="230" rx="2" fill="none" stroke="#a3a3a3" stroke-width="1.5"/>
+  <rect x="440" y="185" width="140" height="25" fill="#a3a3a3"/>
+  <text x="450" y="202" font-family="monospace" font-weight="700" font-size="12" fill="#000000">device: 95.7%</text>
+
+  <!-- Status Bottom -->
+  <rect x="50" y="510" width="700" height="50" rx="6" fill="#141414" stroke="#262626"/>
+  <text x="70" y="540" font-family="monospace" font-size="12" fill="#737373">&gt; [Inference Log]: Frame #3420 processed | 12.8ms execution time | Monochrome pipeline</text>
+</svg>
