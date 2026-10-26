@@ -41,6 +41,54 @@ function SkillCard({ name, icon }: { name: string; icon: string }) {
   );
 }
 
+function getCategoryPriority(category: string): number {
+  const norm = (category || "").toLowerCase().trim();
+  // 1. Bahasa Pemrograman / Programming Languages
+  if (
+    norm.includes("bahasa") ||
+    norm.includes("programming") ||
+    norm.includes("language")
+  ) {
+    return 1;
+  }
+  // 2. Frontend
+  if (
+    norm.includes("frontend") ||
+    norm.includes("front-end") ||
+    norm.includes("front end")
+  ) {
+    return 2;
+  }
+  // 3. Backend
+  if (
+    norm.includes("backend") ||
+    norm.includes("back-end") ||
+    norm.includes("back end") ||
+    norm.includes("beckend")
+  ) {
+    return 3;
+  }
+  // 4. Databases
+  if (
+    norm.includes("database") ||
+    norm.includes("basis data") ||
+    norm.includes("sql") ||
+    norm.includes("db")
+  ) {
+    return 4;
+  }
+  // 5. Tools & Machine Learning / Tools
+  if (
+    norm.includes("tool") ||
+    norm.includes("machine learning") ||
+    norm.includes("alat") ||
+    norm.includes("devops")
+  ) {
+    return 5;
+  }
+  return 10;
+}
+
 export default function Skills({
   initialSkillGroups,
 }: {
@@ -49,7 +97,12 @@ export default function Skills({
   const sectionRef = useRef<HTMLElement>(null);
   const [parallaxOffset, setParallaxOffset] = useState(0);
 
-  const skillGroups = initialSkillGroups || [];
+  const skillGroups = [...(initialSkillGroups || [])].sort((a, b) => {
+    const pA = getCategoryPriority(a.category);
+    const pB = getCategoryPriority(b.category);
+    if (pA !== pB) return pA - pB;
+    return a.category.localeCompare(b.category);
+  });
 
   useEffect(() => {
     const handleScroll = () => {

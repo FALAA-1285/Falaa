@@ -56,6 +56,16 @@ const PRESET_CATEGORIES = [
   "Tools & Machine Learning",
 ];
 
+function getCategoryPriority(category: string): number {
+  const norm = (category || "").toLowerCase().trim();
+  if (norm.includes("bahasa") || norm.includes("programming") || norm.includes("language")) return 1;
+  if (norm.includes("frontend") || norm.includes("front-end") || norm.includes("front end")) return 2;
+  if (norm.includes("backend") || norm.includes("back-end") || norm.includes("back end") || norm.includes("beckend")) return 3;
+  if (norm.includes("database") || norm.includes("basis data") || norm.includes("sql") || norm.includes("db")) return 4;
+  if (norm.includes("tool") || norm.includes("machine learning") || norm.includes("alat") || norm.includes("devops")) return 5;
+  return 10;
+}
+
 interface SkillTableProps {
   initialSkills: SkillItem[];
 }
@@ -173,7 +183,12 @@ export default function SkillTable({ initialSkills }: SkillTableProps) {
   // Group filtered skills
   const categoriesInFiltered = Array.from(
     new Set(filteredSkills.map((s) => s.category || "General"))
-  );
+  ).sort((a, b) => {
+    const pA = getCategoryPriority(a);
+    const pB = getCategoryPriority(b);
+    if (pA !== pB) return pA - pB;
+    return a.localeCompare(b);
+  });
 
   return (
     <div className="space-y-6">

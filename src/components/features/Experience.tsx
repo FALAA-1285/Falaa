@@ -80,37 +80,45 @@ export default function Experience({
             }}
           />
 
-          {/* Experience Items matching reference */}
-          <div className="space-y-20">
+          {/* Experience Items matching previous design */}
+          <div className="space-y-16 sm:space-y-20">
             {experiences.map((item, index) => (
               <div
                 key={item.id ?? index}
-                className="relative pl-12 pb-2 group transition-all duration-300"
+                className="relative pl-10 sm:pl-12 pb-2 group transition-all duration-300"
               >
                 {/* Circle indicator node: enlarges & fills black on hover */}
                 <div className="absolute left-[-6.5px] top-1.5 w-[15px] h-[15px] bg-black rounded-full border-2 border-white transition-transform duration-300 group-hover:scale-125 shadow-xs" />
 
-                <span className="text-sm font-medium text-black/60 group-hover:text-black mb-1 block transition-colors duration-200">
+                <span className="text-sm font-semibold text-black/60 group-hover:text-black mb-1 block transition-colors duration-200">
                   {item.period}
                 </span>
 
-                <h3 className="text-xl font-bold text-black group-hover:translate-x-1 transition-transform duration-200">
+                <h3 className="text-xl sm:text-2xl font-bold text-black group-hover:translate-x-1 transition-transform duration-200">
                   {item.role}
                 </h3>
 
-                <h4 className="text-lg text-black/70 mb-2 font-normal">
+                <h4 className="text-base sm:text-lg text-black/70 mb-3 font-normal">
                   {item.organization}
-                  {item.location && <span className="text-sm text-black/50 ml-2">({item.location})</span>}
+                  {item.location && (
+                    <span className="text-sm text-black/50 ml-2">
+                      ({item.location})
+                    </span>
+                  )}
                 </h4>
 
-                <p className="text-black/60 group-hover:text-black/80 max-w-2xl leading-relaxed text-base transition-colors duration-200">
-                  {item.description}
-                </p>
+                {item.description && (
+                  <p className="text-black/60 group-hover:text-black/80 max-w-2xl leading-relaxed text-sm sm:text-base transition-colors duration-200 mb-3">
+                    {item.description}
+                  </p>
+                )}
 
                 {item.highlights && item.highlights.length > 0 && (
-                  <ul className="mt-3 space-y-1 text-sm text-black/60 list-disc list-inside">
+                  <ul className="mt-2 space-y-1.5 text-sm text-black/65 list-disc list-inside max-w-2xl">
                     {item.highlights.map((h, i) => (
-                      <li key={i}>{h}</li>
+                      <li key={i} className="leading-relaxed">
+                        {h}
+                      </li>
                     ))}
                   </ul>
                 )}

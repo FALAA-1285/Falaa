@@ -31,7 +31,17 @@ export async function getSkills(): Promise<SkillItem[]> {
     const { rows } = await pool.query(
       `SELECT id, category, name, icon, order_index
        FROM skills
-       ORDER BY category ASC, order_index ASC, id ASC`
+       ORDER BY 
+         CASE 
+           WHEN LOWER(category) LIKE '%bahasa%' OR LOWER(category) LIKE '%programming%' OR LOWER(category) LIKE '%language%' THEN 1
+           WHEN LOWER(category) LIKE '%frontend%' OR LOWER(category) LIKE '%front-end%' OR LOWER(category) LIKE '%front end%' THEN 2
+           WHEN LOWER(category) LIKE '%backend%' OR LOWER(category) LIKE '%back-end%' OR LOWER(category) LIKE '%back end%' OR LOWER(category) LIKE '%beckend%' THEN 3
+           WHEN LOWER(category) LIKE '%database%' OR LOWER(category) LIKE '%basis data%' OR LOWER(category) LIKE '%sql%' OR LOWER(category) LIKE '%db%' THEN 4
+           WHEN LOWER(category) LIKE '%tool%' OR LOWER(category) LIKE '%machine learning%' OR LOWER(category) LIKE '%alat%' OR LOWER(category) LIKE '%devops%' THEN 5
+           ELSE 10
+         END ASC,
+         order_index ASC, 
+         id ASC`
     );
     const skillsList = rows.map((r) => ({
       id: r.id,

@@ -28,7 +28,7 @@ export const metadata: Metadata = {
     siteName: "FALAH Portfolio",
     images: [
       {
-        url: "/avatar.png",
+        url: "/foto.jpg",
         width: 800,
         height: 800,
         alt: "FALAH",
@@ -38,8 +38,8 @@ export const metadata: Metadata = {
     type: "website",
   },
   icons: {
-    icon: "/avatar.png",
-    apple: "/avatar.png",
+    icon: "/foto.jpg",
+    apple: "/foto.jpg",
   },
 };
 

@@ -71,10 +71,12 @@ body {
   will-change: transform;
 }
 
-/* Text outline effect matching reference */
+/* Text outline effect matching reference (zurihaqi.github.io) */
 .text-outline {
   color: transparent;
   -webkit-text-stroke: 1.5px black;
+  text-rendering: geometricPrecision;
+  -webkit-font-smoothing: antialiased;
 }
 
 @media (min-width: 1280px) {
@@ -94,20 +96,16 @@ body {
   color: #000000 !important;
 }
 
-/* Custom delicate scrollbar */
+/* Hide scrollbar completely across all browsers */
+html,
+body {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE & Edge */
+}
+
 ::-webkit-scrollbar {
-  width: 7px;
-}
-
-::-webkit-scrollbar-track {
-  background: #fafafa;
-}
-
-::-webkit-scrollbar-thumb {
-  background: #d4d4d8;
-  border-radius: 9999px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: #a1a1aa;
+  display: none; /* Chrome, Safari, Opera */
+  width: 0px;
+  height: 0px;
+  background: transparent;
 }
