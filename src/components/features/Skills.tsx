@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import { MONOCHROME_SKILL_CATEGORIES } from "@/data/skills";
+import { SkillCategoryGroup } from "@/types/skills";
 
 function SkillCard({ name, icon }: { name: string; icon: string }) {
   const [isHovered, setIsHovered] = useState(false);
@@ -41,9 +42,18 @@ function SkillCard({ name, icon }: { name: string; icon: string }) {
   );
 }
 
-export default function Skills() {
+export default function Skills({
+  initialSkillGroups,
+}: {
+  initialSkillGroups?: SkillCategoryGroup[];
+}) {
   const sectionRef = useRef<HTMLElement>(null);
   const [parallaxOffset, setParallaxOffset] = useState(0);
+
+  const skillGroups =
+    initialSkillGroups && initialSkillGroups.length > 0
+      ? initialSkillGroups
+      : MONOCHROME_SKILL_CATEGORIES;
 
   useEffect(() => {
     const handleScroll = () => {
@@ -84,7 +94,7 @@ export default function Skills() {
 
         {/* Categories */}
         <div className="space-y-20 max-w-6xl mx-auto">
-          {MONOCHROME_SKILL_CATEGORIES.map((group) => (
+          {skillGroups.map((group) => (
             <div key={group.category} className="space-y-8">
               <h4 className="text-2xl font-bold text-black">
                 {group.category}
@@ -94,7 +104,7 @@ export default function Skills() {
               <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-x-6 gap-y-12">
                 {group.skills.map((skill) => (
                   <SkillCard
-                    key={skill.name}
+                    key={skill.id ? `${skill.id}-${skill.name}` : skill.name}
                     name={skill.name}
                     icon={skill.icon}
                   />

@@ -2,10 +2,20 @@
 
 import React, { useRef, useState, useEffect } from "react";
 import { EXPERIENCE_DATA } from "@/data/portfolio";
+import { ExperienceItem } from "@/types/portfolio";
 
-export default function Experience() {
+export default function Experience({
+  initialExperiences,
+}: {
+  initialExperiences?: ExperienceItem[];
+}) {
   const sectionRef = useRef<HTMLDivElement>(null);
   const [lineHeightPercent, setLineHeightPercent] = useState(0);
+
+  const experiences =
+    initialExperiences && initialExperiences.length > 0
+      ? initialExperiences
+      : EXPERIENCE_DATA;
 
   useEffect(() => {
     const handleScroll = () => {
@@ -48,9 +58,9 @@ export default function Experience() {
 
           {/* Experience Items matching reference */}
           <div className="space-y-20">
-            {EXPERIENCE_DATA.map((item, index) => (
+            {experiences.map((item, index) => (
               <div
-                key={index}
+                key={item.id ?? index}
                 className="relative pl-12 pb-2 group transition-all duration-300"
               >
                 {/* Circle indicator node: enlarges & fills black on hover */}
@@ -66,11 +76,20 @@ export default function Experience() {
 
                 <h4 className="text-lg text-black/70 mb-2 font-normal">
                   {item.organization}
+                  {item.location && <span className="text-sm text-black/50 ml-2">({item.location})</span>}
                 </h4>
 
                 <p className="text-black/60 group-hover:text-black/80 max-w-2xl leading-relaxed text-base transition-colors duration-200">
                   {item.description}
                 </p>
+
+                {item.highlights && item.highlights.length > 0 && (
+                  <ul className="mt-3 space-y-1 text-sm text-black/60 list-disc list-inside">
+                    {item.highlights.map((h, i) => (
+                      <li key={i}>{h}</li>
+                    ))}
+                  </ul>
+                )}
               </div>
             ))}
           </div>

@@ -3,10 +3,14 @@
 import React, { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import { PERSONAL_INFO } from "@/data/portfolio";
+import { PersonalInfo } from "@/types/portfolio";
 
-export default function Hero() {
+export default function Hero({ profile }: { profile?: PersonalInfo }) {
   const [scale, setScale] = useState(1);
   const sectionRef = useRef<HTMLElement>(null);
+
+  const activeProfile = profile || PERSONAL_INFO;
+  const name = activeProfile.name || "FALAH";
 
   useEffect(() => {
     const handleScroll = () => {
@@ -25,7 +29,7 @@ export default function Hero() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const textRepetition = " • FALAH • FALAH • FALAH • FALAH • FALAH • FALAH • FALAH • FALAH";
+  const textRepetition = ` • ${name} • ${name} • ${name} • ${name} • ${name} • ${name} • ${name} • ${name}`;
 
   return (
     <section
@@ -61,7 +65,7 @@ export default function Hero() {
         >
           <Image
             src="/avatar.png"
-            alt={PERSONAL_INFO.name}
+            alt={name}
             fill
             priority
             sizes="(max-width: 768px) 80vw, 448px"

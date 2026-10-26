@@ -8,49 +8,60 @@ import Experience from "@/components/features/Experience";
 import Skills from "@/components/features/Skills";
 import Contact from "@/components/features/Contact";
 import Footer from "@/components/layout/Footer";
-import { getProjects } from "@/lib/db";
+import {
+  getProjects,
+  getExperiences,
+  getSkillsGrouped,
+  getProfileInfo,
+} from "@/lib/db";
 
-async function DynamicProjects() {
-  const projects = await getProjects();
-  return <Projects initialProjects={projects} />;
+async function PortfolioDynamicContent() {
+  const [projects, experiences, skillGroups, profile] = await Promise.all([
+    getProjects(),
+    getExperiences(),
+    getSkillsGrouped(),
+    getProfileInfo(),
+  ]);
+
+  return (
+    <>
+      <Navbar profile={profile} />
+
+      <div id="hero">
+        <Hero profile={profile} />
+      </div>
+
+      <About profile={profile} />
+
+      <MarqueeBanner text="My Works" />
+
+      <Projects initialProjects={projects} />
+
+      <MarqueeBanner text="Experience" isExperience />
+
+      <Experience initialExperiences={experiences} />
+
+      <Skills initialSkillGroups={skillGroups} />
+
+      <Contact profile={profile} />
+
+      <Footer profile={profile} />
+    </>
+  );
 }
 
 export default function Home() {
   return (
     <main className="min-h-screen bg-white">
-      {/* 1. Header Navigation */}
-      <Navbar />
-
-      {/* 2. Hero Section (Portrait Card with Scroll-Shrink & 3D Layered Marquee) */}
-      <div id="hero">
-        <Hero />
-      </div>
-
-      {/* 3. About Section */}
-      <About />
-
-      {/* 4. Sticky Scroll-Scaling Transition: My Works (Center zooms 1.0 -> 1.5) */}
-      <MarqueeBanner text="My Works" />
-
-      {/* 5. Projects Section (Dynamic with Suspense) */}
-      <Suspense fallback={<Projects />}>
-        <DynamicProjects />
+      <Suspense
+        fallback={
+          <div className="min-h-screen bg-white flex items-center justify-center text-sm text-neutral-400">
+            Memuat portofolio...
+          </div>
+        }
+      >
+        <PortfolioDynamicContent />
       </Suspense>
-
-      {/* 6. Sticky Scroll-Scaling Transition: Experience (Center zooms 1.0 -> 1.5) */}
-      <MarqueeBanner text="Experience" isExperience />
-
-      {/* 7. Experience Section (Dynamic Timeline Fill & Item Reveal) */}
-      <Experience />
-
-      {/* 8. Skills Section (Floating Parallax Watermark + Monochrome to Brand Colors) */}
-      <Skills />
-
-      {/* 9. Contact Section */}
-      <Contact />
-
-      {/* 10. Footer */}
-      <Footer />
     </main>
   );
 }

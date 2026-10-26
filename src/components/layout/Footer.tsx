@@ -3,8 +3,12 @@
 import React from "react";
 import { GithubIcon, LinkedinIcon, GmailIcon } from "@/components/ui/SocialIcons";
 import { PERSONAL_INFO } from "@/data/portfolio";
+import { PersonalInfo } from "@/types/portfolio";
 
-export default function Footer() {
+export default function Footer({ profile }: { profile?: PersonalInfo }) {
+  const activeProfile = profile || PERSONAL_INFO;
+  const name = activeProfile.name || "FALAH";
+
   return (
     <footer className="py-12 sm:px-0 px-4 bg-[#151414] text-white border-t border-black/10">
       <div className="container mx-auto overflow-hidden px-4 md:px-8">
@@ -12,11 +16,11 @@ export default function Footer() {
           {/* Identity & Socials */}
           <div>
             <h3 className="text-xl mb-4 text-white font-normal">
-              FALAH
+              {name}
             </h3>
             <div className="flex space-x-4">
               <a
-                href={PERSONAL_INFO.github}
+                href={activeProfile.github}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-white hover:text-gray-300/70 transition-colors"
@@ -25,7 +29,7 @@ export default function Footer() {
                 <GithubIcon className="h-5 w-5" />
               </a>
               <a
-                href={PERSONAL_INFO.linkedin}
+                href={activeProfile.linkedin}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-white hover:text-gray-300/70 transition-colors"
@@ -34,7 +38,7 @@ export default function Footer() {
                 <LinkedinIcon className="h-5 w-5" />
               </a>
               <a
-                href={`mailto:${PERSONAL_INFO.email}`}
+                href={`mailto:${activeProfile.email}`}
                 className="text-white hover:text-gray-300/70 transition-colors"
                 aria-label="Email"
               >
@@ -88,7 +92,7 @@ export default function Footer() {
         {/* Divider & Copyright */}
         <div className="border-t border-white/20 mt-12 pt-8 font-light text-neutral-400 text-sm">
           <p className="mt-4">
-            Designed and developed by FALAH. © 2026 All rights reserved.
+            Designed and developed by {name}. © 2026 All rights reserved.
           </p>
         </div>
       </div>

@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { Menu, X } from "lucide-react";
+import { PersonalInfo } from "@/types/portfolio";
 
 const NAV_LINKS = [
   { name: "About", href: "#about" },
@@ -12,9 +13,11 @@ const NAV_LINKS = [
   { name: "Contact", href: "#contact" },
 ];
 
-export default function Navbar() {
+export default function Navbar({ profile }: { profile?: PersonalInfo }) {
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  const displayName = profile?.name || "FALAH";
 
   useEffect(() => {
     const handleScroll = () => {
@@ -41,7 +44,7 @@ export default function Navbar() {
           href="/"
           className="text-2xl font-medium tracking-tight text-black hover:text-black/70 transition-colors"
         >
-          FALAH · Portfolio
+          {displayName} · Portfolio
         </Link>
 
         {/* Desktop Nav */}

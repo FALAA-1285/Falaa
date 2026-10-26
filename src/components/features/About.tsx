@@ -3,6 +3,7 @@
 import React from "react";
 import { ChevronDown } from "lucide-react";
 import { PERSONAL_INFO } from "@/data/portfolio";
+import { PersonalInfo } from "@/types/portfolio";
 
 const ABOUT_TAGS = [
   "Web Development",
@@ -11,7 +12,9 @@ const ABOUT_TAGS = [
   "UI/UX Design",
 ];
 
-export default function About() {
+export default function About({ profile }: { profile?: PersonalInfo }) {
+  const activeProfile = profile || PERSONAL_INFO;
+
   const handleScrollDown = () => {
     const el = document.getElementById("projects");
     if (el) {
@@ -24,11 +27,11 @@ export default function About() {
       <div className="container mx-auto px-4">
         <div className="max-w-3xl mx-auto text-center">
           <h2 className="text-3xl md:text-5xl font-medium mb-8 text-black">
-            Hey! I&apos;m FALAH, a fullstack developer based in Indonesia.
+            Hey! I&apos;m {activeProfile.name || "FALAH"}, a {activeProfile.title || "fullstack developer"} based in {activeProfile.location || "Indonesia"}.
           </h2>
 
           <p className="md:text-2xl text-lg text-black/70 mb-8 font-normal leading-relaxed">
-            {PERSONAL_INFO.about}
+            {activeProfile.about}
           </p>
 
           <div className="flex flex-wrap justify-center gap-4 mb-16">

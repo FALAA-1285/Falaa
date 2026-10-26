@@ -1,7 +1,7 @@
 export interface Project {
   id: string;
   title: string;
-  category: "Web & Fullstack" | "Mobile" | "Machine Learning & Tools";
+  category: "Web & Fullstack" | "Mobile" | "Machine Learning & Tools" | string;
   tagline: string;
   description: string;
   image: string;
@@ -10,9 +10,13 @@ export interface Project {
   liveUrl?: string;
   features: string[];
   metrics?: string;
+  order_index?: number;
+  created_at?: string;
+  updated_at?: string;
 }
 
 export interface ExperienceItem {
+  id?: number;
   period: string;
   role: string;
   organization: string;
@@ -20,6 +24,9 @@ export interface ExperienceItem {
   type: string;
   description: string;
   highlights: string[];
+  order_index?: number;
+  created_at?: string;
+  updated_at?: string;
 }
 
 export interface PersonalInfo {
@@ -34,4 +41,14 @@ export interface PersonalInfo {
   quote: string;
   about: string;
   aboutSub: string;
+}
+
+export interface ContactMessage {
+  id: number;
+  name: string;
+  email: string;
+  subject?: string;
+  message: string;
+  is_read: boolean;
+  created_at: string;
 }

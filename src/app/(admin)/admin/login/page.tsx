@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Lock, Mail, Loader2, ArrowRight, ShieldCheck, ArrowLeft } from "lucide-react";
+import { Lock, Mail, Loader2, ArrowRight, ShieldCheck, ArrowLeft, Database } from "lucide-react";
 import Link from "next/link";
 import { loginSchema, LoginFormData } from "@/lib/schemas/auth";
 import { loginAction } from "@/actions/admin/auth";
@@ -41,17 +41,20 @@ export default function AdminLoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-neutral-950 flex flex-col justify-center items-center px-4 sm:px-6 lg:px-8 relative select-none">
-      {/* Background glow effect */}
-      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-neutral-800/30 rounded-full blur-3xl pointer-events-none" />
+    <div className="min-h-screen bg-neutral-100 flex flex-col justify-center items-center px-4 sm:px-6 lg:px-8 relative select-none overflow-hidden">
+      {/* Decorative Monochrome Silhouette Watermark */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] bg-neutral-200/50 rounded-full blur-3xl pointer-events-none" />
+
+      {/* Decorative Vector Silhouette grid lines */}
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,#00000008_1px,transparent_1px),linear-gradient(to_bottom,#00000008_1px,transparent_1px)] bg-[size:4rem_4rem] pointer-events-none" />
 
       {/* Top back button */}
-      <div className="absolute top-6 left-6">
+      <div className="absolute top-6 left-6 z-20">
         <Link
           href="/"
-          className="inline-flex items-center gap-2 text-xs font-medium text-neutral-400 hover:text-white transition"
+          className="inline-flex items-center gap-2 text-xs font-semibold text-neutral-600 hover:text-black bg-white px-3.5 py-2 rounded-xl border border-neutral-200 shadow-xs transition"
         >
-          <ArrowLeft className="w-4 h-4" />
+          <ArrowLeft className="w-4 h-4 text-black" />
           <span>Kembali ke Portofolio</span>
         </Link>
       </div>
@@ -59,44 +62,47 @@ export default function AdminLoginPage() {
       <div className="w-full max-w-md relative z-10">
         {/* Card Header */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-14 h-14 rounded-xl bg-white text-black font-black text-2xl tracking-tighter shadow-lg mb-4">
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-black text-white font-black text-2xl tracking-tighter shadow-md mb-4 border border-black">
             F
           </div>
-          <h1 className="text-2xl font-bold tracking-tight text-white">
+          <h1 className="text-3xl font-extrabold tracking-tight text-neutral-900">
             FALAH CMS
           </h1>
-          <p className="text-xs text-neutral-400 mt-1 uppercase tracking-widest flex items-center justify-center gap-1.5">
-            <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
-            <span>Admin Authentication</span>
+          <p className="text-xs text-neutral-500 mt-1 uppercase tracking-widest font-semibold flex items-center justify-center gap-1.5">
+            <ShieldCheck className="w-4 h-4 text-black" />
+            <span>Monochrome Control Center</span>
           </p>
         </div>
 
         {/* Login Form Box */}
-        <div className="bg-neutral-900/90 border border-neutral-800 rounded-xl p-6 sm:p-8 shadow-2xl backdrop-blur-md">
+        <div className="bg-white border border-neutral-200 rounded-2xl p-6 sm:p-8 shadow-xl relative overflow-hidden">
+          {/* Subtle silhouette corner accent */}
+          <div className="absolute -top-12 -right-12 w-32 h-32 bg-neutral-100 rounded-full pointer-events-none" />
+
           {errorMessage && (
-            <div className="mb-6 p-3 bg-red-950/60 border border-red-800/80 rounded-md text-red-300 text-xs flex items-center gap-2">
-              <span className="w-1.5 h-1.5 rounded-full bg-red-400" />
+            <div className="mb-6 p-3.5 bg-neutral-900 text-white rounded-xl text-xs flex items-center gap-2.5 shadow-sm">
+              <span className="w-2 h-2 rounded-full bg-red-400 shrink-0" />
               <span>{errorMessage}</span>
             </div>
           )}
 
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-5 relative z-10">
             {/* Email Field */}
             <div>
-              <label className="block text-xs font-semibold text-neutral-300 uppercase tracking-wider mb-2">
+              <label className="block text-xs font-bold text-neutral-700 uppercase tracking-wider mb-2">
                 Email Administrator
               </label>
               <div className="relative">
-                <Mail className="w-4 h-4 text-neutral-500 absolute left-3 top-1/2 -translate-y-1/2" />
+                <Mail className="w-4 h-4 text-neutral-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
                 <input
                   type="email"
                   {...register("email")}
                   placeholder="admin@falah.dev"
-                  className="w-full pl-9 pr-3 py-2.5 bg-neutral-950 border border-neutral-800 text-white rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-white focus:border-transparent transition"
+                  className="w-full pl-10 pr-3.5 py-2.5 bg-neutral-50 border border-neutral-200 text-neutral-900 rounded-xl text-sm focus:outline-none focus:border-black focus:ring-1 focus:ring-black transition"
                 />
               </div>
               {errors.email && (
-                <p className="text-xs text-red-400 mt-1.5">
+                <p className="text-xs text-red-600 mt-1.5 font-medium">
                   {errors.email.message}
                 </p>
               )}
@@ -104,20 +110,20 @@ export default function AdminLoginPage() {
 
             {/* Password Field */}
             <div>
-              <label className="block text-xs font-semibold text-neutral-300 uppercase tracking-wider mb-2">
+              <label className="block text-xs font-bold text-neutral-700 uppercase tracking-wider mb-2">
                 Password
               </label>
               <div className="relative">
-                <Lock className="w-4 h-4 text-neutral-500 absolute left-3 top-1/2 -translate-y-1/2" />
+                <Lock className="w-4 h-4 text-neutral-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
                 <input
                   type="password"
                   {...register("password")}
                   placeholder="••••••••"
-                  className="w-full pl-9 pr-3 py-2.5 bg-neutral-950 border border-neutral-800 text-white rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-white focus:border-transparent transition"
+                  className="w-full pl-10 pr-3.5 py-2.5 bg-neutral-50 border border-neutral-200 text-neutral-900 rounded-xl text-sm focus:outline-none focus:border-black focus:ring-1 focus:ring-black transition"
                 />
               </div>
               {errors.password && (
-                <p className="text-xs text-red-400 mt-1.5">
+                <p className="text-xs text-red-600 mt-1.5 font-medium">
                   {errors.password.message}
                 </p>
               )}
@@ -127,10 +133,10 @@ export default function AdminLoginPage() {
             <button
               type="submit"
               disabled={isSubmitting}
-              className="w-full mt-2 inline-flex items-center justify-center gap-2 bg-white hover:bg-neutral-200 text-black font-semibold py-2.5 px-4 rounded-md text-sm transition shadow-md disabled:opacity-50 cursor-pointer"
+              className="w-full mt-2 inline-flex items-center justify-center gap-2 bg-black hover:bg-neutral-800 text-white font-bold py-3 px-4 rounded-xl text-sm transition shadow-sm active:scale-[0.99] disabled:opacity-50 cursor-pointer"
             >
               {isSubmitting ? (
-                <Loader2 className="w-4 h-4 animate-spin text-black" />
+                <Loader2 className="w-4 h-4 animate-spin text-white" />
               ) : (
                 <>
                   <span>Masuk ke Admin Panel</span>
@@ -140,18 +146,24 @@ export default function AdminLoginPage() {
             </button>
           </form>
 
-          {/* Quick Demo Credentials Reminder */}
-          <div className="mt-6 pt-5 border-t border-neutral-800 text-[11px] text-neutral-500 space-y-1">
-            <p className="text-neutral-400 font-medium">Akun Demo Standar:</p>
-            <div className="flex justify-between font-mono text-neutral-400 bg-neutral-950/80 px-2.5 py-1.5 rounded border border-neutral-800/80">
-              <span>Email: admin@falah.dev</span>
-              <span>Pass: admin123</span>
+          {/* Quick Demo Credentials & Database Status */}
+          <div className="mt-6 pt-5 border-t border-neutral-200 space-y-2">
+            <div className="flex items-center justify-between text-[11px] text-neutral-500">
+              <span className="font-semibold text-neutral-700">Database Engine:</span>
+              <span className="inline-flex items-center gap-1 font-mono text-neutral-900 font-semibold bg-neutral-100 px-2 py-0.5 rounded border border-neutral-200">
+                <Database className="w-3 h-3 text-black" />
+                PostgreSQL 18
+              </span>
+            </div>
+            <div className="flex justify-between font-mono text-xs text-neutral-600 bg-neutral-50 px-3 py-2 rounded-xl border border-neutral-200">
+              <span>admin@falah.dev</span>
+              <span className="text-black font-bold">admin123</span>
             </div>
           </div>
         </div>
 
-        <p className="text-center text-[11px] text-neutral-400 mt-6">
-          &copy; 2026 FALAH · Protected Internal Route
+        <p className="text-center text-xs text-neutral-500 mt-6 font-medium">
+          &copy; 2026 FALAH · Protected PostgreSQL CMS
         </p>
       </div>
     </div>

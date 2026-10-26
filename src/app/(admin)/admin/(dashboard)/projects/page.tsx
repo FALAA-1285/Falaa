@@ -13,18 +13,18 @@ export default function AdminProjectsPage() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 border-b border-neutral-200 pb-4">
         <div>
           <h2 className="text-xl font-bold text-neutral-900 tracking-tight">
-            Manajemen Project
+            Manajemen Project (CRUD)
           </h2>
           <p className="text-xs sm:text-sm text-neutral-500 mt-0.5">
-            Kelola, tambah, edit, atau hapus item karya yang tampil di portofolio publik.
+            Kelola, tambah, edit, atau hapus item karya yang tampil di portofolio publik langsung tersimpan di PostgreSQL.
           </p>
         </div>
       </div>
 
       <Suspense
         fallback={
-          <div className="bg-white rounded-lg border border-neutral-200 p-8 text-center text-sm text-neutral-400">
-            Memuat daftar data project...
+          <div className="bg-white rounded-2xl border border-neutral-200 p-8 text-center text-xs text-neutral-400 font-medium">
+            Memuat daftar data project dari PostgreSQL...
           </div>
         }
       >

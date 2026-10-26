@@ -43,7 +43,7 @@ export default function ProjectForm({
   const defaultValues: ProjectFormData = {
     id: initialData?.id || "",
     title: initialData?.title || "",
-    category: initialData?.category || "Web & Fullstack",
+    category: (initialData?.category as ProjectFormData["category"]) || "Web & Fullstack",
     tagline: initialData?.tagline || "",
     description: initialData?.description || "",
     image: initialData?.image || "",
