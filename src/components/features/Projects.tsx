@@ -7,15 +7,20 @@ import { Project } from "@/types/portfolio";
 import { PROJECTS_DATA } from "@/data/portfolio";
 import ProjectModal from "@/components/ui/ProjectModal";
 
-export default function Projects() {
+interface ProjectsProps {
+  initialProjects?: Project[];
+}
+
+export default function Projects({ initialProjects }: ProjectsProps) {
   const [activeProject, setActiveProject] = useState<Project | null>(null);
+  const projects = initialProjects && initialProjects.length > 0 ? initialProjects : PROJECTS_DATA;
 
   return (
     <section id="projects" className="bg-white min-h-[100vh] px-4 sm:px-8 scroll-mt-24 relative">
       <div className="container mx-auto">
         {/* Projects Grid matching reference: grid-cols-1 md:grid-cols-2 gap-8 */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          {PROJECTS_DATA.map((project) => (
+          {projects.map((project) => (
             <div
               key={project.id}
               onClick={() => setActiveProject(project)}

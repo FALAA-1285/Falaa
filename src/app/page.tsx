@@ -1,3 +1,4 @@
+import React, { Suspense } from "react";
 import Navbar from "@/components/layout/Navbar";
 import Hero from "@/components/features/Hero";
 import About from "@/components/features/About";
@@ -7,6 +8,12 @@ import Experience from "@/components/features/Experience";
 import Skills from "@/components/features/Skills";
 import Contact from "@/components/features/Contact";
 import Footer from "@/components/layout/Footer";
+import { getProjects } from "@/lib/db";
+
+async function DynamicProjects() {
+  const projects = await getProjects();
+  return <Projects initialProjects={projects} />;
+}
 
 export default function Home() {
   return (
@@ -25,8 +32,10 @@ export default function Home() {
       {/* 4. Sticky Scroll-Scaling Transition: My Works (Center zooms 1.0 -> 1.5) */}
       <MarqueeBanner text="My Works" />
 
-      {/* 5. Projects Section */}
-      <Projects />
+      {/* 5. Projects Section (Dynamic with Suspense) */}
+      <Suspense fallback={<Projects />}>
+        <DynamicProjects />
+      </Suspense>
 
       {/* 6. Sticky Scroll-Scaling Transition: Experience (Center zooms 1.0 -> 1.5) */}
       <MarqueeBanner text="Experience" isExperience />
