@@ -15,7 +15,7 @@ export default function Projects({ initialProjects = [] }: ProjectsProps) {
   const projects = initialProjects;
 
   return (
-    <section id="projects" className="bg-white min-h-[100vh] px-4 sm:px-8 scroll-mt-24 relative">
+    <div className="bg-white px-4 sm:px-8 pt-8 pb-20 relative">
       <div className="container mx-auto">
         {/* Projects Grid matching reference: grid-cols-1 md:grid-cols-2 gap-8 */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -53,11 +53,11 @@ export default function Projects({ initialProjects = [] }: ProjectsProps) {
                 </div>
 
                 {/* Tech Pills */}
-                <div className="mt-3 flex flex-wrap gap-2">
+                <div className="mt-3 flex flex-wrap gap-1.5 sm:gap-2">
                   {project.tags.map((tag) => (
                     <span
                       key={tag}
-                      className="text-sm px-3 py-1 border border-black/10 rounded-full text-black/80 font-normal bg-white"
+                      className="text-xs font-mono px-2.5 py-1 border border-neutral-200/90 rounded-full text-neutral-700 font-medium bg-neutral-50/80 tracking-tight"
                     >
                       {tag}
                     </span>
@@ -74,6 +74,6 @@ export default function Projects({ initialProjects = [] }: ProjectsProps) {
         project={activeProject}
         onClose={() => setActiveProject(null)}
       />
-    </section>
+    </div>
   );
 }

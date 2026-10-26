@@ -32,7 +32,7 @@ export default function ProjectModal({ project, onClose }: ProjectModalProps) {
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/60 backdrop-blur-xs">
       <div className="fixed inset-0" onClick={onClose} />
 
-      <div className="relative w-full max-w-2xl max-h-[90vh] bg-white rounded-lg shadow-2xl overflow-y-auto border border-black/10 z-10 flex flex-col">
+      <div className="relative w-full max-w-2xl max-h-[90vh] bg-white rounded-2xl shadow-2xl overflow-y-auto border border-black/10 z-10 flex flex-col">
         {/* Header */}
         <div className="sticky top-0 bg-white/95 backdrop-blur-sm px-6 py-4 border-b border-black/10 flex justify-between items-center z-20">
           <div>
@@ -45,7 +45,7 @@ export default function ProjectModal({ project, onClose }: ProjectModalProps) {
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 rounded-full hover:bg-neutral-100 text-black/70 hover:text-black transition-colors"
+            className="p-1.5 rounded-full hover:bg-neutral-100 text-black/70 hover:text-black transition-colors cursor-pointer"
             aria-label="Close"
           >
             <X className="w-5 h-5" />
@@ -54,7 +54,7 @@ export default function ProjectModal({ project, onClose }: ProjectModalProps) {
 
         {/* Content */}
         <div className="p-6 space-y-6">
-          <div className="relative aspect-[16/10] w-full rounded-md overflow-hidden bg-neutral-900 border border-neutral-200">
+          <div className="relative aspect-[16/10] w-full rounded-xl overflow-hidden bg-neutral-900 border border-neutral-200">
             <Image
               src={project.image}
               alt={project.title}
@@ -91,7 +91,7 @@ export default function ProjectModal({ project, onClose }: ProjectModalProps) {
             {project.tags.map((tag) => (
               <span
                 key={tag}
-                className="text-xs px-3 py-1 border border-black/10 rounded-full text-black/80 font-normal bg-white"
+                className="text-xs font-mono px-2.5 py-1 border border-neutral-200 rounded-full text-neutral-700 font-medium bg-neutral-50 tracking-tight"
               >
                 {tag}
               </span>
@@ -105,7 +105,7 @@ export default function ProjectModal({ project, onClose }: ProjectModalProps) {
                 href={project.githubUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-black text-white text-xs font-medium hover:bg-black/80 transition-colors"
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-black text-white text-xs font-medium hover:bg-black/80 transition-colors active:scale-95 cursor-pointer"
               >
                 <GithubIcon className="w-4 h-4" />
                 <span>Repository</span>
@@ -116,7 +116,7 @@ export default function ProjectModal({ project, onClose }: ProjectModalProps) {
                 href={project.liveUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full border border-black/20 text-black text-xs font-medium hover:bg-neutral-50 transition-colors"
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full border border-black/20 text-black text-xs font-medium hover:bg-neutral-50 transition-colors active:scale-95 cursor-pointer"
               >
                 <span>Preview</span>
                 <ExternalLink className="w-3.5 h-3.5" />
