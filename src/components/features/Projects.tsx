@@ -15,7 +15,7 @@ export default function Projects({ initialProjects = [] }: ProjectsProps) {
   const projects = initialProjects;
 
   return (
-    <div className="bg-white px-4 sm:px-8 pt-8 pb-20 relative">
+    <section id="projects" className="bg-white px-4 sm:px-8 pt-8 pb-20 scroll-mt-24 relative">
       <div className="container mx-auto">
         {/* Projects Grid matching reference: grid-cols-1 md:grid-cols-2 gap-8 */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -74,6 +74,6 @@ export default function Projects({ initialProjects = [] }: ProjectsProps) {
         project={activeProject}
         onClose={() => setActiveProject(null)}
       />
-    </div>
+    </section>
   );
 }

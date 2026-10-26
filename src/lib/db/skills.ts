@@ -1,5 +1,6 @@
 import { pool } from "./pool";
 import { SkillCategoryGroup, SkillItem } from "@/types/skills";
+import { DEFAULT_SKILLS } from "@/lib/constants";
 
 function getCategoryPriority(category: string): number {
   const norm = category.toLowerCase().trim();
@@ -59,10 +60,13 @@ export async function getSkills(): Promise<SkillItem[]> {
       return (a.order_index || 0) - (b.order_index || 0);
     });
 
+    if (skillsList.length === 0) {
+      return DEFAULT_SKILLS;
+    }
     return skillsList;
   } catch (error) {
     console.error("Error fetching skills from PostgreSQL:", error);
-    return [];
+    return DEFAULT_SKILLS;
   }
 }
 

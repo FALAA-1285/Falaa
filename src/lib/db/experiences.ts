@@ -1,5 +1,6 @@
 import { pool } from "./pool";
 import { ExperienceItem } from "@/types/portfolio";
+import { DEFAULT_EXPERIENCES } from "@/lib/constants";
 
 export async function getExperiences(): Promise<ExperienceItem[]> {
   try {
@@ -8,6 +9,9 @@ export async function getExperiences(): Promise<ExperienceItem[]> {
        FROM experiences
        ORDER BY order_index ASC, id ASC`
     );
+    if (rows.length === 0) {
+      return DEFAULT_EXPERIENCES;
+    }
     return rows.map((r) => ({
       id: r.id,
       period: r.period,
@@ -22,7 +26,7 @@ export async function getExperiences(): Promise<ExperienceItem[]> {
     }));
   } catch (error) {
     console.error("Error fetching experiences from PostgreSQL:", error);
-    return [];
+    return DEFAULT_EXPERIENCES;
   }
 }
 

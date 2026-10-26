@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState } from "react";
 import { SkillCategoryGroup } from "@/types/skills";
 
 function SkillCard({ name, icon }: { name: string; icon: string }) {
@@ -94,9 +94,6 @@ export default function Skills({
 }: {
   initialSkillGroups?: SkillCategoryGroup[];
 }) {
-  const sectionRef = useRef<HTMLElement>(null);
-  const [parallaxOffset, setParallaxOffset] = useState(0);
-
   const skillGroups = [...(initialSkillGroups || [])].sort((a, b) => {
     const pA = getCategoryPriority(a.category);
     const pB = getCategoryPriority(b.category);
@@ -104,42 +101,27 @@ export default function Skills({
     return a.category.localeCompare(b.category);
   });
 
-  useEffect(() => {
-    const handleScroll = () => {
-      if (!sectionRef.current) return;
-      const rect = sectionRef.current.getBoundingClientRect();
-      // Parallax translation as user scrolls through Skills section
-      const offset = (window.innerHeight / 2 - rect.top) * 0.12;
-      setParallaxOffset(offset);
-    };
-
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    handleScroll();
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
-
   return (
     <section
-      ref={sectionRef}
       id="skills"
       className="relative py-28 bg-white text-black overflow-hidden min-h-screen scroll-mt-24"
     >
-      {/* Giant Interactive Parallax Watermark Background */}
-      <h2
-        aria-hidden="true"
-        style={{
-          transform: `translateY(${parallaxOffset}px)`,
-        }}
-        className="absolute inset-0 md:-top-30 text-[6.5rem] md:text-[15rem] font-extrabold text-black/10 uppercase tracking-widest text-center pointer-events-none select-none -z-10 transition-transform duration-75 ease-out"
-      >
-        Skills
-      </h2>
-
       <div className="relative z-10 container mx-auto px-4">
-        {/* Title */}
-        <h3 className="text-4xl md:text-5xl font-bold text-center mb-20 text-black">
-          My Technical Skills
-        </h3>
+        {/* Harmonized Section Header with Perfectly Centered Watermark */}
+        <div className="relative flex items-center justify-center mb-16 sm:mb-20 select-none py-4">
+          {/* Subtle Watermark Background - Centered Behind Title */}
+          <span
+            aria-hidden="true"
+            className="absolute text-6xl sm:text-8xl md:text-[10rem] lg:text-[13rem] font-extrabold text-black/[0.05] uppercase tracking-widest pointer-events-none select-none whitespace-nowrap leading-none"
+          >
+            SKILLS
+          </span>
+
+          {/* Foreground Title */}
+          <h3 className="relative z-10 text-3xl sm:text-4xl md:text-5xl font-bold text-center text-black tracking-tight">
+            My Technical Skills
+          </h3>
+        </div>
 
         {/* Categories */}
         <div className="space-y-20 max-w-6xl mx-auto">

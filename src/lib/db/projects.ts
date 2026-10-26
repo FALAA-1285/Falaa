@@ -1,5 +1,6 @@
 import { pool } from "./pool";
 import { Project } from "@/types/portfolio";
+import { DEFAULT_PROJECTS } from "@/lib/constants";
 
 export async function getProjects(): Promise<Project[]> {
   try {
@@ -10,6 +11,9 @@ export async function getProjects(): Promise<Project[]> {
        FROM projects
        ORDER BY order_index ASC, created_at DESC`
     );
+    if (rows.length === 0) {
+      return DEFAULT_PROJECTS;
+    }
     return rows.map((r) => ({
       id: r.id,
       title: r.title,
@@ -28,7 +32,7 @@ export async function getProjects(): Promise<Project[]> {
     }));
   } catch (error) {
     console.error("Error reading projects from PostgreSQL:", error);
-    return [];
+    return DEFAULT_PROJECTS;
   }
 }
 

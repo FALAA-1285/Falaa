@@ -73,9 +73,6 @@ export default function AdminSidebar() {
             </span>
           </div>
         </Link>
-        <span className="inline-flex items-center gap-1 text-[10px] font-bold bg-black text-white px-2 py-0.5 rounded-full tracking-wide">
-          PRO
-        </span>
       </div>
 
       {/* Quick Action Button */}

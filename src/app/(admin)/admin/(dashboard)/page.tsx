@@ -11,10 +11,19 @@ import {
   ExternalLink,
   UserCheck,
   CheckCircle2,
+  AlertTriangle,
 } from "lucide-react";
 import { getProjects, getExperiences, getSkills, getMessages } from "@/lib/db";
+import { pool } from "@/lib/db/pool";
 
 async function DashboardContent() {
+  let isDbConnected = true;
+  try {
+    await pool.query("SELECT 1");
+  } catch {
+    isDbConnected = false;
+  }
+
   const [projects, experiences, skills, messages] = await Promise.all([
     getProjects(),
     getExperiences(),
@@ -28,6 +37,17 @@ async function DashboardContent() {
 
   return (
     <div className="space-y-8">
+      {!isDbConnected && (
+        <div className="bg-amber-50 border border-amber-300 text-amber-900 rounded-2xl p-4 sm:p-5 flex items-start gap-3 shadow-xs">
+          <AlertTriangle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
+          <div className="text-xs sm:text-sm">
+            <p className="font-bold">PostgreSQL Tidak Terhubung</p>
+            <p className="text-amber-800 mt-1">
+              Service PostgreSQL di Laragon saat ini tidak aktif. Silakan buka Laragon dan klik <strong>Start All</strong> atau pastikan port 5432 aktif. Data portofolio publik tetap aman ditampilkan menggunakan data cadangan (fallback).
+            </p>
+          </div>
+        </div>
+      )}
       {/* Top Monochrome Hero Banner with Vector Silhouettes */}
       <div className="bg-white rounded-2xl border border-neutral-200/90 p-6 sm:p-8 shadow-sm relative overflow-hidden">
         {/* Black Geometric Silhouette Art Watermark */}

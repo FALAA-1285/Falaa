@@ -20,7 +20,7 @@ export default function AdminLoginPage() {
   } = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
-      email: "admin@falah.dev",
+      email: "",
       password: "",
     },
   });
@@ -97,7 +97,8 @@ export default function AdminLoginPage() {
                 <input
                   type="email"
                   {...register("email")}
-                  placeholder="admin@falah.dev"
+                  placeholder="admin@email.com"
+                  autoComplete="username"
                   className="w-full pl-10 pr-3.5 py-2.5 bg-neutral-50 border border-neutral-200 text-neutral-900 rounded-xl text-sm focus:outline-none focus:border-black focus:ring-1 focus:ring-black transition"
                 />
               </div>
@@ -145,14 +146,6 @@ export default function AdminLoginPage() {
               )}
             </button>
           </form>
-
-          {/* Demo Credentials */}
-          <div className="mt-6 pt-5 border-t border-neutral-200">
-            <div className="flex justify-between font-mono text-xs text-neutral-600 bg-neutral-50 px-3 py-2 rounded-xl border border-neutral-200">
-              <span>admin@falah.dev</span>
-              <span className="text-black font-bold">admin123</span>
-            </div>
-          </div>
         </div>
 
         <p className="text-center text-xs text-neutral-500 mt-6 font-medium">

@@ -5,6 +5,7 @@ import Image from "next/image";
 import { X, ExternalLink, CheckCircle2 } from "lucide-react";
 import { GithubIcon } from "@/components/ui/SocialIcons";
 import { Project } from "@/types/portfolio";
+import { getLenisInstance } from "@/lib/scroll";
 
 interface ProjectModalProps {
   project: Project | null;
@@ -18,10 +19,18 @@ export default function ProjectModal({ project, onClose }: ProjectModalProps) {
     };
     if (project) {
       document.body.style.overflow = "hidden";
+      const lenis = getLenisInstance();
+      if (lenis) {
+        lenis.stop();
+      }
       window.addEventListener("keydown", handleKeyDown);
     }
     return () => {
       document.body.style.overflow = "unset";
+      const lenis = getLenisInstance();
+      if (lenis) {
+        lenis.start();
+      }
       window.removeEventListener("keydown", handleKeyDown);
     };
   }, [project, onClose]);
@@ -29,10 +38,16 @@ export default function ProjectModal({ project, onClose }: ProjectModalProps) {
   if (!project) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/60 backdrop-blur-xs">
+    <div
+      data-lenis-prevent
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/60 backdrop-blur-xs overscroll-contain"
+    >
       <div className="fixed inset-0" onClick={onClose} />
 
-      <div className="relative w-full max-w-2xl max-h-[90vh] bg-white rounded-2xl shadow-2xl overflow-y-auto border border-black/10 z-10 flex flex-col">
+      <div
+        data-lenis-prevent
+        className="relative w-full max-w-2xl max-h-[90vh] bg-white rounded-2xl shadow-2xl overflow-y-auto overscroll-contain border border-black/10 z-10 flex flex-col"
+      >
         {/* Header */}
         <div className="sticky top-0 bg-white/95 backdrop-blur-sm px-6 py-4 border-b border-black/10 flex justify-between items-center z-20">
           <div>
