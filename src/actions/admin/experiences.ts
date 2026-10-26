@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { getAdminSession } from "@/lib/auth";
+import { invalidatePortfolioCache } from "@/lib/cached-data";
 import {
   getExperiences,
   getExperienceById,
@@ -36,9 +37,11 @@ export async function createExperienceAction(
     revalidatePath("/");
     revalidatePath("/admin");
     revalidatePath("/admin/experiences");
+    invalidatePortfolioCache();
     return { success: true, experience: created };
-  } catch (error: any) {
-    return { success: false, error: error?.message || "Gagal membuat pengalaman." };
+  } catch (error: unknown) {
+    const errorMsg = error instanceof Error ? error.message : "Gagal membuat pengalaman.";
+    return { success: false, error: errorMsg };
   }
 }
 
@@ -56,9 +59,11 @@ export async function updateExperienceAction(
     revalidatePath("/");
     revalidatePath("/admin");
     revalidatePath("/admin/experiences");
+    invalidatePortfolioCache();
     return { success: true, experience: updated };
-  } catch (error: any) {
-    return { success: false, error: error?.message || "Gagal memperbarui pengalaman." };
+  } catch (error: unknown) {
+    const errorMsg = error instanceof Error ? error.message : "Gagal memperbarui pengalaman.";
+    return { success: false, error: errorMsg };
   }
 }
 
@@ -78,8 +83,10 @@ export async function deleteExperienceAction(
     revalidatePath("/");
     revalidatePath("/admin");
     revalidatePath("/admin/experiences");
+    invalidatePortfolioCache();
     return { success: true };
-  } catch (error: any) {
-    return { success: false, error: error?.message || "Gagal menghapus pengalaman." };
+  } catch (error: unknown) {
+    const errorMsg = error instanceof Error ? error.message : "Gagal menghapus pengalaman.";
+    return { success: false, error: errorMsg };
   }
 }

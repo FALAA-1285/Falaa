@@ -4,16 +4,15 @@ import React, { useState } from "react";
 import Image from "next/image";
 import { ArrowUpRight } from "lucide-react";
 import { Project } from "@/types/portfolio";
-import { PROJECTS_DATA } from "@/data/portfolio";
 import ProjectModal from "@/components/ui/ProjectModal";
 
 interface ProjectsProps {
   initialProjects?: Project[];
 }
 
-export default function Projects({ initialProjects }: ProjectsProps) {
+export default function Projects({ initialProjects = [] }: ProjectsProps) {
   const [activeProject, setActiveProject] = useState<Project | null>(null);
-  const projects = initialProjects && initialProjects.length > 0 ? initialProjects : PROJECTS_DATA;
+  const projects = initialProjects;
 
   return (
     <section id="projects" className="bg-white min-h-[100vh] px-4 sm:px-8 scroll-mt-24 relative">

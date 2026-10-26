@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   Loader2,
@@ -61,22 +61,24 @@ export default function ProjectForm({
     register,
     handleSubmit,
     setValue,
-    watch,
+    getValues,
+    control,
     formState: { errors, isSubmitting },
   } = useForm<ProjectFormData>({
     resolver: zodResolver(projectSchema),
     defaultValues,
   });
 
-  const currentImage = watch("image");
-  const currentTags = watch("tags") || [];
-  const currentFeatures = watch("features") || [];
+  const currentImage = useWatch({ control, name: "image" });
+  const currentTags = useWatch({ control, name: "tags" }) || [];
+  const currentFeatures = useWatch({ control, name: "features" }) || [];
 
   // Auto-slug generation from title in create mode
   const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const titleVal = e.target.value;
     setValue("title", titleVal, { shouldValidate: true });
-    if (!isEdit && (!watch("id") || watch("id") === "")) {
+    const currentId = getValues("id");
+    if (!isEdit && (!currentId || currentId === "")) {
       const generatedSlug = titleVal
         .toLowerCase()
         .replace(/[^a-z0-9]+/g, "-")

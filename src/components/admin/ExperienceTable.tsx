@@ -45,7 +45,6 @@ export default function ExperienceTable({
   const [formError, setFormError] = useState<string | null>(null);
 
   // Deletion state
-  const [deleteId, setDeleteId] = useState<number | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
 
   const openCreateModal = () => {
@@ -146,7 +145,6 @@ export default function ExperienceTable({
       alert("Terjadi kesalahan saat menghapus data.");
     } finally {
       setIsDeleting(false);
-      setDeleteId(null);
     }
   };
 

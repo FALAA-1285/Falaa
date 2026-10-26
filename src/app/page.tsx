@@ -8,19 +8,20 @@ import Experience from "@/components/features/Experience";
 import Skills from "@/components/features/Skills";
 import Contact from "@/components/features/Contact";
 import Footer from "@/components/layout/Footer";
+import SmoothScrollProvider from "@/components/layout/SmoothScrollProvider";
 import {
-  getProjects,
-  getExperiences,
-  getSkillsGrouped,
-  getProfileInfo,
-} from "@/lib/db";
+  getCachedProjects,
+  getCachedExperiences,
+  getCachedSkillsGrouped,
+  getCachedProfileInfo,
+} from "@/lib/cached-data";
 
 async function PortfolioDynamicContent() {
   const [projects, experiences, skillGroups, profile] = await Promise.all([
-    getProjects(),
-    getExperiences(),
-    getSkillsGrouped(),
-    getProfileInfo(),
+    getCachedProjects(),
+    getCachedExperiences(),
+    getCachedSkillsGrouped(),
+    getCachedProfileInfo(),
   ]);
 
   return (
@@ -53,15 +54,17 @@ async function PortfolioDynamicContent() {
 export default function Home() {
   return (
     <main className="min-h-screen bg-white">
-      <Suspense
-        fallback={
-          <div className="min-h-screen bg-white flex items-center justify-center text-sm text-neutral-400">
-            Memuat portofolio...
-          </div>
-        }
-      >
-        <PortfolioDynamicContent />
-      </Suspense>
+      <SmoothScrollProvider>
+        <Suspense
+          fallback={
+            <div className="min-h-screen bg-white flex items-center justify-center text-sm text-neutral-400">
+              Memuat portofolio...
+            </div>
+          }
+        >
+          <PortfolioDynamicContent />
+        </Suspense>
+      </SmoothScrollProvider>
     </main>
   );
 }

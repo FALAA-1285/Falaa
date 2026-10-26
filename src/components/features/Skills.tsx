@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
-import { MONOCHROME_SKILL_CATEGORIES } from "@/data/skills";
 import { SkillCategoryGroup } from "@/types/skills";
 
 function SkillCard({ name, icon }: { name: string; icon: string }) {
@@ -50,10 +49,7 @@ export default function Skills({
   const sectionRef = useRef<HTMLElement>(null);
   const [parallaxOffset, setParallaxOffset] = useState(0);
 
-  const skillGroups =
-    initialSkillGroups && initialSkillGroups.length > 0
-      ? initialSkillGroups
-      : MONOCHROME_SKILL_CATEGORIES;
+  const skillGroups = initialSkillGroups || [];
 
   useEffect(() => {
     const handleScroll = () => {

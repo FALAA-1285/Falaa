@@ -1,22 +1,39 @@
-"use client";
-
 import React from "react";
 import { GithubIcon, LinkedinIcon, GmailIcon } from "@/components/ui/SocialIcons";
-import { PERSONAL_INFO } from "@/data/portfolio";
+import { DEFAULT_PERSONAL_INFO } from "@/lib/constants";
 import { PersonalInfo } from "@/types/portfolio";
 
 export default function Footer({ profile }: { profile?: PersonalInfo }) {
-  const activeProfile = profile || PERSONAL_INFO;
-  const name = activeProfile.name || "FALAH";
+  const activeProfile = profile || DEFAULT_PERSONAL_INFO;
+  const displayName = "AHMAD • FALAHI";
 
   return (
     <footer className="py-12 sm:px-0 px-4 bg-[#151414] text-white border-t border-black/10">
       <div className="container mx-auto overflow-hidden px-4 md:px-8">
+        {/* 1. Seamless Marquee Ticker Matching Reference (zurihaqi.github.io) */}
+        <div className="overflow-hidden mb-12 select-none pointer-events-none">
+          <div className="animate-marquee-left flex whitespace-nowrap">
+            <div className="flex shrink-0 items-center text-3xl sm:text-4xl font-light text-white">
+              <span className="mr-24 sm:mr-40">THANKS FOR VISITING</span>
+              <span className="mr-24 sm:mr-40">LET&apos;S CONNECT</span>
+              <span className="mr-24 sm:mr-40">CHECK OUT MY GITHUB</span>
+              <span className="mr-24 sm:mr-40">AHMAD • FALAHI</span>
+            </div>
+            <div className="flex shrink-0 items-center text-3xl sm:text-4xl font-light text-white">
+              <span className="mr-24 sm:mr-40">THANKS FOR VISITING</span>
+              <span className="mr-24 sm:mr-40">LET&apos;S CONNECT</span>
+              <span className="mr-24 sm:mr-40">CHECK OUT MY GITHUB</span>
+              <span className="mr-24 sm:mr-40">AHMAD • FALAHI</span>
+            </div>
+          </div>
+        </div>
+
+        {/* 2. Main Footer Content Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 font-light">
           {/* Identity & Socials */}
           <div>
             <h3 className="text-xl mb-4 text-white font-normal">
-              {name}
+              {displayName}
             </h3>
             <div className="flex space-x-4">
               <a
@@ -47,53 +64,45 @@ export default function Footer({ profile }: { profile?: PersonalInfo }) {
             </div>
           </div>
 
-          {/* Navigation */}
-          <div className="space-y-2 text-xl font-light">
-            <h3 className="mb-4 text-xl text-white font-normal">Navigation</h3>
-            <a
-              className="block hover:text-gray-300 transition-colors w-fit text-white/90"
-              href="#hero"
-            >
-              Home
-            </a>
-            <a
-              className="block hover:text-gray-300 transition-colors w-fit text-white/90"
-              href="#about"
-            >
-              About
-            </a>
-            <a
-              className="block hover:text-gray-300 transition-colors w-fit text-white/90"
-              href="#projects"
-            >
-              Projects
-            </a>
-            <a
-              className="block hover:text-gray-300 transition-colors w-fit text-white/90"
-              href="#experience"
-            >
-              Experience
-            </a>
-            <a
-              className="block hover:text-gray-300 transition-colors w-fit text-white/90"
-              href="#skills"
-            >
-              Skills
-            </a>
-            <a
-              className="block hover:text-gray-300 transition-colors w-fit text-white/90"
-              href="#contact"
-            >
-              Contact
-            </a>
-          </div>
-        </div>
+          {/* Quick Navigation Links & Copyright */}
+          <div className="flex flex-col md:items-end justify-between">
+            <div className="flex flex-wrap gap-4 md:gap-6 mb-4 text-sm font-normal text-white">
+              <a
+                href="#about"
+                className="hover:text-gray-300 transition-colors"
+              >
+                About
+              </a>
+              <a
+                href="#projects"
+                className="hover:text-gray-300 transition-colors"
+              >
+                Projects
+              </a>
+              <a
+                href="#experience"
+                className="hover:text-gray-300 transition-colors"
+              >
+                Experience
+              </a>
+              <a
+                href="#skills"
+                className="hover:text-gray-300 transition-colors"
+              >
+                Skills
+              </a>
+              <a
+                href="#contact"
+                className="hover:text-gray-300 transition-colors"
+              >
+                Contact
+              </a>
+            </div>
 
-        {/* Divider & Copyright */}
-        <div className="border-t border-white/20 mt-12 pt-8 font-light text-neutral-400 text-sm">
-          <p className="mt-4">
-            Designed and developed by {name}. © 2026 All rights reserved.
-          </p>
+            <p className="text-xs text-neutral-400 font-light mt-6 md:mt-0">
+              Designed and developed by Ahmad Falahi. &copy; 2026 All rights reserved.
+            </p>
+          </div>
         </div>
       </div>
     </footer>

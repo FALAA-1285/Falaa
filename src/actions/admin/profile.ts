@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { getAdminSession } from "@/lib/auth";
+import { invalidatePortfolioCache } from "@/lib/cached-data";
 import { getProfileInfo, updateProfileInfo } from "@/lib/db";
 import { PersonalInfo } from "@/types/portfolio";
 
@@ -26,8 +27,10 @@ export async function updateProfileInfoAction(
     revalidatePath("/");
     revalidatePath("/admin");
     revalidatePath("/admin/profile");
+    invalidatePortfolioCache();
     return { success: true, profile: updated };
-  } catch (error: any) {
-    return { success: false, error: error?.message || "Gagal memperbarui profil." };
+  } catch (error: unknown) {
+    const errorMsg = error instanceof Error ? error.message : "Gagal memperbarui profil.";
+    return { success: false, error: errorMsg };
   }
 }

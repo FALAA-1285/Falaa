@@ -1,21 +1,17 @@
 "use client";
 
 import React, { useRef, useState, useEffect } from "react";
-import { EXPERIENCE_DATA } from "@/data/portfolio";
 import { ExperienceItem } from "@/types/portfolio";
 
 export default function Experience({
-  initialExperiences,
+  initialExperiences = [],
 }: {
   initialExperiences?: ExperienceItem[];
 }) {
   const sectionRef = useRef<HTMLDivElement>(null);
   const [lineHeightPercent, setLineHeightPercent] = useState(0);
 
-  const experiences =
-    initialExperiences && initialExperiences.length > 0
-      ? initialExperiences
-      : EXPERIENCE_DATA;
+  const experiences = initialExperiences;
 
   useEffect(() => {
     const handleScroll = () => {

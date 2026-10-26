@@ -1,8 +1,25 @@
 import { SignJWT, jwtVerify } from "jose";
 import { cookies } from "next/headers";
 
-const SECRET_KEY = process.env.ADMIN_JWT_SECRET || "falah_cms_super_secure_jwt_secret_key_2026_antigravity_safe";
-const JWT_SECRET = new TextEncoder().encode(SECRET_KEY);
+function resolveJwtSecret(): Uint8Array {
+  const secret = process.env.ADMIN_JWT_SECRET;
+  if (!secret || secret.trim().length === 0) {
+    if (process.env.NODE_ENV === "production") {
+      throw new Error(
+        "FATAL SECURITY CONFIGURATION: ADMIN_JWT_SECRET environment variable is missing in production!"
+      );
+    }
+    console.warn(
+      "[SECURITY ADVISORY] ADMIN_JWT_SECRET is not set in environment. Using dev-only fallback key. Do NOT use in production."
+    );
+    return new TextEncoder().encode(
+      "dev_only_antigravity_secret_key_minimum_32_characters_long_1234"
+    );
+  }
+  return new TextEncoder().encode(secret);
+}
+
+const JWT_SECRET = resolveJwtSecret();
 
 export const ADMIN_COOKIE_NAME = "admin_token";
 
@@ -48,14 +65,4 @@ export async function getAdminSession(): Promise<AdminPayload | null> {
   const token = cookieStore.get(ADMIN_COOKIE_NAME)?.value;
   if (!token) return null;
   return await verifyAdminToken(token);
-}
-
-/**
- * Validate submitted credentials against env variables or default config
- */
-export function validateAdminCredentials(email: string, pass: string): boolean {
-  const expectedEmail = process.env.ADMIN_EMAIL || "admin@falah.dev";
-  const expectedPassword = process.env.ADMIN_PASSWORD || "admin123";
-
-  return email.trim().toLowerCase() === expectedEmail.toLowerCase() && pass === expectedPassword;
 }

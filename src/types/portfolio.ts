@@ -41,6 +41,11 @@ export interface PersonalInfo {
   quote: string;
   about: string;
   aboutSub: string;
+  aboutHeadline?: string;
+  aboutTags?: string[];
+  ctaHeadline?: string;
+  ctaSub?: string;
+  ctaButtonText?: string;
 }
 
 export interface ContactMessage {

@@ -1,5 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Fira+Code:wght@400;500;600&display=swap');
 @import "tailwindcss";
+@import "lenis/dist/lenis.css";
 
 :root {
   --background: #ffffff;
@@ -19,7 +20,7 @@
 }
 
 html {
-  scroll-behavior: smooth;
+  /* Controlled smoothly by Lenis inertial engine */
 }
 
 body {
@@ -59,14 +60,14 @@ body {
 .animate-marquee-left {
   display: flex;
   width: max-content;
-  animation: marquee-left 25s linear infinite;
+  animation: marquee-left 70s linear infinite;
   will-change: transform;
 }
 
 .animate-marquee-right {
   display: flex;
   width: max-content;
-  animation: marquee-right 25s linear infinite;
+  animation: marquee-right 70s linear infinite;
   will-change: transform;
 }
 

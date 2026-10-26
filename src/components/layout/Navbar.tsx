@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { Menu, X } from "lucide-react";
 import { PersonalInfo } from "@/types/portfolio";
+import { scrollToTarget } from "@/lib/scroll";
 
 const NAV_LINKS = [
   { name: "About", href: "#about" },
@@ -32,6 +33,17 @@ export default function Navbar({ profile }: { profile?: PersonalInfo }) {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  const handleNavClick = (
+    e: React.MouseEvent<HTMLAnchorElement>,
+    href: string
+  ) => {
+    if (href.startsWith("#")) {
+      e.preventDefault();
+      setMobileMenuOpen(false);
+      scrollToTarget(href, { offset: -80, duration: 1.8 });
+    }
+  };
+
   return (
     <header
       className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 ${
@@ -53,7 +65,8 @@ export default function Navbar({ profile }: { profile?: PersonalInfo }) {
             <a
               key={item.name}
               href={item.href}
-              className="text-black hover:text-black/70 transition-colors"
+              onClick={(e) => handleNavClick(e, item.href)}
+              className="text-black hover:text-black/70 transition-colors cursor-pointer"
             >
               {item.name}
             </a>
@@ -63,7 +76,7 @@ export default function Navbar({ profile }: { profile?: PersonalInfo }) {
         {/* Mobile Menu Button */}
         <button
           onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          className="md:hidden text-black p-2"
+          className="md:hidden text-black p-2 cursor-pointer"
           aria-label="Toggle menu"
         >
           {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
@@ -78,8 +91,8 @@ export default function Navbar({ profile }: { profile?: PersonalInfo }) {
               <a
                 key={item.name}
                 href={item.href}
-                onClick={() => setMobileMenuOpen(false)}
-                className="text-black hover:text-black/70 py-2 border-b border-black/5"
+                onClick={(e) => handleNavClick(e, item.href)}
+                className="text-black hover:text-black/70 py-2 border-b border-black/5 cursor-pointer"
               >
                 {item.name}
               </a>

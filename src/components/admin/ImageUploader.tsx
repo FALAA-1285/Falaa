@@ -2,7 +2,7 @@
 
 import React, { useState, useRef } from "react";
 import Image from "next/image";
-import { Upload, X, Loader2, Link as LinkIcon, Image as ImageIcon } from "lucide-react";
+import { Upload, X, Loader2, Link as LinkIcon } from "lucide-react";
 import { uploadImageAction } from "@/actions/admin/upload";
 
 interface ImageUploaderProps {

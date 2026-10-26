@@ -8,7 +8,6 @@ import {
   Trash2,
   Reply,
   Calendar,
-  CheckCircle2,
   Search,
   Filter,
 } from "lucide-react";

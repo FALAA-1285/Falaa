@@ -27,8 +27,9 @@ export async function toggleMessageReadAction(
     revalidatePath("/admin");
     revalidatePath("/admin/messages");
     return { success };
-  } catch (error: any) {
-    return { success: false, error: error?.message || "Gagal mengubah status pesan." };
+  } catch (error: unknown) {
+    const errorMsg = error instanceof Error ? error.message : "Gagal mengubah status pesan.";
+    return { success: false, error: errorMsg };
   }
 }
 
@@ -45,7 +46,8 @@ export async function deleteMessageAction(
     revalidatePath("/admin");
     revalidatePath("/admin/messages");
     return { success: deleted };
-  } catch (error: any) {
-    return { success: false, error: error?.message || "Gagal menghapus pesan." };
+  } catch (error: unknown) {
+    const errorMsg = error instanceof Error ? error.message : "Gagal menghapus pesan.";
+    return { success: false, error: errorMsg };
   }
 }

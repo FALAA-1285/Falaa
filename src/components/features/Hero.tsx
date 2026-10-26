@@ -2,14 +2,14 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import Image from "next/image";
-import { PERSONAL_INFO } from "@/data/portfolio";
+import { DEFAULT_PERSONAL_INFO } from "@/lib/constants";
 import { PersonalInfo } from "@/types/portfolio";
 
 export default function Hero({ profile }: { profile?: PersonalInfo }) {
   const [scale, setScale] = useState(1);
   const sectionRef = useRef<HTMLElement>(null);
 
-  const activeProfile = profile || PERSONAL_INFO;
+  const activeProfile = profile || DEFAULT_PERSONAL_INFO;
   const name = activeProfile.name || "FALAH";
 
   useEffect(() => {
@@ -29,7 +29,8 @@ export default function Hero({ profile }: { profile?: PersonalInfo }) {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const textRepetition = ` • ${name} • ${name} • ${name} • ${name} • ${name} • ${name} • ${name} • ${name}`;
+  // Running marquee with 2 distinct words: AHMAD & FALAHI
+  const textRepetition = " • AHMAD • FALAHI • AHMAD • FALAHI • AHMAD • FALAHI • AHMAD • FALAHI";
 
   return (
     <section

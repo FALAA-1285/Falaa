@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { getAdminSession } from "@/lib/auth";
+import { invalidatePortfolioCache } from "@/lib/cached-data";
 import {
   getSkills,
   getSkillsGrouped,
@@ -38,9 +39,11 @@ export async function createSkillAction(data: {
     revalidatePath("/");
     revalidatePath("/admin");
     revalidatePath("/admin/skills");
+    invalidatePortfolioCache();
     return { success: true, skill: created };
-  } catch (error: any) {
-    return { success: false, error: error?.message || "Gagal membuat skill." };
+  } catch (error: unknown) {
+    const errorMsg = error instanceof Error ? error.message : "Gagal membuat skill.";
+    return { success: false, error: errorMsg };
   }
 }
 
@@ -58,9 +61,11 @@ export async function updateSkillAction(
     revalidatePath("/");
     revalidatePath("/admin");
     revalidatePath("/admin/skills");
+    invalidatePortfolioCache();
     return { success: true, skill: updated };
-  } catch (error: any) {
-    return { success: false, error: error?.message || "Gagal memperbarui skill." };
+  } catch (error: unknown) {
+    const errorMsg = error instanceof Error ? error.message : "Gagal memperbarui skill.";
+    return { success: false, error: errorMsg };
   }
 }
 
@@ -80,8 +85,10 @@ export async function deleteSkillAction(
     revalidatePath("/");
     revalidatePath("/admin");
     revalidatePath("/admin/skills");
+    invalidatePortfolioCache();
     return { success: true };
-  } catch (error: any) {
-    return { success: false, error: error?.message || "Gagal menghapus skill." };
+  } catch (error: unknown) {
+    const errorMsg = error instanceof Error ? error.message : "Gagal menghapus skill.";
+    return { success: false, error: errorMsg };
   }
 }

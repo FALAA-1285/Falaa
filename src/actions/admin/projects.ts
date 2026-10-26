@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { projectSchema, ProjectFormData } from "@/lib/schemas/project";
 import { getAdminSession } from "@/lib/auth";
+import { invalidatePortfolioCache } from "@/lib/cached-data";
 import {
   createProject,
   updateProject,
@@ -40,11 +41,13 @@ export async function createProjectAction(
     revalidatePath("/");
     revalidatePath("/admin");
     revalidatePath("/admin/projects");
+    invalidatePortfolioCache();
     return { success: true, project: newProject };
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const errorMsg = error instanceof Error ? error.message : "Gagal membuat project baru.";
     return {
       success: false,
-      error: error?.message || "Gagal membuat project baru.",
+      error: errorMsg,
     };
   }
 }
@@ -72,12 +75,14 @@ export async function updateProjectAction(
     revalidatePath("/");
     revalidatePath("/admin");
     revalidatePath("/admin/projects");
+    invalidatePortfolioCache();
     revalidatePath(`/admin/projects/${id}/edit`);
     return { success: true, project: updated };
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const errorMsg = error instanceof Error ? error.message : "Gagal memperbarui project.";
     return {
       success: false,
-      error: error?.message || "Gagal memperbarui project.",
+      error: errorMsg,
     };
   }
 }
@@ -101,11 +106,13 @@ export async function deleteProjectAction(
     revalidatePath("/");
     revalidatePath("/admin");
     revalidatePath("/admin/projects");
+    invalidatePortfolioCache();
     return { success: true };
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const errorMsg = error instanceof Error ? error.message : "Gagal menghapus project.";
     return {
       success: false,
-      error: error?.message || "Gagal menghapus project.",
+      error: errorMsg,
     };
   }
 }

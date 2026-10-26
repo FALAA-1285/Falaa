@@ -31,7 +31,7 @@ type SortOrder = "asc" | "desc";
 
 export default function ProjectTable({ initialProjects }: ProjectTableProps) {
   const router = useRouter();
-  const [projects, setProjects] = useState<Project[]>(initialProjects);
+  const [deletedIds, setDeletedIds] = useState<string[]>([]);
   const [search, setSearch] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("ALL");
   const [sortField, setSortField] = useState<SortField>("title");
@@ -41,11 +41,6 @@ export default function ProjectTable({ initialProjects }: ProjectTableProps) {
 
   // Deletion modal state
   const [deleteTarget, setDeleteTarget] = useState<Project | null>(null);
-
-  // Sync with prop updates
-  React.useEffect(() => {
-    setProjects(initialProjects);
-  }, [initialProjects]);
 
   // Handle Sort Toggle
   const handleSort = (field: SortField) => {
@@ -60,7 +55,7 @@ export default function ProjectTable({ initialProjects }: ProjectTableProps) {
 
   // Filtered & Sorted Projects
   const filteredAndSortedProjects = useMemo(() => {
-    let result = [...projects];
+    let result = initialProjects.filter((p) => !deletedIds.includes(p.id));
 
     // 1. Search Filter
     if (search.trim()) {
@@ -93,7 +88,7 @@ export default function ProjectTable({ initialProjects }: ProjectTableProps) {
     });
 
     return result;
-  }, [projects, search, selectedCategory, sortField, sortOrder]);
+  }, [initialProjects, deletedIds, search, selectedCategory, sortField, sortOrder]);
 
   // Pagination calculation
   const totalItems = filteredAndSortedProjects.length;
@@ -112,7 +107,7 @@ export default function ProjectTable({ initialProjects }: ProjectTableProps) {
 
   const handleDeleteSuccess = () => {
     if (deleteTarget) {
-      setProjects((prev) => prev.filter((p) => p.id !== deleteTarget.id));
+      setDeletedIds((prev) => [...prev, deleteTarget.id]);
       router.refresh();
     }
   };

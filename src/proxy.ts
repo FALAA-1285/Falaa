@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { verifyAdminToken, ADMIN_COOKIE_NAME } from "@/lib/auth";
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // Only handle /admin routes
@@ -26,7 +26,6 @@ export async function middleware(request: NextRequest) {
   // Protected /admin routes:
   if (!isAuthenticated) {
     const loginUrl = new URL("/admin/login", request.url);
-    // Optional: preserve original redirect query param
     loginUrl.searchParams.set("callbackUrl", pathname);
     return NextResponse.redirect(loginUrl);
   }
