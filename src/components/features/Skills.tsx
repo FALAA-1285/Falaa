@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { MONOCHROME_SKILL_CATEGORIES } from "@/data/skills";
 
 function SkillCard({ name, icon }: { name: string; icon: string }) {
@@ -42,15 +42,36 @@ function SkillCard({ name, icon }: { name: string; icon: string }) {
 }
 
 export default function Skills() {
+  const sectionRef = useRef<HTMLElement>(null);
+  const [parallaxOffset, setParallaxOffset] = useState(0);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (!sectionRef.current) return;
+      const rect = sectionRef.current.getBoundingClientRect();
+      // Parallax translation as user scrolls through Skills section
+      const offset = (window.innerHeight / 2 - rect.top) * 0.12;
+      setParallaxOffset(offset);
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    handleScroll();
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
   return (
     <section
+      ref={sectionRef}
       id="skills"
       className="relative py-28 bg-white text-black overflow-hidden min-h-screen scroll-mt-24"
     >
-      {/* Giant Watermark Background placed safely behind with -z-10 */}
+      {/* Giant Interactive Parallax Watermark Background */}
       <h2
         aria-hidden="true"
-        className="absolute inset-0 md:-top-30 text-[6.5rem] md:text-[15rem] font-extrabold text-black/10 uppercase tracking-widest text-center pointer-events-none select-none -z-10"
+        style={{
+          transform: `translateY(${parallaxOffset}px)`,
+        }}
+        className="absolute inset-0 md:-top-30 text-[6.5rem] md:text-[15rem] font-extrabold text-black/10 uppercase tracking-widest text-center pointer-events-none select-none -z-10 transition-transform duration-75 ease-out"
       >
         Skills
       </h2>

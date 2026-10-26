@@ -24,7 +24,7 @@ export default function About() {
       <div className="container mx-auto px-4">
         <div className="max-w-3xl mx-auto text-center">
           <h2 className="text-3xl md:text-5xl font-medium mb-8 text-black">
-            Hey! I&apos;m Ahmad, a fullstack developer based in Indonesia.
+            Hey! I&apos;m FALAH, a fullstack developer based in Indonesia.
           </h2>
 
           <p className="md:text-2xl text-lg text-black/70 mb-8 font-normal leading-relaxed">

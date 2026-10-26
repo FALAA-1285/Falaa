@@ -14,7 +14,7 @@ export default function Home() {
       {/* 1. Header Navigation */}
       <Navbar />
 
-      {/* 2. Hero Section (Portrait Card) */}
+      {/* 2. Hero Section (Portrait Card with Scroll-Shrink & 3D Layered Marquee) */}
       <div id="hero">
         <Hero />
       </div>
@@ -22,19 +22,19 @@ export default function Home() {
       {/* 3. About Section */}
       <About />
 
-      {/* 4. Sticky / Marquee Transition: My Works */}
+      {/* 4. Sticky Scroll-Scaling Transition: My Works (Center zooms 1.0 -> 1.5) */}
       <MarqueeBanner text="My Works" />
 
       {/* 5. Projects Section */}
       <Projects />
 
-      {/* 6. Sticky / Marquee Transition: Experience */}
-      <MarqueeBanner text="Experience" />
+      {/* 6. Sticky Scroll-Scaling Transition: Experience (Center zooms 1.0 -> 1.5) */}
+      <MarqueeBanner text="Experience" isExperience />
 
-      {/* 7. Experience Section */}
+      {/* 7. Experience Section (Dynamic Timeline Fill & Item Reveal) */}
       <Experience />
 
-      {/* 8. Skills Section (Watermark + Categorized Monochrome Icon Grid) */}
+      {/* 8. Skills Section (Floating Parallax Watermark + Monochrome to Brand Colors) */}
       <Skills />
 
       {/* 9. Contact Section */}

@@ -3,10 +3,11 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://github.com/FALAA-1285"),
-  title: "Ahmad Falahi · Portfolio",
+  title: "FALAH · Portfolio",
   description:
-    "Portfolio of Ahmad Falahi, IT Undergraduate at Politeknik Negeri Malang & Web Developer. Building clean, responsive, and user-friendly web experiences.",
+    "Portfolio of FALAH, IT Undergraduate at Politeknik Negeri Malang & Web Developer. Building clean, responsive, and user-friendly web experiences.",
   keywords: [
+    "FALAH",
     "Ahmad Falahi",
     "FALAA-1285",
     "Web Developer",
@@ -18,19 +19,19 @@ export const metadata: Metadata = {
     "React",
     "Tailwind CSS",
   ],
-  authors: [{ name: "Ahmad Falahi" }],
+  authors: [{ name: "FALAH" }],
   openGraph: {
-    title: "Ahmad Falahi · Portfolio",
+    title: "FALAH · Portfolio",
     description:
       "Web Developer & IT Student at Politeknik Negeri Malang. Crafting clean, responsive, and impactful digital experiences.",
     url: "https://github.com/FALAA-1285",
-    siteName: "Ahmad Falahi Portfolio",
+    siteName: "FALAH Portfolio",
     images: [
       {
         url: "/avatar.png",
         width: 800,
         height: 800,
-        alt: "Ahmad Falahi",
+        alt: "FALAH",
       },
     ],
     locale: "en_US",

@@ -12,7 +12,7 @@ export default function Footer() {
           {/* Identity & Socials */}
           <div>
             <h3 className="text-xl mb-4 text-white font-normal">
-              Ahmad · Falahi
+              FALAH
             </h3>
             <div className="flex space-x-4">
               <a
@@ -88,7 +88,7 @@ export default function Footer() {
         {/* Divider & Copyright */}
         <div className="border-t border-white/20 mt-12 pt-8 font-light text-neutral-400 text-sm">
           <p className="mt-4">
-            Designed and developed by Ahmad Falahi. © 2026 All rights reserved.
+            Designed and developed by FALAH. © 2026 All rights reserved.
           </p>
         </div>
       </div>

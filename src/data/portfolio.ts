@@ -1,7 +1,7 @@
 import { PersonalInfo, Project, ExperienceItem } from "@/types/portfolio";
 
 export const PERSONAL_INFO: PersonalInfo = {
-  name: "Ahmad Falahi",
+  name: "FALAH",
   handle: "FALAA-1285",
   title: "Web Developer & IT Student",
   institution: "Politeknik Negeri Malang (Polinema)",

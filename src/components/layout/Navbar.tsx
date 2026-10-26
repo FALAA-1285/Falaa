@@ -41,7 +41,7 @@ export default function Navbar() {
           href="/"
           className="text-2xl font-medium tracking-tight text-black hover:text-black/70 transition-colors"
         >
-          Ahmad Falahi · Portfolio
+          FALAH · Portfolio
         </Link>
 
         {/* Desktop Nav */}
