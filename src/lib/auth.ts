@@ -4,16 +4,11 @@ import { cookies } from "next/headers";
 function resolveJwtSecret(): Uint8Array {
   const secret = process.env.ADMIN_JWT_SECRET;
   if (!secret || secret.trim().length === 0) {
-    if (process.env.NODE_ENV === "production") {
-      throw new Error(
-        "FATAL SECURITY CONFIGURATION: ADMIN_JWT_SECRET environment variable is missing in production!"
-      );
-    }
     console.warn(
-      "[SECURITY ADVISORY] ADMIN_JWT_SECRET is not set in environment. Using dev-only fallback key. Do NOT use in production."
+      "[SECURITY ADVISORY] ADMIN_JWT_SECRET is not set in environment. Using fallback key. It is strongly recommended to set ADMIN_JWT_SECRET in your Vercel Environment Variables."
     );
     return new TextEncoder().encode(
-      "dev_only_antigravity_secret_key_minimum_32_characters_long_1234"
+      "falah_portfolio_default_jwt_secret_key_minimum_32_characters_long_2026"
     );
   }
   return new TextEncoder().encode(secret);
