@@ -86,34 +86,63 @@ class MemoryRateLimiter {
   }
 }
 
-// Global singleton to persist across Next.js module evaluations
+// Global singleton to persist across Next.js module evaluations and serverless warm starts
 const globalRateLimiter =
   (globalThis as unknown as { __rateLimiter?: MemoryRateLimiter }).__rateLimiter ||
   new MemoryRateLimiter();
 
-if (process.env.NODE_ENV !== "production") {
-  (globalThis as unknown as { __rateLimiter?: MemoryRateLimiter }).__rateLimiter =
-    globalRateLimiter;
-}
+// Always persist on globalThis so module reloads in production warm instances reuse memory
+(globalThis as unknown as { __rateLimiter?: MemoryRateLimiter }).__rateLimiter =
+  globalRateLimiter;
 
 export const rateLimiter = globalRateLimiter;
 
+function isValidIp(ip: string): boolean {
+  if (!ip || ip.length > 45) return false;
+  const ipv4Regex =
+    /^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
+  const ipv6Regex = /^[a-fA-F0-9:]+$/;
+  return ipv4Regex.test(ip) || ipv6Regex.test(ip);
+}
+
 /**
- * Helper to safely extract client IP from Next.js server headers
+ * Helper to safely extract client IP from Next.js server headers.
+ * Defends against X-Forwarded-For spoofing by prioritizing verified reverse proxy headers
+ * and validating IP format before returning.
  */
 export async function getClientIp(): Promise<string> {
   try {
     const headerList = await headers();
-    const forwardedFor = headerList.get("x-forwarded-for");
-    if (forwardedFor) {
-      return forwardedFor.split(",")[0].trim();
+
+    // 1. Cloudflare connecting IP (tamper-proof when behind Cloudflare)
+    const cfIp = headerList.get("cf-connecting-ip");
+    if (cfIp && isValidIp(cfIp.trim())) {
+      return cfIp.trim();
     }
+
+    // 2. Vercel / Nginx real client IP
     const realIp = headerList.get("x-real-ip");
-    if (realIp) {
+    if (realIp && isValidIp(realIp.trim())) {
       return realIp.trim();
     }
+
+    // 3. X-Forwarded-For: Client IP is appended by proxies; validate hops safely
+    const forwardedFor = headerList.get("x-forwarded-for");
+    if (forwardedFor) {
+      const hops = forwardedFor
+        .split(",")
+        .map((h) => h.trim())
+        .filter(Boolean);
+
+      // The rightmost hop is appended by the nearest trusted edge proxy
+      for (let i = hops.length - 1; i >= 0; i--) {
+        if (isValidIp(hops[i])) {
+          return hops[i];
+        }
+      }
+    }
   } catch {
-    // If called outside of request context
+    // If called outside of request context (e.g. background tasks or unit tests)
   }
   return "127.0.0.1";
 }

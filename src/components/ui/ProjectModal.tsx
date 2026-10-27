@@ -6,6 +6,7 @@ import { X, ExternalLink, CheckCircle2 } from "lucide-react";
 import { GithubIcon } from "@/components/ui/SocialIcons";
 import { Project } from "@/types/portfolio";
 import { getLenisInstance } from "@/lib/scroll";
+import { isSafeUrl, sanitizeImageUrl } from "@/lib/security";
 
 interface ProjectModalProps {
   project: Project | null;
@@ -36,6 +37,10 @@ export default function ProjectModal({ project, onClose }: ProjectModalProps) {
   }, [project, onClose]);
 
   if (!project) return null;
+
+  const safeGithubUrl = isSafeUrl(project.githubUrl) ? project.githubUrl : null;
+  const safeLiveUrl = isSafeUrl(project.liveUrl) ? project.liveUrl : null;
+  const safeImage = sanitizeImageUrl(project.image);
 
   return (
     <div
@@ -71,10 +76,12 @@ export default function ProjectModal({ project, onClose }: ProjectModalProps) {
         <div className="p-6 space-y-6">
           <div className="relative aspect-[16/10] w-full rounded-xl overflow-hidden bg-neutral-900 border border-neutral-200">
             <Image
-              src={project.image}
+              src={safeImage}
               alt={project.title}
               fill
+              sizes="(max-width: 768px) 100vw, 672px"
               className="object-contain"
+              unoptimized={safeImage.endsWith(".svg")}
             />
           </div>
 
@@ -115,9 +122,9 @@ export default function ProjectModal({ project, onClose }: ProjectModalProps) {
 
           {/* Actions */}
           <div className="flex items-center gap-3 pt-4 border-t border-black/10">
-            {project.githubUrl && (
+            {safeGithubUrl && (
               <a
-                href={project.githubUrl}
+                href={safeGithubUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-black text-white text-xs font-medium hover:bg-black/80 transition-colors active:scale-95 cursor-pointer"
@@ -126,9 +133,9 @@ export default function ProjectModal({ project, onClose }: ProjectModalProps) {
                 <span>Repository</span>
               </a>
             )}
-            {project.liveUrl && (
+            {safeLiveUrl && (
               <a
-                href={project.liveUrl}
+                href={safeLiveUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full border border-black/20 text-black text-xs font-medium hover:bg-neutral-50 transition-colors active:scale-95 cursor-pointer"

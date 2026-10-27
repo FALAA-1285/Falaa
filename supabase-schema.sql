@@ -83,6 +83,44 @@ CREATE TABLE IF NOT EXISTS public.messages (
   created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
+-- 6. SCHEMA MIGRATIONS TABLE (Tracking applied migrations)
+CREATE TABLE IF NOT EXISTS public.schema_migrations (
+  id SERIAL PRIMARY KEY,
+  name VARCHAR(255) NOT NULL UNIQUE,
+  applied_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- ==============================================================================
+-- SECONDARY INDEXES FOR PERFORMANCE OPTIMIZATION
+-- ==============================================================================
+CREATE INDEX IF NOT EXISTS idx_projects_order ON public.projects(order_index ASC);
+CREATE INDEX IF NOT EXISTS idx_experiences_order ON public.experiences(order_index ASC);
+CREATE INDEX IF NOT EXISTS idx_skills_order ON public.skills(order_index ASC);
+CREATE INDEX IF NOT EXISTS idx_skills_category ON public.skills(category);
+CREATE INDEX IF NOT EXISTS idx_messages_created ON public.messages(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_messages_unread ON public.messages(is_read) WHERE is_read = FALSE;
+
+-- ==============================================================================
+-- ROW LEVEL SECURITY (RLS) POLICIES
+-- ==============================================================================
+ALTER TABLE public.profile_info ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.projects ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.experiences ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.skills ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.messages ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Public can view profile info" ON public.profile_info;
+DROP POLICY IF EXISTS "Public can view projects" ON public.projects;
+DROP POLICY IF EXISTS "Public can view experiences" ON public.experiences;
+DROP POLICY IF EXISTS "Public can view skills" ON public.skills;
+DROP POLICY IF EXISTS "Public can submit contact messages" ON public.messages;
+
+CREATE POLICY "Public can view profile info" ON public.profile_info FOR SELECT USING (true);
+CREATE POLICY "Public can view projects" ON public.projects FOR SELECT USING (true);
+CREATE POLICY "Public can view experiences" ON public.experiences FOR SELECT USING (true);
+CREATE POLICY "Public can view skills" ON public.skills FOR SELECT USING (true);
+CREATE POLICY "Public can submit contact messages" ON public.messages FOR INSERT WITH CHECK (true);
+
 -- ==============================================================================
 -- INITIAL DATA SEEDING
 -- ==============================================================================

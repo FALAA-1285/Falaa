@@ -13,6 +13,7 @@ import { LinkedinIcon, GithubIcon } from "@/components/ui/SocialIcons";
 import { DEFAULT_PERSONAL_INFO } from "@/lib/constants";
 import { PersonalInfo } from "@/types/portfolio";
 import { sendContactMessageAction } from "@/actions/contact";
+import { isSafeUrl, createSafeMailtoUrl } from "@/lib/security";
 
 export default function Contact({ profile }: { profile?: PersonalInfo }) {
   const activeProfile = profile || DEFAULT_PERSONAL_INFO;
@@ -56,6 +57,10 @@ export default function Contact({ profile }: { profile?: PersonalInfo }) {
     "Open for internship opportunities, freelance projects, or just chatting about Web Development, Fullstack Systems, and UI/UX Design.";
   const ctaButtonText = activeProfile.ctaButtonText || "Let's Talk";
 
+  const safeLinkedin = isSafeUrl(activeProfile.linkedin) ? activeProfile.linkedin : null;
+  const safeGithub = isSafeUrl(activeProfile.github) ? activeProfile.github : null;
+  const safeMailto = createSafeMailtoUrl(activeProfile.email);
+
   return (
     <section id="contact" className="py-20 sm:py-28 bg-white text-black scroll-mt-24 relative">
       <div className="container mx-auto px-4 max-w-4xl">
@@ -95,19 +100,21 @@ export default function Contact({ profile }: { profile?: PersonalInfo }) {
 
           {/* Direct Social / Contact Badges */}
           <div className="mt-8 pt-6 border-t border-black/10 w-full max-w-lg flex flex-wrap items-center justify-center gap-3 sm:gap-6 text-xs sm:text-sm text-black/60 relative z-10 font-normal">
-            <a
-              href={`mailto:${activeProfile.email}`}
-              className="inline-flex items-center gap-1.5 hover:text-black transition-colors"
-            >
-              <Mail className="w-4 h-4 text-black" />
-              <span>{activeProfile.email}</span>
-            </a>
+            {safeMailto !== "#" && (
+              <a
+                href={safeMailto}
+                className="inline-flex items-center gap-1.5 hover:text-black transition-colors"
+              >
+                <Mail className="w-4 h-4 text-black" />
+                <span>{activeProfile.email}</span>
+              </a>
+            )}
 
-            {activeProfile.linkedin && (
+            {safeLinkedin && (
               <>
                 <span className="text-black/20 hidden sm:inline">•</span>
                 <a
-                  href={activeProfile.linkedin}
+                  href={safeLinkedin}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-1.5 hover:text-black transition-colors"
@@ -118,11 +125,11 @@ export default function Contact({ profile }: { profile?: PersonalInfo }) {
               </>
             )}
 
-            {activeProfile.github && (
+            {safeGithub && (
               <>
                 <span className="text-black/20 hidden sm:inline">•</span>
                 <a
-                  href={activeProfile.github}
+                  href={safeGithub}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-1.5 hover:text-black transition-colors"

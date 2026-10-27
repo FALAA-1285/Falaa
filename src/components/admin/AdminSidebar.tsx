@@ -12,7 +12,9 @@ import {
   Mail,
   ExternalLink,
   PlusCircle,
+  X,
 } from "lucide-react";
+import { useAdminNav } from "./AdminNavContext";
 
 const NAV_ITEMS = [
   {
@@ -53,14 +55,23 @@ const NAV_ITEMS = [
   },
 ];
 
-export default function AdminSidebar() {
+interface SidebarContentProps {
+  onClose?: () => void;
+  isMobile?: boolean;
+}
+
+function SidebarContent({ onClose, isMobile = false }: SidebarContentProps) {
   const pathname = usePathname();
 
   return (
-    <aside className="w-64 bg-neutral-50 border-r border-neutral-200 text-neutral-900 flex flex-col h-screen sticky top-0 z-40 select-none shadow-xs">
+    <div className="flex flex-col h-full select-none">
       {/* Brand Header */}
-      <div className="h-16 px-6 flex items-center justify-between border-b border-neutral-200 bg-white">
-        <Link href="/admin" className="flex items-center gap-2.5 group">
+      <div className="h-16 px-6 flex items-center justify-between border-b border-neutral-200 bg-white shrink-0">
+        <Link
+          href="/admin"
+          onClick={onClose}
+          className="flex items-center gap-2.5 group"
+        >
           <div className="w-8 h-8 rounded-lg bg-black text-white font-black flex items-center justify-center text-sm tracking-wider shadow-sm transition-transform group-hover:scale-105">
             F
           </div>
@@ -73,12 +84,24 @@ export default function AdminSidebar() {
             </span>
           </div>
         </Link>
+
+        {isMobile && (
+          <button
+            type="button"
+            onClick={onClose}
+            className="p-1.5 rounded-lg text-neutral-500 hover:text-black hover:bg-neutral-100 transition focus:outline-none focus:ring-2 focus:ring-black cursor-pointer"
+            aria-label="Tutup navigasi admin"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        )}
       </div>
 
       {/* Quick Action Button */}
-      <div className="p-4 bg-white/50 border-b border-neutral-200/60">
+      <div className="p-4 bg-white/50 border-b border-neutral-200/60 shrink-0">
         <Link
           href="/admin/projects/new"
+          onClick={onClose}
           className="w-full flex items-center justify-center gap-2 bg-black text-white font-medium px-3.5 py-2.5 rounded-xl hover:bg-neutral-800 transition-all text-xs tracking-wide shadow-sm active:scale-[0.99]"
         >
           <PlusCircle className="w-4 h-4" />
@@ -101,6 +124,7 @@ export default function AdminSidebar() {
             <Link
               key={item.href}
               href={item.href}
+              onClick={onClose}
               className={`flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold transition-all ${
                 isActive
                   ? "bg-black text-white shadow-sm"
@@ -129,6 +153,7 @@ export default function AdminSidebar() {
           href="/"
           target="_blank"
           rel="noopener noreferrer"
+          onClick={onClose}
           className="flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold text-neutral-600 hover:text-black hover:bg-neutral-200/70 transition-all"
         >
           <div className="flex items-center gap-3">
@@ -142,9 +167,9 @@ export default function AdminSidebar() {
       </nav>
 
       {/* User Info Footer */}
-      <div className="p-4 border-t border-neutral-200 bg-white">
+      <div className="p-4 border-t border-neutral-200 bg-white shrink-0">
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-full bg-black text-white flex items-center justify-center text-xs font-bold shadow-xs">
+          <div className="w-8 h-8 rounded-full bg-black text-white flex items-center justify-center text-xs font-bold shadow-xs shrink-0">
             AD
           </div>
           <div className="flex flex-col min-w-0">
@@ -157,6 +182,41 @@ export default function AdminSidebar() {
           </div>
         </div>
       </div>
-    </aside>
+    </div>
+  );
+}
+
+export default function AdminSidebar() {
+  const { isMobileOpen, closeMobile } = useAdminNav();
+
+  return (
+    <>
+      {/* Desktop Sticky Sidebar (Visible only on lg and above) */}
+      <aside className="hidden lg:flex w-64 bg-neutral-50 border-r border-neutral-200 text-neutral-900 flex-col h-screen sticky top-0 z-40 select-none shadow-xs shrink-0">
+        <SidebarContent />
+      </aside>
+
+      {/* Mobile & Tablet Slide-over Drawer (Visible on screens < lg when opened) */}
+      {isMobileOpen && (
+        <div
+          className="fixed inset-0 z-50 lg:hidden"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Menu Navigasi Admin"
+        >
+          {/* Backdrop Blur Overlay */}
+          <div
+            className="fixed inset-0 bg-black/60 backdrop-blur-xs transition-opacity"
+            onClick={closeMobile}
+            aria-hidden="true"
+          />
+
+          {/* Off-canvas Drawer Panel */}
+          <aside className="fixed inset-y-0 left-0 w-72 max-w-[85vw] bg-neutral-50 border-r border-neutral-200 z-50 flex flex-col shadow-2xl">
+            <SidebarContent onClose={closeMobile} isMobile />
+          </aside>
+        </div>
+      )}
+    </>
   );
 }

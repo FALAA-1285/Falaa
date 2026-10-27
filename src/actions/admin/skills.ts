@@ -10,7 +10,8 @@ import {
   updateSkill,
   deleteSkill,
 } from "@/lib/db";
-import { SkillItem, SkillCategoryGroup } from "@/types/skills";
+import type { SkillItem, SkillCategoryGroup } from "@/types/skills";
+import { skillSchema, updateSkillSchema, type SkillInput, type UpdateSkillInput } from "@/lib/schemas/skill";
 
 export async function getSkillsAction(): Promise<SkillItem[]> {
   return await getSkills();
@@ -20,22 +21,22 @@ export async function getSkillsGroupedAction(): Promise<SkillCategoryGroup[]> {
   return await getSkillsGrouped();
 }
 
-export async function createSkillAction(data: {
-  name: string;
-  category: string;
-  icon: string;
-}): Promise<{ success: boolean; skill?: SkillItem; error?: string }> {
+export async function createSkillAction(
+  data: SkillInput | { name: string; category: string; icon: string }
+): Promise<{ success: boolean; skill?: SkillItem; error?: string }> {
   const session = await getAdminSession();
   if (!session || session.role !== "ADMIN") {
     return { success: false, error: "Akses ditolak: Hanya ADMIN yang diizinkan." };
   }
 
-  if (!data.name || !data.category) {
-    return { success: false, error: "Nama skill dan kategori wajib diisi." };
+  const parsed = skillSchema.safeParse(data);
+  if (!parsed.success) {
+    const errorMsg = parsed.error.issues[0]?.message || "Data keahlian/skill tidak valid.";
+    return { success: false, error: errorMsg };
   }
 
   try {
-    const created = await createSkill(data);
+    const created = await createSkill(parsed.data);
     revalidatePath("/");
     revalidatePath("/admin");
     revalidatePath("/admin/skills");
@@ -49,15 +50,21 @@ export async function createSkillAction(data: {
 
 export async function updateSkillAction(
   id: number,
-  data: { name?: string; category?: string; icon?: string }
+  data: UpdateSkillInput | { name?: string; category?: string; icon?: string }
 ): Promise<{ success: boolean; skill?: SkillItem; error?: string }> {
   const session = await getAdminSession();
   if (!session || session.role !== "ADMIN") {
     return { success: false, error: "Akses ditolak: Hanya ADMIN yang diizinkan." };
   }
 
+  const parsed = updateSkillSchema.safeParse(data);
+  if (!parsed.success) {
+    const errorMsg = parsed.error.issues[0]?.message || "Data perubahan keahlian/skill tidak valid.";
+    return { success: false, error: errorMsg };
+  }
+
   try {
-    const updated = await updateSkill(id, data);
+    const updated = await updateSkill(id, parsed.data);
     revalidatePath("/");
     revalidatePath("/admin");
     revalidatePath("/admin/skills");

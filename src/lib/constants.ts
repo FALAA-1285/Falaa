@@ -1,5 +1,5 @@
-import { PersonalInfo, Project, ExperienceItem } from "@/types/portfolio";
-import { SkillItem } from "@/types/skills";
+import type { PersonalInfo, Project, ExperienceItem } from "@/types/portfolio";
+import type { SkillItem } from "@/types/skills";
 
 export const DEFAULT_PERSONAL_INFO: PersonalInfo = {
   name: "FALAH",

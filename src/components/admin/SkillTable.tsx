@@ -11,13 +11,17 @@ import {
   Loader2,
   AlertCircle,
   Search,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 import { SkillItem } from "@/types/skills";
+import { PRESET_SKILL_CATEGORIES, compareCategories } from "@/lib/constants/skills";
 import {
   createSkillAction,
   updateSkillAction,
   deleteSkillAction,
 } from "@/actions/admin/skills";
+import { reorderSkillsAction } from "@/actions/admin/reorder";
 
 const PRESET_ICONS = [
   "javascript.svg",
@@ -48,23 +52,7 @@ const PRESET_ICONS = [
   "scikitlearn.svg",
 ];
 
-const PRESET_CATEGORIES = [
-  "Programming Languages",
-  "Frontend",
-  "Backend",
-  "Databases",
-  "Tools & Machine Learning",
-];
-
-function getCategoryPriority(category: string): number {
-  const norm = (category || "").toLowerCase().trim();
-  if (norm.includes("bahasa") || norm.includes("programming") || norm.includes("language")) return 1;
-  if (norm.includes("frontend") || norm.includes("front-end") || norm.includes("front end")) return 2;
-  if (norm.includes("backend") || norm.includes("back-end") || norm.includes("back end") || norm.includes("beckend")) return 3;
-  if (norm.includes("database") || norm.includes("basis data") || norm.includes("sql") || norm.includes("db")) return 4;
-  if (norm.includes("tool") || norm.includes("machine learning") || norm.includes("alat") || norm.includes("devops")) return 5;
-  return 10;
-}
+const PRESET_CATEGORIES = PRESET_SKILL_CATEGORIES;
 
 interface SkillTableProps {
   initialSkills: SkillItem[];
@@ -88,6 +76,49 @@ export default function SkillTable({ initialSkills }: SkillTableProps) {
   const [customIcon, setCustomIcon] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
+  const [isReordering, setIsReordering] = useState(false);
+
+  const handleMoveSkill = async (skillId: number, direction: "prev" | "next") => {
+    const currentSkill = skills.find((s) => s.id === skillId);
+    if (!currentSkill) return;
+
+    const cat = currentSkill.category || "Frontend";
+    const catSkills = skills.filter((s) => (s.category || "Frontend") === cat);
+    const catIndex = catSkills.findIndex((s) => s.id === skillId);
+
+    if (direction === "prev" && catIndex === 0) return;
+    if (direction === "next" && catIndex === catSkills.length - 1) return;
+
+    const targetCatSkill = catSkills[direction === "prev" ? catIndex - 1 : catIndex + 1];
+
+    const idxA = skills.findIndex((s) => s.id === skillId);
+    const idxB = skills.findIndex((s) => s.id === targetCatSkill.id);
+
+    const updated = [...skills];
+    const temp = updated[idxA];
+    updated[idxA] = updated[idxB];
+    updated[idxB] = temp;
+
+    const reordered = updated.map((s, idx) => ({ ...s, order_index: idx }));
+    setSkills(reordered);
+    setIsReordering(true);
+
+    try {
+      const orderedIds = reordered.map((s) => s.id!).filter(Boolean);
+      const res = await reorderSkillsAction(orderedIds);
+      if (!res.success) {
+        alert(res.error || "Gagal mengubah urutan skill.");
+        setSkills(skills);
+      } else {
+        router.refresh();
+      }
+    } catch {
+      alert("Terjadi kesalahan koneksi saat menyimpan urutan skill.");
+      setSkills(skills);
+    } finally {
+      setIsReordering(false);
+    }
+  };
 
   const openCreateModal = () => {
     setEditingItem(null);
@@ -183,12 +214,7 @@ export default function SkillTable({ initialSkills }: SkillTableProps) {
   // Group filtered skills
   const categoriesInFiltered = Array.from(
     new Set(filteredSkills.map((s) => s.category || "General"))
-  ).sort((a, b) => {
-    const pA = getCategoryPriority(a);
-    const pB = getCategoryPriority(b);
-    if (pA !== pB) return pA - pB;
-    return a.localeCompare(b);
-  });
+  ).sort((a, b) => compareCategories(a, b));
 
   return (
     <div className="space-y-6">
@@ -278,22 +304,22 @@ export default function SkillTable({ initialSkills }: SkillTableProps) {
                       key={skill.id ?? skill.name}
                       className="group p-3.5 rounded-xl bg-neutral-50 hover:bg-neutral-100/90 border border-neutral-200 transition-all flex flex-col items-center justify-between gap-2.5 relative"
                     >
-                      {/* Action buttons on hover */}
-                      <div className="absolute top-2 right-2 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                      {/* Action buttons (always visible on touch screens, hover on desktop) */}
+                      <div className="absolute top-2 right-2 flex items-center gap-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
                         <button
                           onClick={() => openEditModal(skill)}
-                          className="p-1 rounded bg-white text-neutral-700 hover:text-black border border-neutral-200 shadow-xs"
+                          className="p-1.5 sm:p-1 rounded bg-white text-neutral-700 hover:text-black border border-neutral-200 shadow-xs cursor-pointer"
                           title="Edit"
                         >
-                          <Edit className="w-3 h-3" />
+                          <Edit className="w-3.5 h-3.5 sm:w-3 sm:h-3" />
                         </button>
                         {skill.id && (
                           <button
                             onClick={() => handleDelete(skill.id!)}
-                            className="p-1 rounded bg-white text-red-500 hover:text-red-700 border border-neutral-200 shadow-xs"
+                            className="p-1.5 sm:p-1 rounded bg-white text-red-500 hover:text-red-700 border border-neutral-200 shadow-xs cursor-pointer"
                             title="Hapus"
                           >
-                            <Trash2 className="w-3 h-3" />
+                            <Trash2 className="w-3.5 h-3.5 sm:w-3 sm:h-3" />
                           </button>
                         )}
                       </div>
@@ -319,6 +345,31 @@ export default function SkillTable({ initialSkills }: SkillTableProps) {
                           {skill.icon}
                         </span>
                       </div>
+
+                      {/* Reorder Left/Right Controls */}
+                      <div className="flex items-center justify-between w-full pt-1.5 mt-1 border-t border-neutral-200/60">
+                        <button
+                          type="button"
+                          onClick={() => handleMoveSkill(skill.id!, "prev")}
+                          disabled={isReordering}
+                          className="p-1 rounded hover:bg-neutral-200 disabled:opacity-20 text-neutral-500 transition cursor-pointer"
+                          title="Pindahkan ke kiri"
+                        >
+                          <ChevronLeft className="w-3.5 h-3.5" />
+                        </button>
+                        <span className="text-[10px] font-mono text-neutral-400 font-bold">
+                          #{(skill.order_index ?? 0) + 1}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => handleMoveSkill(skill.id!, "next")}
+                          disabled={isReordering}
+                          className="p-1 rounded hover:bg-neutral-200 disabled:opacity-20 text-neutral-500 transition cursor-pointer"
+                          title="Pindahkan ke kanan"
+                        >
+                          <ChevronRight className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -331,7 +382,7 @@ export default function SkillTable({ initialSkills }: SkillTableProps) {
       {/* Add / Edit Skill Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-fade-in">
-          <div className="bg-white rounded-2xl border border-neutral-200 max-w-lg w-full p-6 sm:p-8 shadow-2xl relative">
+          <div className="bg-white rounded-2xl border border-neutral-200 max-w-lg w-full p-6 sm:p-8 shadow-2xl relative max-h-[90vh] overflow-y-auto">
             <button
               onClick={() => setIsModalOpen(false)}
               className="absolute top-5 right-5 text-neutral-400 hover:text-black p-1 rounded-lg transition"

@@ -13,6 +13,8 @@ import {
   Loader2,
   AlertCircle,
   Building,
+  ArrowUp,
+  ArrowDown,
 } from "lucide-react";
 import { ExperienceItem } from "@/types/portfolio";
 import {
@@ -20,6 +22,7 @@ import {
   updateExperienceAction,
   deleteExperienceAction,
 } from "@/actions/admin/experiences";
+import { reorderExperiencesAction } from "@/actions/admin/reorder";
 
 interface ExperienceTableProps {
   initialExperiences: ExperienceItem[];
@@ -46,6 +49,39 @@ export default function ExperienceTable({
 
   // Deletion state
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isReordering, setIsReordering] = useState(false);
+
+  const handleMove = async (expId: number, direction: "up" | "down") => {
+    const currentIndex = experiences.findIndex((e) => e.id === expId);
+    if (currentIndex === -1) return;
+    if (direction === "up" && currentIndex === 0) return;
+    if (direction === "down" && currentIndex === experiences.length - 1) return;
+
+    const targetIndex = direction === "up" ? currentIndex - 1 : currentIndex + 1;
+    const updated = [...experiences];
+    const [moved] = updated.splice(currentIndex, 1);
+    updated.splice(targetIndex, 0, moved);
+
+    const reordered = updated.map((e, idx) => ({ ...e, order_index: idx }));
+    setExperiences(reordered);
+    setIsReordering(true);
+
+    try {
+      const orderedIds = reordered.map((e) => e.id!).filter(Boolean);
+      const res = await reorderExperiencesAction(orderedIds);
+      if (!res.success) {
+        alert(res.error || "Gagal mengubah urutan pengalaman.");
+        setExperiences(experiences);
+      } else {
+        router.refresh();
+      }
+    } catch {
+      alert("Terjadi kesalahan koneksi saat menyimpan urutan.");
+      setExperiences(experiences);
+    } finally {
+      setIsReordering(false);
+    }
+  };
 
   const openCreateModal = () => {
     setEditingItem(null);
@@ -234,7 +270,26 @@ export default function ExperienceTable({
                 </div>
 
                 {/* Action Buttons */}
-                <div className="flex items-center sm:flex-col gap-2 shrink-0">
+                <div className="flex items-center sm:flex-col gap-1.5 shrink-0">
+                  <div className="flex sm:flex-col gap-1 items-center">
+                    <button
+                      onClick={() => handleMove(item.id!, "up")}
+                      disabled={idx === 0 || isReordering}
+                      className="p-1.5 rounded-lg border border-neutral-200 bg-neutral-50 hover:bg-neutral-100 disabled:opacity-30 disabled:hover:bg-neutral-50 text-neutral-600 transition cursor-pointer"
+                      title="Pindahkan ke atas"
+                    >
+                      <ArrowUp className="w-3.5 h-3.5" />
+                    </button>
+                    <button
+                      onClick={() => handleMove(item.id!, "down")}
+                      disabled={idx === experiences.length - 1 || isReordering}
+                      className="p-1.5 rounded-lg border border-neutral-200 bg-neutral-50 hover:bg-neutral-100 disabled:opacity-30 disabled:hover:bg-neutral-50 text-neutral-600 transition cursor-pointer"
+                      title="Pindahkan ke bawah"
+                    >
+                      <ArrowDown className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+
                   <button
                     onClick={() => openEditModal(item)}
                     className="p-2 rounded-xl bg-neutral-100 hover:bg-black hover:text-white text-neutral-800 border border-neutral-200 transition-all text-xs font-semibold flex items-center gap-1.5 shadow-xs cursor-pointer"

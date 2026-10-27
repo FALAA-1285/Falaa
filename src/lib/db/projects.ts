@@ -1,5 +1,5 @@
 import { pool } from "./pool";
-import { Project } from "@/types/portfolio";
+import type { Project } from "@/types/portfolio";
 import { DEFAULT_PROJECTS } from "@/lib/constants";
 
 export async function getProjects(): Promise<Project[]> {
@@ -127,13 +127,14 @@ export async function updateProject(
   const updatedLive = p.liveUrl !== undefined ? p.liveUrl : (current.liveUrl || "");
   const updatedFeatures = p.features !== undefined ? JSON.stringify(p.features) : JSON.stringify(current.features);
   const updatedMetrics = p.metrics !== undefined ? p.metrics : (current.metrics || "");
+  const updatedOrderIndex = p.order_index !== undefined ? p.order_index : (current.order_index ?? 0);
 
   const { rows } = await pool.query(
     `UPDATE projects
      SET title = $1, category = $2, tagline = $3, description = $4,
          image = $5, tags = $6, github_url = $7, live_url = $8,
-         features = $9, metrics = $10, updated_at = CURRENT_TIMESTAMP
-     WHERE id = $11
+         features = $9, metrics = $10, order_index = $11, updated_at = CURRENT_TIMESTAMP
+     WHERE id = $12
      RETURNING id, title, category, tagline, description, image, tags,
                github_url as "githubUrl", live_url as "liveUrl", features, metrics, order_index,
                created_at, updated_at`,
@@ -148,6 +149,7 @@ export async function updateProject(
       updatedLive,
       updatedFeatures,
       updatedMetrics,
+      updatedOrderIndex,
       id,
     ]
   );
@@ -172,4 +174,29 @@ export async function updateProject(
 export async function deleteProject(id: string): Promise<boolean> {
   const result = await pool.query("DELETE FROM projects WHERE id = $1", [id]);
   return (result.rowCount ?? 0) > 0;
+}
+
+/**
+ * Persistently update the display order for projects in a single database transaction.
+ * Guarantees zero duplicate order conflicts.
+ */
+export async function reorderProjects(orderedIds: string[]): Promise<boolean> {
+  if (!orderedIds || orderedIds.length === 0) return true;
+  const client = await pool.connect();
+  try {
+    await client.query("BEGIN");
+    for (let index = 0; index < orderedIds.length; index++) {
+      await client.query(
+        "UPDATE projects SET order_index = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2",
+        [index, orderedIds[index]]
+      );
+    }
+    await client.query("COMMIT");
+    return true;
+  } catch (err) {
+    await client.query("ROLLBACK");
+    throw err;
+  } finally {
+    client.release();
+  }
 }

@@ -3,11 +3,6 @@
 # --- Project Specific Ignores ---
 # Documentation & prompts (private / temporary docs)
 /docs/
-docs/
-
-# Local generation & helper scripts
-/scripts/
-scripts/
 
 # --- Dependencies ---
 /node_modules

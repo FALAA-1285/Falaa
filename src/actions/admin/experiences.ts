@@ -10,7 +10,8 @@ import {
   updateExperience,
   deleteExperience,
 } from "@/lib/db";
-import { ExperienceItem } from "@/types/portfolio";
+import type { ExperienceItem } from "@/types/portfolio";
+import { experienceSchema, updateExperienceSchema, type ExperienceInput, type UpdateExperienceInput } from "@/lib/schemas/experience";
 
 export async function getExperiencesAction(): Promise<ExperienceItem[]> {
   return await getExperiences();
@@ -21,19 +22,21 @@ export async function getExperienceByIdAction(id: number): Promise<ExperienceIte
 }
 
 export async function createExperienceAction(
-  data: Omit<ExperienceItem, "id">
+  data: ExperienceInput | Omit<ExperienceItem, "id">
 ): Promise<{ success: boolean; experience?: ExperienceItem; error?: string }> {
   const session = await getAdminSession();
   if (!session || session.role !== "ADMIN") {
     return { success: false, error: "Akses ditolak: Hanya ADMIN yang diizinkan." };
   }
 
-  if (!data.period || !data.role || !data.organization || !data.description) {
-    return { success: false, error: "Semua bidang wajib harus diisi." };
+  const parsed = experienceSchema.safeParse(data);
+  if (!parsed.success) {
+    const errorMsg = parsed.error.issues[0]?.message || "Data formulir pengalaman tidak valid.";
+    return { success: false, error: errorMsg };
   }
 
   try {
-    const created = await createExperience(data);
+    const created = await createExperience(parsed.data);
     revalidatePath("/");
     revalidatePath("/admin");
     revalidatePath("/admin/experiences");
@@ -47,15 +50,21 @@ export async function createExperienceAction(
 
 export async function updateExperienceAction(
   id: number,
-  data: Partial<ExperienceItem>
+  data: UpdateExperienceInput | Partial<ExperienceItem>
 ): Promise<{ success: boolean; experience?: ExperienceItem; error?: string }> {
   const session = await getAdminSession();
   if (!session || session.role !== "ADMIN") {
     return { success: false, error: "Akses ditolak: Hanya ADMIN yang diizinkan." };
   }
 
+  const parsed = updateExperienceSchema.safeParse(data);
+  if (!parsed.success) {
+    const errorMsg = parsed.error.issues[0]?.message || "Data perubahan pengalaman tidak valid.";
+    return { success: false, error: errorMsg };
+  }
+
   try {
-    const updated = await updateExperience(id, data);
+    const updated = await updateExperience(id, parsed.data);
     revalidatePath("/");
     revalidatePath("/admin");
     revalidatePath("/admin/experiences");

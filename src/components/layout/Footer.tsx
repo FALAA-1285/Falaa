@@ -2,10 +2,15 @@ import React from "react";
 import { GithubIcon, LinkedinIcon, GmailIcon } from "@/components/ui/SocialIcons";
 import { DEFAULT_PERSONAL_INFO } from "@/lib/constants";
 import { PersonalInfo } from "@/types/portfolio";
+import { isSafeUrl, createSafeMailtoUrl } from "@/lib/security";
 
 export default function Footer({ profile }: { profile?: PersonalInfo }) {
   const activeProfile = profile || DEFAULT_PERSONAL_INFO;
   const displayName = "AHMAD • FALAHI";
+
+  const safeGithub = isSafeUrl(activeProfile.github) ? activeProfile.github : null;
+  const safeLinkedin = isSafeUrl(activeProfile.linkedin) ? activeProfile.linkedin : null;
+  const safeMailto = createSafeMailtoUrl(activeProfile.email);
 
   return (
     <footer className="py-12 sm:px-0 px-4 bg-[#151414] text-white border-t border-black/10">
@@ -36,31 +41,37 @@ export default function Footer({ profile }: { profile?: PersonalInfo }) {
               {displayName}
             </h3>
             <div className="flex space-x-4">
-              <a
-                href={activeProfile.github}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-white hover:text-gray-300/70 transition-colors"
-                aria-label="GitHub"
-              >
-                <GithubIcon className="h-5 w-5" />
-              </a>
-              <a
-                href={activeProfile.linkedin}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-white hover:text-gray-300/70 transition-colors"
-                aria-label="LinkedIn"
-              >
-                <LinkedinIcon className="h-5 w-5" />
-              </a>
-              <a
-                href={`mailto:${activeProfile.email}`}
-                className="text-white hover:text-gray-300/70 transition-colors"
-                aria-label="Email"
-              >
-                <GmailIcon className="h-5 w-5" />
-              </a>
+              {safeGithub && (
+                <a
+                  href={safeGithub}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-white hover:text-gray-300/70 transition-colors"
+                  aria-label="GitHub"
+                >
+                  <GithubIcon className="h-5 w-5" />
+                </a>
+              )}
+              {safeLinkedin && (
+                <a
+                  href={safeLinkedin}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-white hover:text-gray-300/70 transition-colors"
+                  aria-label="LinkedIn"
+                >
+                  <LinkedinIcon className="h-5 w-5" />
+                </a>
+              )}
+              {safeMailto !== "#" && (
+                <a
+                  href={safeMailto}
+                  className="text-white hover:text-gray-300/70 transition-colors"
+                  aria-label="Email"
+                >
+                  <GmailIcon className="h-5 w-5" />
+                </a>
+              )}
             </div>
           </div>
 

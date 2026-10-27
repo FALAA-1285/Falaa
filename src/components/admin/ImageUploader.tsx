@@ -2,8 +2,9 @@
 
 import React, { useState, useRef } from "react";
 import Image from "next/image";
-import { Upload, X, Loader2, Link as LinkIcon } from "lucide-react";
+import { Upload, X, Loader2, Link as LinkIcon, AlertTriangle } from "lucide-react";
 import { uploadImageAction } from "@/actions/admin/upload";
+import { isSafeImageUrl, sanitizeImageUrl } from "@/lib/security";
 
 interface ImageUploaderProps {
   value: string;
@@ -53,6 +54,9 @@ export default function ImageUploader({
     setUploadError(null);
   };
 
+  const isValueSafe = !value || isSafeImageUrl(value);
+  const safePreviewSrc = isValueSafe && value ? sanitizeImageUrl(value) : null;
+
   return (
     <div className="space-y-2">
       <div className="flex items-center justify-between">
@@ -62,7 +66,7 @@ export default function ImageUploader({
         <button
           type="button"
           onClick={() => setIsManualUrlMode(!isManualUrlMode)}
-          className="text-xs text-neutral-500 hover:text-black flex items-center gap-1 transition-colors underline"
+          className="text-xs text-neutral-500 hover:text-black flex items-center gap-1 transition-colors underline cursor-pointer"
         >
           <LinkIcon className="w-3 h-3" />
           <span>{isManualUrlMode ? "Gunakan Upload File" : "Input URL Manual"}</span>
@@ -70,25 +74,67 @@ export default function ImageUploader({
       </div>
 
       {isManualUrlMode ? (
-        <div className="space-y-1">
+        <div className="space-y-2">
           <input
             type="text"
             value={value}
             onChange={(e) => onChange(e.target.value)}
             placeholder="Contoh: /projects/project-1.svg atau https://images..."
-            className="w-full px-3 py-2 text-sm border border-neutral-300 rounded-md focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition"
+            className={`w-full px-3 py-2 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition ${
+              !isValueSafe
+                ? "border-red-400 bg-red-50/50"
+                : "border-neutral-300"
+            }`}
           />
+          {!isValueSafe && (
+            <p className="text-xs text-red-600 flex items-center gap-1">
+              <AlertTriangle className="w-3.5 h-3.5 shrink-0" />
+              <span>
+                Format URL gambar tidak aman atau tidak diizinkan. Skema berbahaya seperti javascript: ditolak.
+              </span>
+            </p>
+          )}
           <p className="text-[11px] text-neutral-500">
-            Masukkan path lokal (`/projects/nama.svg`) atau URL gambar eksternal.
+            Masukkan path lokal internal (`/projects/nama.svg`, `/uploads/...`) atau URL gambar aman (`https://...`).
           </p>
+
+          {safePreviewSrc && (
+            <div className="relative border border-neutral-200 rounded-lg p-2 bg-neutral-50 flex items-center gap-4 mt-2">
+              <div className="relative w-20 h-16 rounded bg-white border border-neutral-200 overflow-hidden shrink-0">
+                <Image
+                  src={safePreviewSrc}
+                  alt="Preview"
+                  fill
+                  className="object-cover"
+                  unoptimized={safePreviewSrc.endsWith(".svg")}
+                />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-xs font-medium text-neutral-800 truncate">
+                  {value}
+                </p>
+                <p className="text-[11px] text-emerald-600 font-medium mt-0.5">
+                  URL gambar valid
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={handleRemove}
+                className="p-1.5 rounded-full hover:bg-neutral-200 text-neutral-500 hover:text-red-600 transition"
+                title="Hapus gambar"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+          )}
         </div>
       ) : (
         <div>
-          {value ? (
+          {value && isValueSafe ? (
             <div className="relative border border-neutral-200 rounded-lg p-2 bg-neutral-50 flex items-center gap-4">
-              <div className="relative w-24 h-20 rounded bg-white border border-neutral-200 overflow-hidden flex-shrink-0">
+              <div className="relative w-24 h-20 rounded bg-white border border-neutral-200 overflow-hidden shrink-0">
                 <Image
-                  src={value}
+                  src={safePreviewSrc || "/projects/project-1.svg"}
                   alt="Preview"
                   fill
                   className="object-cover"
@@ -124,7 +170,7 @@ export default function ImageUploader({
               <input
                 ref={fileInputRef}
                 type="file"
-                accept="image/png,image/jpeg,image/webp,image/svg+xml,image/gif"
+                accept="image/png,image/jpeg,image/webp,image/gif"
                 onChange={handleFileChange}
                 disabled={isUploading}
                 className="hidden"
@@ -149,7 +195,7 @@ export default function ImageUploader({
                     <span className="text-xs text-neutral-500"> atau seret file ke sini</span>
                   </div>
                   <span className="text-[11px] text-neutral-400">
-                    Mendukung PNG, JPEG, WEBP, SVG (Maks. 5MB)
+                    Mendukung PNG, JPEG, WEBP, GIF (Maks. 5MB)
                   </span>
                 </div>
               )}

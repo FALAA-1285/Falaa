@@ -1,3 +1,5 @@
+import { createSafeMailtoUrl } from "./security";
+
 /**
  * Simple class name combiner utility
  */
@@ -6,12 +8,8 @@ export function cn(...inputs: (string | boolean | undefined | null)[]): string {
 }
 
 /**
- * Format email mailto URL
+ * Format email mailto URL safely preventing CRLF or malicious scheme injections
  */
 export function createMailtoUrl(email: string, subject?: string, body?: string): string {
-  const params = new URLSearchParams();
-  if (subject) params.append("subject", subject);
-  if (body) params.append("body", body);
-  const queryString = params.toString();
-  return `mailto:${email}${queryString ? `?${queryString}` : ""}`;
+  return createSafeMailtoUrl(email, subject, body);
 }

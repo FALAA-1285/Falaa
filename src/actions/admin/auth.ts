@@ -2,7 +2,7 @@
 
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { loginSchema, LoginFormData } from "@/lib/schemas/auth";
+import { loginSchema, type LoginFormData } from "@/lib/schemas/auth";
 import {
   signAdminToken,
   ADMIN_COOKIE_NAME,

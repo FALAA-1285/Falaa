@@ -20,24 +20,28 @@ import {
 } from "lucide-react";
 import { Project } from "@/types/portfolio";
 import { CATEGORIES } from "@/lib/schemas/project";
+import { isSafeUrl, sanitizeImageUrl } from "@/lib/security";
+import { reorderProjectsAction } from "@/actions/admin/reorder";
 import DeleteProjectModal from "./DeleteProjectModal";
 
 interface ProjectTableProps {
   initialProjects: Project[];
 }
 
-type SortField = "title" | "category" | "id";
+type SortField = "order" | "title" | "category" | "id";
 type SortOrder = "asc" | "desc";
 
 export default function ProjectTable({ initialProjects }: ProjectTableProps) {
   const router = useRouter();
+  const [projects, setProjects] = useState<Project[]>(initialProjects);
   const [deletedIds, setDeletedIds] = useState<string[]>([]);
   const [search, setSearch] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("ALL");
-  const [sortField, setSortField] = useState<SortField>("title");
+  const [sortField, setSortField] = useState<SortField>("order");
   const [sortOrder, setSortOrder] = useState<SortOrder>("asc");
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(5);
+  const [isReordering, setIsReordering] = useState(false);
 
   // Deletion modal state
   const [deleteTarget, setDeleteTarget] = useState<Project | null>(null);
@@ -53,9 +57,41 @@ export default function ProjectTable({ initialProjects }: ProjectTableProps) {
     setCurrentPage(1);
   };
 
+  // Reordering handler
+  const handleMove = async (projectId: string, direction: "up" | "down") => {
+    const currentList = [...projects];
+    const currentIndex = currentList.findIndex((p) => p.id === projectId);
+    if (currentIndex === -1) return;
+    if (direction === "up" && currentIndex === 0) return;
+    if (direction === "down" && currentIndex === currentList.length - 1) return;
+
+    const targetIndex = direction === "up" ? currentIndex - 1 : currentIndex + 1;
+    const [moved] = currentList.splice(currentIndex, 1);
+    currentList.splice(targetIndex, 0, moved);
+
+    const reordered = currentList.map((p, idx) => ({ ...p, order_index: idx }));
+    setProjects(reordered);
+    setIsReordering(true);
+
+    try {
+      const res = await reorderProjectsAction(reordered.map((p) => p.id));
+      if (!res.success) {
+        alert(res.error || "Gagal mengubah urutan project.");
+        setProjects(projects);
+      } else {
+        router.refresh();
+      }
+    } catch {
+      alert("Terjadi kesalahan koneksi saat menyimpan urutan.");
+      setProjects(projects);
+    } finally {
+      setIsReordering(false);
+    }
+  };
+
   // Filtered & Sorted Projects
   const filteredAndSortedProjects = useMemo(() => {
-    let result = initialProjects.filter((p) => !deletedIds.includes(p.id));
+    let result = projects.filter((p) => !deletedIds.includes(p.id));
 
     // 1. Search Filter
     if (search.trim()) {
@@ -76,6 +112,12 @@ export default function ProjectTable({ initialProjects }: ProjectTableProps) {
 
     // 3. Sorting
     result.sort((a, b) => {
+      if (sortField === "order") {
+        const ordA = a.order_index ?? 0;
+        const ordB = b.order_index ?? 0;
+        return sortOrder === "asc" ? ordA - ordB : ordB - ordA;
+      }
+
       let valA = a[sortField] || "";
       let valB = b[sortField] || "";
 
@@ -88,7 +130,7 @@ export default function ProjectTable({ initialProjects }: ProjectTableProps) {
     });
 
     return result;
-  }, [initialProjects, deletedIds, search, selectedCategory, sortField, sortOrder]);
+  }, [projects, deletedIds, search, selectedCategory, sortField, sortOrder]);
 
   // Pagination calculation
   const totalItems = filteredAndSortedProjects.length;
@@ -117,7 +159,7 @@ export default function ProjectTable({ initialProjects }: ProjectTableProps) {
       {/* Search & Filter Toolbar */}
       <div className="bg-white p-4 rounded-lg border border-neutral-200 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
         {/* Search Input */}
-        <div className="relative flex-1 max-w-md">
+        <div className="relative flex-1 w-full md:max-w-md">
           <Search className="w-4 h-4 text-neutral-400 absolute left-3 top-1/2 -translate-y-1/2" />
           <input
             type="text"
@@ -180,10 +222,27 @@ export default function ProjectTable({ initialProjects }: ProjectTableProps) {
 
       {/* Projects Table */}
       <div className="bg-white rounded-lg border border-neutral-200 shadow-sm overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm text-neutral-700">
+        <div className="overflow-x-auto scrollbar-thin">
+          <table className="w-full min-w-[640px] text-left text-sm text-neutral-700">
             <thead className="bg-neutral-50 border-b border-neutral-200 text-xs font-semibold uppercase text-neutral-500 tracking-wider">
               <tr>
+                <th
+                  className="py-3.5 px-3 w-20 cursor-pointer hover:text-black transition select-none"
+                  onClick={() => handleSort("order")}
+                >
+                  <div className="flex items-center gap-1">
+                    <span>Urutan</span>
+                    {sortField === "order" ? (
+                      sortOrder === "asc" ? (
+                        <ArrowUp className="w-3.5 h-3.5 text-black" />
+                      ) : (
+                        <ArrowDown className="w-3.5 h-3.5 text-black" />
+                      )
+                    ) : (
+                      <ArrowUpDown className="w-3.5 h-3.5 text-neutral-400" />
+                    )}
+                  </div>
+                </th>
                 <th className="py-3.5 px-4 w-16">Preview</th>
                 <th
                   className="py-3.5 px-4 cursor-pointer hover:text-black transition select-none"
@@ -226,7 +285,7 @@ export default function ProjectTable({ initialProjects }: ProjectTableProps) {
             <tbody className="divide-y divide-neutral-200">
               {paginatedProjects.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="py-12 text-center text-neutral-400">
+                  <td colSpan={6} className="py-12 text-center text-neutral-400">
                     <div className="flex flex-col items-center justify-center gap-2">
                       <Layers className="w-8 h-8 text-neutral-300 stroke-[1.5]" />
                       <p className="text-sm font-medium text-neutral-600">
@@ -239,95 +298,129 @@ export default function ProjectTable({ initialProjects }: ProjectTableProps) {
                   </td>
                 </tr>
               ) : (
-                paginatedProjects.map((project) => (
-                  <tr
-                    key={project.id}
-                    className="hover:bg-neutral-50/80 transition-colors"
-                  >
-                    {/* Thumbnail */}
-                    <td className="py-3 px-4">
-                      <div className="relative w-12 h-9 rounded bg-neutral-100 border border-neutral-200 overflow-hidden flex-shrink-0">
-                        <Image
-                          src={project.image}
-                          alt={project.title}
-                          fill
-                          className="object-cover"
-                          unoptimized={project.image.endsWith(".svg")}
-                        />
-                      </div>
-                    </td>
+                paginatedProjects.map((project, index) => {
+                  const safeImage = sanitizeImageUrl(project.image);
+                  const safeLiveUrl = isSafeUrl(project.liveUrl) ? project.liveUrl : null;
 
-                    {/* Title & Slug */}
-                    <td className="py-3 px-4">
-                      <div className="font-semibold text-neutral-900 line-clamp-1">
-                        {project.title}
-                      </div>
-                      <div className="text-xs text-neutral-400 font-mono">
-                        id: {project.id}
-                      </div>
-                    </td>
-
-                    {/* Category */}
-                    <td className="py-3 px-4">
-                      <span className="inline-block px-2.5 py-0.5 rounded-full text-xs font-medium bg-neutral-100 text-neutral-800 border border-neutral-200">
-                        {project.category}
-                      </span>
-                    </td>
-
-                    {/* Tags */}
-                    <td className="py-3 px-4 hidden md:table-cell">
-                      <div className="flex flex-wrap gap-1 max-w-xs">
-                        {project.tags.slice(0, 3).map((tag, idx) => (
-                          <span
-                            key={idx}
-                            className="text-[11px] bg-neutral-100 text-neutral-600 px-1.5 py-0.5 rounded"
-                          >
-                            {tag}
+                  return (
+                    <tr
+                      key={project.id}
+                      className="hover:bg-neutral-50/80 transition-colors"
+                    >
+                      {/* Urutan */}
+                      <td className="py-3 px-3">
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-xs font-mono font-bold text-neutral-400 w-5 text-center">
+                            #{(project.order_index ?? 0) + 1}
                           </span>
-                        ))}
-                        {project.tags.length > 3 && (
-                          <span className="text-[11px] text-neutral-400">
-                            +{project.tags.length - 3}
-                          </span>
-                        )}
-                      </div>
-                    </td>
+                          {sortField === "order" && selectedCategory === "ALL" && !search.trim() && (
+                            <div className="flex flex-col gap-0.5">
+                              <button
+                                onClick={() => handleMove(project.id, "up")}
+                                disabled={startIndex + index === 0 || isReordering}
+                                className="p-1 rounded hover:bg-neutral-200 disabled:opacity-20 text-neutral-600 transition cursor-pointer"
+                                title="Pindahkan ke atas"
+                              >
+                                <ArrowUp className="w-3.5 h-3.5" />
+                              </button>
+                              <button
+                                onClick={() => handleMove(project.id, "down")}
+                                disabled={startIndex + index === filteredAndSortedProjects.length - 1 || isReordering}
+                                className="p-1 rounded hover:bg-neutral-200 disabled:opacity-20 text-neutral-600 transition cursor-pointer"
+                                title="Pindahkan ke bawah"
+                              >
+                                <ArrowDown className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      </td>
 
-                    {/* Actions */}
-                    <td className="py-3 px-4 text-right">
-                      <div className="flex items-center justify-end gap-1.5">
-                        {project.liveUrl && (
-                          <a
-                            href={project.liveUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="p-1.5 rounded hover:bg-neutral-100 text-neutral-500 hover:text-black transition"
-                            title="Buka Demo"
+                      {/* Thumbnail */}
+                      <td className="py-3 px-4">
+                        <div className="relative w-12 h-9 rounded bg-neutral-100 border border-neutral-200 overflow-hidden flex-shrink-0">
+                          <Image
+                            src={safeImage}
+                            alt={project.title}
+                            fill
+                            className="object-cover"
+                            unoptimized={safeImage.endsWith(".svg")}
+                          />
+                        </div>
+                      </td>
+
+                      {/* Title & Slug */}
+                      <td className="py-3 px-4">
+                        <div className="font-semibold text-neutral-900 line-clamp-1">
+                          {project.title}
+                        </div>
+                        <div className="text-xs text-neutral-400 font-mono">
+                          id: {project.id}
+                        </div>
+                      </td>
+
+                      {/* Category */}
+                      <td className="py-3 px-4">
+                        <span className="inline-block px-2.5 py-0.5 rounded-full text-xs font-medium bg-neutral-100 text-neutral-800 border border-neutral-200">
+                          {project.category}
+                        </span>
+                      </td>
+
+                      {/* Tags */}
+                      <td className="py-3 px-4 hidden md:table-cell">
+                        <div className="flex flex-wrap gap-1 max-w-xs">
+                          {project.tags.slice(0, 3).map((tag, idx) => (
+                            <span
+                              key={idx}
+                              className="text-[11px] bg-neutral-100 text-neutral-600 px-1.5 py-0.5 rounded"
+                            >
+                              {tag}
+                            </span>
+                          ))}
+                          {project.tags.length > 3 && (
+                            <span className="text-[11px] text-neutral-400">
+                              +{project.tags.length - 3}
+                            </span>
+                          )}
+                        </div>
+                      </td>
+
+                      {/* Actions */}
+                      <td className="py-3 px-4 text-right">
+                        <div className="flex items-center justify-end gap-1.5">
+                          {safeLiveUrl && (
+                            <a
+                              href={safeLiveUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="p-2 sm:p-1.5 rounded hover:bg-neutral-100 text-neutral-500 hover:text-black transition"
+                              title="Buka Demo"
+                            >
+                              <ExternalLink className="w-4 h-4" />
+                            </a>
+                          )}
+
+                          <Link
+                            href={`/admin/projects/${project.id}/edit`}
+                            className="p-2 sm:p-1.5 rounded hover:bg-neutral-100 text-neutral-600 hover:text-black transition"
+                            title="Edit Project"
                           >
-                            <ExternalLink className="w-4 h-4" />
-                          </a>
-                        )}
+                            <Edit className="w-4 h-4" />
+                          </Link>
 
-                        <Link
-                          href={`/admin/projects/${project.id}/edit`}
-                          className="p-1.5 rounded hover:bg-neutral-100 text-neutral-600 hover:text-black transition"
-                          title="Edit Project"
-                        >
-                          <Edit className="w-4 h-4" />
-                        </Link>
-
-                        <button
-                          type="button"
-                          onClick={() => setDeleteTarget(project)}
-                          className="p-1.5 rounded hover:bg-red-50 text-neutral-400 hover:text-red-600 transition"
-                          title="Hapus Project"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))
+                          <button
+                            type="button"
+                            onClick={() => setDeleteTarget(project)}
+                            className="p-2 sm:p-1.5 rounded hover:bg-red-50 text-neutral-400 hover:text-red-600 transition cursor-pointer"
+                            title="Hapus Project"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })
               )}
             </tbody>
           </table>

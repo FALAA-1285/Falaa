@@ -10,12 +10,14 @@ import {
   Calendar,
   Search,
   Filter,
+  ArrowLeft,
 } from "lucide-react";
 import { ContactMessage } from "@/types/portfolio";
 import {
   toggleMessageReadAction,
   deleteMessageAction,
 } from "@/actions/admin/messages";
+import { createSafeMailtoUrl } from "@/lib/security";
 
 interface MessageInboxProps {
   initialMessages: ContactMessage[];
@@ -159,6 +161,11 @@ export default function MessageInbox({ initialMessages }: MessageInboxProps) {
                       if (!msg.is_read) {
                         handleToggleRead(msg.id, false);
                       }
+                      if (typeof window !== "undefined" && window.innerWidth < 1024) {
+                        setTimeout(() => {
+                          document.getElementById("message-detail-view")?.scrollIntoView({ behavior: "smooth" });
+                        }, 50);
+                      }
                     }}
                     className={`p-4 rounded-xl border transition-all cursor-pointer relative ${
                       isSelected
@@ -196,11 +203,23 @@ export default function MessageInbox({ initialMessages }: MessageInboxProps) {
         </div>
 
         {/* Right Column (7 cols): Message Detail */}
-        <div className="lg:col-span-7">
+        <div id="message-detail-view" className="lg:col-span-7">
           {selectedMessage ? (
             <div className="bg-white rounded-2xl border border-neutral-200 shadow-xs p-6 sm:p-8 space-y-6 relative overflow-hidden">
               {/* Silhouette accent */}
               <div className="absolute top-0 right-0 w-32 h-32 bg-neutral-100/50 rounded-full blur-xl pointer-events-none" />
+
+              {/* Mobile Back Button */}
+              <div className="lg:hidden pb-2 border-b border-neutral-100">
+                <button
+                  type="button"
+                  onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+                  className="inline-flex items-center gap-1.5 text-xs font-semibold text-neutral-600 hover:text-black py-1 cursor-pointer"
+                >
+                  <ArrowLeft className="w-3.5 h-3.5" />
+                  <span>Kembali ke daftar pesan</span>
+                </button>
+              </div>
 
               {/* Header actions */}
               <div className="flex flex-wrap items-center justify-between gap-3 border-b border-neutral-200/80 pb-5">
@@ -222,13 +241,18 @@ export default function MessageInbox({ initialMessages }: MessageInboxProps) {
                     )}
                   </button>
 
-                  <a
-                    href={`mailto:${selectedMessage.email}?subject=Re: ${encodeURIComponent(selectedMessage.subject || "Pesan dari Portofolio")}`}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold bg-black text-white hover:bg-neutral-800 transition shadow-xs"
-                  >
-                    <Reply className="w-3.5 h-3.5" />
-                    <span>Balas Email</span>
-                  </a>
+                  {createSafeMailtoUrl(selectedMessage.email) !== "#" && (
+                    <a
+                      href={createSafeMailtoUrl(
+                        selectedMessage.email,
+                        `Re: ${selectedMessage.subject || "Pesan dari Portofolio"}`
+                      )}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold bg-black text-white hover:bg-neutral-800 transition shadow-xs"
+                    >
+                      <Reply className="w-3.5 h-3.5" />
+                      <span>Balas Email</span>
+                    </a>
+                  )}
                 </div>
 
                 <button
@@ -263,12 +287,16 @@ export default function MessageInbox({ initialMessages }: MessageInboxProps) {
                     <span className="font-bold text-neutral-500 uppercase tracking-wider text-[10px] mr-2">
                       Email:
                     </span>
-                    <a
-                      href={`mailto:${selectedMessage.email}`}
-                      className="font-mono text-black underline"
-                    >
-                      {selectedMessage.email}
-                    </a>
+                    {createSafeMailtoUrl(selectedMessage.email) !== "#" ? (
+                      <a
+                        href={createSafeMailtoUrl(selectedMessage.email)}
+                        className="font-mono text-black underline"
+                      >
+                        {selectedMessage.email}
+                      </a>
+                    ) : (
+                      <span className="font-mono text-black">{selectedMessage.email}</span>
+                    )}
                   </div>
                 </div>
               </div>

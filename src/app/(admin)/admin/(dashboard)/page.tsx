@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { getProjects, getExperiences, getSkills, getMessages } from "@/lib/db";
 import { pool } from "@/lib/db/pool";
+import { isSafeUrl, sanitizeImageUrl } from "@/lib/security";
 
 async function DashboardContent() {
   let isDbConnected = true;
@@ -220,55 +221,60 @@ async function DashboardContent() {
             </div>
           ) : (
             <div className="divide-y divide-neutral-100">
-              {recentProjects.map((project) => (
-                <div
-                  key={project.id}
-                  className="py-3 flex items-center justify-between gap-4 hover:bg-neutral-50/80 px-2 rounded-xl transition"
-                >
-                  <div className="flex items-center gap-3.5 min-w-0">
-                    <div className="relative w-12 h-10 rounded-lg bg-neutral-100 border border-neutral-200 overflow-hidden flex-shrink-0">
-                      <Image
-                        src={project.image}
-                        alt={project.title}
-                        fill
-                        className="object-cover"
-                        unoptimized={project.image.endsWith(".svg")}
-                      />
-                    </div>
-                    <div className="min-w-0">
-                      <h4 className="text-xs sm:text-sm font-bold text-neutral-900 truncate">
-                        {project.title}
-                      </h4>
-                      <p className="text-xs text-neutral-500 truncate">
-                        {project.tagline}
-                      </p>
-                    </div>
-                  </div>
+              {recentProjects.map((project) => {
+                const safeImage = sanitizeImageUrl(project.image);
+                const safeLiveUrl = isSafeUrl(project.liveUrl) ? project.liveUrl : null;
 
-                  <div className="flex items-center gap-2 flex-shrink-0">
-                    <span className="text-[11px] font-semibold bg-neutral-100 text-neutral-800 px-2.5 py-1 rounded-md border border-neutral-200 hidden sm:inline-block">
-                      {project.category}
-                    </span>
-                    <Link
-                      href={`/admin/projects/${project.id}/edit`}
-                      className="text-xs font-bold text-neutral-900 bg-neutral-100 hover:bg-black hover:text-white px-3 py-1.5 rounded-lg border border-neutral-300 transition"
-                    >
-                      Edit
-                    </Link>
-                    {project.liveUrl && (
-                      <a
-                        href={project.liveUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="p-1.5 text-neutral-400 hover:text-black transition"
-                        title="Lihat URL"
+                return (
+                  <div
+                    key={project.id}
+                    className="py-3 flex items-center justify-between gap-4 hover:bg-neutral-50/80 px-2 rounded-xl transition"
+                  >
+                    <div className="flex items-center gap-3.5 min-w-0">
+                      <div className="relative w-12 h-10 rounded-lg bg-neutral-100 border border-neutral-200 overflow-hidden flex-shrink-0">
+                        <Image
+                          src={safeImage}
+                          alt={project.title}
+                          fill
+                          className="object-cover"
+                          unoptimized={safeImage.endsWith(".svg")}
+                        />
+                      </div>
+                      <div className="min-w-0">
+                        <h4 className="text-xs sm:text-sm font-bold text-neutral-900 truncate">
+                          {project.title}
+                        </h4>
+                        <p className="text-xs text-neutral-500 truncate">
+                          {project.tagline}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-2 flex-shrink-0">
+                      <span className="text-[11px] font-semibold bg-neutral-100 text-neutral-800 px-2.5 py-1 rounded-md border border-neutral-200 hidden sm:inline-block">
+                        {project.category}
+                      </span>
+                      <Link
+                        href={`/admin/projects/${project.id}/edit`}
+                        className="text-xs font-bold text-neutral-900 bg-neutral-100 hover:bg-black hover:text-white px-3 py-1.5 rounded-lg border border-neutral-300 transition"
                       >
-                        <ExternalLink className="w-3.5 h-3.5" />
-                      </a>
-                    )}
+                        Edit
+                      </Link>
+                      {safeLiveUrl && (
+                        <a
+                          href={safeLiveUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="p-1.5 text-neutral-400 hover:text-black transition"
+                          title="Lihat URL"
+                        >
+                          <ExternalLink className="w-3.5 h-3.5" />
+                        </a>
+                      )}
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </div>

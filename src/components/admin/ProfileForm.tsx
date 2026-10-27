@@ -18,6 +18,8 @@ import {
 import { LinkedinIcon, GithubIcon } from "@/components/ui/SocialIcons";
 import { PersonalInfo } from "@/types/portfolio";
 import { updateProfileInfoAction } from "@/actions/admin/profile";
+import { profileSchema } from "@/lib/schemas/profile";
+import { isSafeUrl } from "@/lib/security";
 
 interface ProfileFormProps {
   initialProfile: PersonalInfo;
@@ -70,6 +72,14 @@ export default function ProfileForm({ initialProfile }: ProfileFormProps) {
     e.preventDefault();
     setErrorMsg(null);
     setSuccessMsg(false);
+
+    // Client-side validation with strict URL and email allowlists
+    const clientValidation = profileSchema.safeParse(formData);
+    if (!clientValidation.success) {
+      setErrorMsg(clientValidation.error.issues[0]?.message || "Validasi data profil gagal.");
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
@@ -87,6 +97,9 @@ export default function ProfileForm({ initialProfile }: ProfileFormProps) {
       setIsSubmitting(false);
     }
   };
+
+  const isLinkedinValid = !formData.linkedin || isSafeUrl(formData.linkedin);
+  const isGithubValid = !formData.github || isSafeUrl(formData.github);
 
   return (
     <div className="space-y-6">
@@ -378,9 +391,19 @@ export default function ProfileForm({ initialProfile }: ProfileFormProps) {
                     onChange={(e) =>
                       setFormData({ ...formData, linkedin: e.target.value })
                     }
-                    className="w-full pl-10 pr-3.5 py-2.5 bg-neutral-50 border border-neutral-300 rounded-xl text-xs sm:text-sm text-neutral-900 focus:outline-none focus:border-black"
+                    placeholder="https://linkedin.com/in/..."
+                    className={`w-full pl-10 pr-3.5 py-2.5 rounded-xl text-xs sm:text-sm text-neutral-900 focus:outline-none focus:border-black ${
+                      !isLinkedinValid
+                        ? "bg-red-50 border border-red-300"
+                        : "bg-neutral-50 border border-neutral-300"
+                    }`}
                   />
                 </div>
+                {!isLinkedinValid && (
+                  <p className="text-[11px] text-red-600 mt-1">
+                    URL LinkedIn harus menggunakan protokol https:// atau http://
+                  </p>
+                )}
               </div>
 
               <div>
@@ -395,9 +418,19 @@ export default function ProfileForm({ initialProfile }: ProfileFormProps) {
                     onChange={(e) =>
                       setFormData({ ...formData, github: e.target.value })
                     }
-                    className="w-full pl-10 pr-3.5 py-2.5 bg-neutral-50 border border-neutral-300 rounded-xl text-xs sm:text-sm text-neutral-900 focus:outline-none focus:border-black"
+                    placeholder="https://github.com/..."
+                    className={`w-full pl-10 pr-3.5 py-2.5 rounded-xl text-xs sm:text-sm text-neutral-900 focus:outline-none focus:border-black ${
+                      !isGithubValid
+                        ? "bg-red-50 border border-red-300"
+                        : "bg-neutral-50 border border-neutral-300"
+                    }`}
                   />
                 </div>
+                {!isGithubValid && (
+                  <p className="text-[11px] text-red-600 mt-1">
+                    URL GitHub harus menggunakan protokol https:// atau http://
+                  </p>
+                )}
               </div>
             </div>
 
@@ -449,7 +482,7 @@ export default function ProfileForm({ initialProfile }: ProfileFormProps) {
             <button
               type="submit"
               disabled={isSubmitting}
-              className="inline-flex items-center gap-2 px-7 py-3.5 bg-black hover:bg-neutral-800 text-white text-xs sm:text-sm font-bold rounded-xl transition shadow-xs cursor-pointer disabled:opacity-50"
+              className="w-full sm:w-auto justify-center inline-flex items-center gap-2 px-7 py-3.5 bg-black hover:bg-neutral-800 text-white text-xs sm:text-sm font-bold rounded-xl transition shadow-xs cursor-pointer disabled:opacity-50"
             >
               {isSubmitting ? (
                 <>

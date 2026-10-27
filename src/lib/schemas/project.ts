@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+import { isSafeUrl, isSafeImageUrl } from "@/lib/security";
+
 export const CATEGORIES = [
   "Web & Fullstack",
   "Mobile",
@@ -20,16 +22,30 @@ export const projectSchema = z.object({
   }),
   tagline: z.string().min(5, "Tagline minimal 5 karakter"),
   description: z.string().min(10, "Deskripsi minimal 10 karakter"),
-  image: z.string().min(1, "Gambar project wajib diunggah atau diisi URL-nya"),
+  image: z
+    .string()
+    .min(1, "Gambar project wajib diunggah atau diisi URL-nya")
+    .refine(
+      (val) => isSafeImageUrl(val),
+      "Format URL gambar tidak aman atau tidak valid. Gunakan path internal (/uploads/..., /projects/...) atau URL http/https yang valid."
+    ),
   tags: z.array(z.string()).min(1, "Minimal 1 tag teknologi"),
   githubUrl: z
     .string()
-    .url("URL GitHub tidak valid")
+    .trim()
+    .refine(
+      (val) => !val || isSafeUrl(val),
+      "URL GitHub harus valid dan menggunakan protokol http:// atau https:// (skema berbahaya seperti javascript: dilarang)"
+    )
     .optional()
     .or(z.literal("")),
   liveUrl: z
     .string()
-    .url("URL Demo Live tidak valid")
+    .trim()
+    .refine(
+      (val) => !val || isSafeUrl(val),
+      "URL Demo Live harus valid dan menggunakan protokol http:// atau https:// (skema berbahaya seperti javascript: dilarang)"
+    )
     .optional()
     .or(z.literal("")),
   features: z.array(z.string()).min(1, "Minimal 1 poin fitur utama"),

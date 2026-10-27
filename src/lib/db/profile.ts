@@ -1,5 +1,5 @@
 import { pool } from "./pool";
-import { PersonalInfo } from "@/types/portfolio";
+import type { PersonalInfo } from "@/types/portfolio";
 import { DEFAULT_PERSONAL_INFO } from "@/lib/constants";
 
 export async function getProfileInfo(): Promise<PersonalInfo> {

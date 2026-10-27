@@ -11,12 +11,31 @@ function timingSafeStringEqual(a: string, b: string): boolean {
 }
 
 /**
- * Validate submitted credentials against env variables or default config using constant-time comparison.
+ * Validate submitted credentials against env variables with constant-time comparison.
+ * In production, strictly requires ADMIN_EMAIL and ADMIN_PASSWORD (min 8 chars);
+ * dangerous hardcoded fallback values are strictly rejected.
  * Executed strictly in Node.js server action context.
  */
 export function validateAdminCredentials(email: string, pass: string): boolean {
-  const expectedEmail = (process.env.ADMIN_EMAIL || "admin@falah.dev").trim().toLowerCase();
-  const expectedPassword = process.env.ADMIN_PASSWORD || "admin123";
+  if (!email || !pass || typeof email !== "string" || typeof pass !== "string") {
+    return false;
+  }
+
+  const isProd = process.env.NODE_ENV === "production";
+  const rawExpectedEmail = process.env.ADMIN_EMAIL;
+  const rawExpectedPassword = process.env.ADMIN_PASSWORD;
+
+  // In production, reject login if required credentials are missing or too weak
+  if (isProd && (!rawExpectedEmail || !rawExpectedPassword || rawExpectedPassword.length < 8)) {
+    console.error(
+      "[SECURITY FATAL] In production, ADMIN_EMAIL and ADMIN_PASSWORD (minimum 8 chars) must be configured in environment variables. Access denied."
+    );
+    return false;
+  }
+
+  // In non-production development, allow fallback with warning
+  const expectedEmail = (rawExpectedEmail || "admin@falah.dev").trim().toLowerCase();
+  const expectedPassword = rawExpectedPassword || "admin123";
 
   const inputEmail = email.trim().toLowerCase();
 

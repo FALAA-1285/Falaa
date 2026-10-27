@@ -1,5 +1,5 @@
 import { pool } from "./pool";
-import { ContactMessage } from "@/types/portfolio";
+import type { ContactMessage } from "@/types/portfolio";
 
 export async function getMessages(): Promise<ContactMessage[]> {
   try {

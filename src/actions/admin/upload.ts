@@ -1,8 +1,8 @@
 "use server";
 
-import fs from "fs/promises";
 import path from "path";
 import { getAdminSession } from "@/lib/auth";
+import { uploadToStorage } from "@/lib/storage";
 
 export interface UploadActionResult {
   success: boolean;
@@ -75,14 +75,22 @@ export async function uploadImageAction(
 
     const uniqueFileName = `${sanitizedBase}-${Date.now()}${safeExt}`;
 
-    const uploadDir = path.join(process.cwd(), "public", "uploads");
-    await fs.mkdir(uploadDir, { recursive: true });
+    // 5. Save to persistent storage (Supabase Object Storage or local fallback)
+    const uploadResult = await uploadToStorage({
+      buffer,
+      contentType: file.type,
+      filename: uniqueFileName,
+      folder: "uploads",
+    });
 
-    const filePath = path.join(uploadDir, uniqueFileName);
-    await fs.writeFile(filePath, buffer);
+    if (!uploadResult.success || !uploadResult.url) {
+      return {
+        success: false,
+        error: uploadResult.error || "Gagal menyimpan berkas gambar ke penyimpanan.",
+      };
+    }
 
-    const publicUrl = `/uploads/${uniqueFileName}`;
-    return { success: true, url: publicUrl };
+    return { success: true, url: uploadResult.url };
   } catch (error: unknown) {
     console.error("Gagal mengupload gambar:", error);
     return {

@@ -4,7 +4,9 @@ import { revalidatePath } from "next/cache";
 import { getAdminSession } from "@/lib/auth";
 import { invalidatePortfolioCache } from "@/lib/cached-data";
 import { getProfileInfo, updateProfileInfo } from "@/lib/db";
-import { PersonalInfo } from "@/types/portfolio";
+import { profileSchema } from "@/lib/schemas/profile";
+import { sanitizeUrl } from "@/lib/security";
+import type { PersonalInfo } from "@/types/portfolio";
 
 export async function getProfileInfoAction(): Promise<PersonalInfo> {
   return await getProfileInfo();
@@ -18,12 +20,29 @@ export async function updateProfileInfoAction(
     return { success: false, error: "Akses ditolak: Hanya ADMIN yang diizinkan." };
   }
 
-  if (!data.name || !data.email || !data.title) {
-    return { success: false, error: "Nama, email, dan title wajib diisi." };
+  const parsed = profileSchema.safeParse(data);
+  if (!parsed.success) {
+    const errorMsg = parsed.error.issues[0]?.message || "Validasi data profil gagal.";
+    return { success: false, error: errorMsg };
   }
 
   try {
-    const updated = await updateProfileInfo(data);
+    const sanitizedData: PersonalInfo = {
+      ...parsed.data,
+      linkedin: sanitizeUrl(parsed.data.linkedin, ""),
+      github: sanitizeUrl(parsed.data.github, ""),
+      institution: parsed.data.institution || "",
+      location: parsed.data.location || "",
+      quote: parsed.data.quote || "",
+      aboutSub: parsed.data.aboutSub || "",
+      aboutHeadline: parsed.data.aboutHeadline || "",
+      aboutTags: parsed.data.aboutTags || [],
+      ctaHeadline: parsed.data.ctaHeadline || "",
+      ctaSub: parsed.data.ctaSub || "",
+      ctaButtonText: parsed.data.ctaButtonText || "",
+    };
+
+    const updated = await updateProfileInfo(sanitizedData);
     revalidatePath("/");
     revalidatePath("/admin");
     revalidatePath("/admin/profile");

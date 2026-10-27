@@ -453,10 +453,10 @@ export default function ProjectForm({
       </div>
 
       {/* Form Submission Bar */}
-      <div className="flex items-center justify-between pt-4 border-t border-neutral-200">
+      <div className="flex flex-col-reverse sm:flex-row gap-3 sm:items-center sm:justify-between pt-4 border-t border-neutral-200">
         <Link
           href="/admin/projects"
-          className="inline-flex items-center gap-1.5 text-sm font-medium text-neutral-600 hover:text-black transition"
+          className="inline-flex items-center justify-center gap-1.5 text-sm font-medium text-neutral-600 hover:text-black py-2 sm:py-0 transition"
         >
           <ArrowLeft className="w-4 h-4" />
           <span>Kembali ke Daftar</span>
@@ -465,7 +465,7 @@ export default function ProjectForm({
         <button
           type="submit"
           disabled={isSubmitting}
-          className="inline-flex items-center gap-2 bg-black hover:bg-neutral-800 text-white px-6 py-2.5 rounded-md text-sm font-medium transition shadow-sm disabled:opacity-50 cursor-pointer"
+          className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-black hover:bg-neutral-800 text-white px-6 py-2.5 rounded-md text-sm font-medium transition shadow-sm disabled:opacity-50 cursor-pointer"
         >
           {isSubmitting ? (
             <Loader2 className="w-4 h-4 animate-spin" />

@@ -1,92 +1,26 @@
-"use client";
-
-import React, { useState } from "react";
+import React from "react";
 import { SkillCategoryGroup } from "@/types/skills";
+import { compareCategories } from "@/lib/constants/skills";
 
 function SkillCard({ name, icon }: { name: string; icon: string }) {
-  const [isHovered, setIsHovered] = useState(false);
-
   return (
-    <div
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-      onPointerEnter={() => setIsHovered(true)}
-      onPointerLeave={() => setIsHovered(false)}
-      className="flex flex-col items-center gap-3 group cursor-pointer select-none"
-    >
+    <div className="flex flex-col items-center gap-3 group cursor-pointer select-none">
       <div className="relative w-12 h-12 md:w-14 md:h-14 flex items-center justify-center pointer-events-none">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={`/icons/${icon}`}
           alt={name}
-          className="w-full h-full object-contain transition-all duration-300 ease-out"
-          style={{
-            filter: isHovered
-              ? "grayscale(0%) contrast(100%) brightness(100%)"
-              : "grayscale(100%) contrast(125%) brightness(95%)",
-            opacity: isHovered ? 1 : 0.7,
-            transform: "none",
-          }}
+          className="w-full h-full object-contain transition-all duration-300 ease-out grayscale contrast-125 brightness-95 opacity-70 group-hover:grayscale-0 group-hover:contrast-100 group-hover:brightness-100 group-hover:opacity-100"
+          loading="lazy"
+          width={56}
+          height={56}
         />
       </div>
-      <span
-        className="text-sm font-medium transition-colors duration-200 text-center"
-        style={{
-          color: isHovered ? "#000000" : "#6b7280",
-        }}
-      >
+      <span className="text-sm font-medium text-neutral-500 group-hover:text-black transition-colors duration-200 text-center">
         {name}
       </span>
     </div>
   );
-}
-
-function getCategoryPriority(category: string): number {
-  const norm = (category || "").toLowerCase().trim();
-  // 1. Bahasa Pemrograman / Programming Languages
-  if (
-    norm.includes("bahasa") ||
-    norm.includes("programming") ||
-    norm.includes("language")
-  ) {
-    return 1;
-  }
-  // 2. Frontend
-  if (
-    norm.includes("frontend") ||
-    norm.includes("front-end") ||
-    norm.includes("front end")
-  ) {
-    return 2;
-  }
-  // 3. Backend
-  if (
-    norm.includes("backend") ||
-    norm.includes("back-end") ||
-    norm.includes("back end") ||
-    norm.includes("beckend")
-  ) {
-    return 3;
-  }
-  // 4. Databases
-  if (
-    norm.includes("database") ||
-    norm.includes("basis data") ||
-    norm.includes("sql") ||
-    norm.includes("db")
-  ) {
-    return 4;
-  }
-  // 5. Tools & Machine Learning / Tools
-  if (
-    norm.includes("tool") ||
-    norm.includes("machine learning") ||
-    norm.includes("alat") ||
-    norm.includes("devops")
-  ) {
-    return 5;
-  }
-  return 10;
 }
 
 export default function Skills({
@@ -94,12 +28,9 @@ export default function Skills({
 }: {
   initialSkillGroups?: SkillCategoryGroup[];
 }) {
-  const skillGroups = [...(initialSkillGroups || [])].sort((a, b) => {
-    const pA = getCategoryPriority(a.category);
-    const pB = getCategoryPriority(b.category);
-    if (pA !== pB) return pA - pB;
-    return a.category.localeCompare(b.category);
-  });
+  const skillGroups = [...(initialSkillGroups || [])].sort((a, b) =>
+    compareCategories(a.category, b.category)
+  );
 
   return (
     <section

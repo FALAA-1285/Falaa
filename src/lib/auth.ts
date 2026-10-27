@@ -1,20 +1,23 @@
 import { SignJWT, jwtVerify } from "jose";
 import { cookies } from "next/headers";
 
-function resolveJwtSecret(): Uint8Array {
+export function resolveJwtSecret(): Uint8Array {
   const secret = process.env.ADMIN_JWT_SECRET;
-  if (!secret || secret.trim().length === 0) {
+  if (!secret || secret.trim().length < 32) {
+    if (process.env.NODE_ENV === "production") {
+      throw new Error(
+        "[FATAL SECURITY ERROR] ADMIN_JWT_SECRET must be defined with at least 32 characters in production environment."
+      );
+    }
     console.warn(
-      "[SECURITY ADVISORY] ADMIN_JWT_SECRET is not set in environment. Using fallback key. It is strongly recommended to set ADMIN_JWT_SECRET in your Vercel Environment Variables."
+      "[SECURITY ADVISORY] ADMIN_JWT_SECRET is not set or too short (< 32 chars). Using development fallback."
     );
     return new TextEncoder().encode(
       "falah_portfolio_default_jwt_secret_key_minimum_32_characters_long_2026"
     );
   }
-  return new TextEncoder().encode(secret);
+  return new TextEncoder().encode(secret.trim());
 }
-
-const JWT_SECRET = resolveJwtSecret();
 
 export const ADMIN_COOKIE_NAME = "admin_token";
 
@@ -27,11 +30,12 @@ export interface AdminPayload {
  * Sign a new Admin JWT token using JOSE (HS256)
  */
 export async function signAdminToken(payload: AdminPayload): Promise<string> {
+  const secretKey = resolveJwtSecret();
   return await new SignJWT({ ...payload })
     .setProtectedHeader({ alg: "HS256" })
     .setIssuedAt()
     .setExpirationTime("24h")
-    .sign(JWT_SECRET);
+    .sign(secretKey);
 }
 
 /**
@@ -39,10 +43,11 @@ export async function signAdminToken(payload: AdminPayload): Promise<string> {
  */
 export async function verifyAdminToken(token: string): Promise<AdminPayload | null> {
   try {
-    const { payload } = await jwtVerify(token, JWT_SECRET);
-    if (payload && payload.role === "ADMIN") {
+    const secretKey = resolveJwtSecret();
+    const { payload } = await jwtVerify(token, secretKey);
+    if (payload && payload.role === "ADMIN" && typeof payload.email === "string") {
       return {
-        email: payload.email as string,
+        email: payload.email,
         role: "ADMIN",
       };
     }

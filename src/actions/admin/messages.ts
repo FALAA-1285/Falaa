@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { getAdminSession } from "@/lib/auth";
 import { getMessages, toggleMessageRead, deleteMessage } from "@/lib/db";
-import { ContactMessage } from "@/types/portfolio";
+import type { ContactMessage } from "@/types/portfolio";
 
 export async function getMessagesAction(): Promise<ContactMessage[]> {
   const session = await getAdminSession();

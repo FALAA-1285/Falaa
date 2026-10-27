@@ -1,9 +1,10 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { projectSchema, ProjectFormData } from "@/lib/schemas/project";
+import { projectSchema, type ProjectFormData } from "@/lib/schemas/project";
 import { getAdminSession } from "@/lib/auth";
 import { invalidatePortfolioCache } from "@/lib/cached-data";
+import { sanitizeUrl, sanitizeImageUrl } from "@/lib/security";
 import {
   createProject,
   updateProject,
@@ -11,7 +12,7 @@ import {
   getProjects,
   getProjectById,
 } from "@/lib/db";
-import { Project } from "@/types/portfolio";
+import type { Project } from "@/types/portfolio";
 
 export interface ProjectActionResult {
   success: boolean;
@@ -36,8 +37,15 @@ export async function createProjectAction(
     return { success: false, error: errorMsg };
   }
 
+  const safeData: Project = {
+    ...parsed.data,
+    image: sanitizeImageUrl(parsed.data.image),
+    githubUrl: parsed.data.githubUrl ? sanitizeUrl(parsed.data.githubUrl) : undefined,
+    liveUrl: parsed.data.liveUrl ? sanitizeUrl(parsed.data.liveUrl) : undefined,
+  };
+
   try {
-    const newProject = await createProject(parsed.data as Project);
+    const newProject = await createProject(safeData);
     revalidatePath("/");
     revalidatePath("/admin");
     revalidatePath("/admin/projects");
@@ -70,8 +78,15 @@ export async function updateProjectAction(
     return { success: false, error: errorMsg };
   }
 
+  const safeData: Project = {
+    ...parsed.data,
+    image: sanitizeImageUrl(parsed.data.image),
+    githubUrl: parsed.data.githubUrl ? sanitizeUrl(parsed.data.githubUrl) : undefined,
+    liveUrl: parsed.data.liveUrl ? sanitizeUrl(parsed.data.liveUrl) : undefined,
+  };
+
   try {
-    const updated = await updateProject(id, parsed.data as Project);
+    const updated = await updateProject(id, safeData);
     revalidatePath("/");
     revalidatePath("/admin");
     revalidatePath("/admin/projects");

@@ -1,48 +1,14 @@
 import { pool } from "./pool";
-import { SkillCategoryGroup, SkillItem } from "@/types/skills";
+import type { SkillCategoryGroup, SkillItem } from "@/types/skills";
 import { DEFAULT_SKILLS } from "@/lib/constants";
-
-function getCategoryPriority(category: string): number {
-  const norm = category.toLowerCase().trim();
-  // 1. Bahasa Pemrograman / Programming Languages
-  if (norm.includes("bahasa") || norm.includes("programming") || norm.includes("language")) {
-    return 1;
-  }
-  // 2. Frontend
-  if (norm.includes("frontend") || norm.includes("front-end") || norm.includes("front end")) {
-    return 2;
-  }
-  // 3. Backend
-  if (norm.includes("backend") || norm.includes("back-end") || norm.includes("back end") || norm.includes("beckend")) {
-    return 3;
-  }
-  // 4. Databases (compliments backend)
-  if (norm.includes("database") || norm.includes("basis data") || norm.includes("sql")) {
-    return 4;
-  }
-  // 5. Tools & Machine Learning / Tools
-  if (norm.includes("tool") || norm.includes("machine learning") || norm.includes("alat") || norm.includes("devops")) {
-    return 5;
-  }
-  return 10;
-}
+import { compareCategories } from "@/lib/constants/skills";
 
 export async function getSkills(): Promise<SkillItem[]> {
   try {
     const { rows } = await pool.query(
       `SELECT id, category, name, icon, order_index
        FROM skills
-       ORDER BY 
-         CASE 
-           WHEN LOWER(category) LIKE '%bahasa%' OR LOWER(category) LIKE '%programming%' OR LOWER(category) LIKE '%language%' THEN 1
-           WHEN LOWER(category) LIKE '%frontend%' OR LOWER(category) LIKE '%front-end%' OR LOWER(category) LIKE '%front end%' THEN 2
-           WHEN LOWER(category) LIKE '%backend%' OR LOWER(category) LIKE '%back-end%' OR LOWER(category) LIKE '%back end%' OR LOWER(category) LIKE '%beckend%' THEN 3
-           WHEN LOWER(category) LIKE '%database%' OR LOWER(category) LIKE '%basis data%' OR LOWER(category) LIKE '%sql%' OR LOWER(category) LIKE '%db%' THEN 4
-           WHEN LOWER(category) LIKE '%tool%' OR LOWER(category) LIKE '%machine learning%' OR LOWER(category) LIKE '%alat%' OR LOWER(category) LIKE '%devops%' THEN 5
-           ELSE 10
-         END ASC,
-         order_index ASC, 
-         id ASC`
+       ORDER BY order_index ASC, id ASC`
     );
     const skillsList = rows.map((r) => ({
       id: r.id,
@@ -54,9 +20,8 @@ export async function getSkills(): Promise<SkillItem[]> {
 
     // Sort by desired category hierarchy, then order_index
     skillsList.sort((a, b) => {
-      const pA = getCategoryPriority(a.category || "");
-      const pB = getCategoryPriority(b.category || "");
-      if (pA !== pB) return pA - pB;
+      const catCompare = compareCategories(a.category || "", b.category || "");
+      if (catCompare !== 0) return catCompare;
       return (a.order_index || 0) - (b.order_index || 0);
     });
 
@@ -92,13 +57,8 @@ export async function getSkillsGrouped(): Promise<SkillCategoryGroup[]> {
     skills,
   }));
 
-  // Ensure groups strictly follow: 1. Programming Languages, 2. Frontend, 3. Backend, 4. Databases, 5. Tools
-  groups.sort((a, b) => {
-    const pA = getCategoryPriority(a.category);
-    const pB = getCategoryPriority(b.category);
-    if (pA !== pB) return pA - pB;
-    return a.category.localeCompare(b.category);
-  });
+  // Ensure groups strictly follow single source of truth category hierarchy
+  groups.sort((a, b) => compareCategories(a.category, b.category));
 
   return groups;
 }
@@ -124,7 +84,7 @@ export async function createSkill(
 
 export async function updateSkill(
   id: number,
-  skill: { name?: string; category?: string; icon?: string }
+  skill: { name?: string; category?: string; icon?: string; order_index?: number }
 ): Promise<SkillItem> {
   const { rows: currentRows } = await pool.query("SELECT * FROM skills WHERE id = $1", [id]);
   if (currentRows.length === 0) {
@@ -134,13 +94,14 @@ export async function updateSkill(
   const name = skill.name ?? curr.name;
   const category = skill.category ?? curr.category;
   const icon = skill.icon ?? curr.icon;
+  const orderIndex = skill.order_index !== undefined ? skill.order_index : curr.order_index;
 
   const { rows } = await pool.query(
     `UPDATE skills
-     SET name = $1, category = $2, icon = $3
-     WHERE id = $4
+     SET name = $1, category = $2, icon = $3, order_index = $4
+     WHERE id = $5
      RETURNING id, category, name, icon, order_index`,
-    [name, category, icon, id]
+    [name, category, icon, orderIndex, id]
   );
   const r = rows[0];
   return {
@@ -155,4 +116,29 @@ export async function updateSkill(
 export async function deleteSkill(id: number): Promise<boolean> {
   const result = await pool.query("DELETE FROM skills WHERE id = $1", [id]);
   return (result.rowCount ?? 0) > 0;
+}
+
+/**
+ * Persistently update the display order for skills in a single database transaction.
+ * Guarantees zero duplicate order conflicts.
+ */
+export async function reorderSkills(orderedIds: number[]): Promise<boolean> {
+  if (!orderedIds || orderedIds.length === 0) return true;
+  const client = await pool.connect();
+  try {
+    await client.query("BEGIN");
+    for (let index = 0; index < orderedIds.length; index++) {
+      await client.query(
+        "UPDATE skills SET order_index = $1 WHERE id = $2",
+        [index, orderedIds[index]]
+      );
+    }
+    await client.query("COMMIT");
+    return true;
+  } catch (err) {
+    await client.query("ROLLBACK");
+    throw err;
+  } finally {
+    client.release();
+  }
 }
