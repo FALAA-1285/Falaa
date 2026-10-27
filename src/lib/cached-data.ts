@@ -31,7 +31,7 @@ export const getCachedExperiences = unstable_cache(
  */
 export const getCachedSkillsGrouped = unstable_cache(
   async () => getSkillsGrouped(),
-  ["portfolio-skills-cache-v2"],
+  ["portfolio-skills-cache-v3"],
   { tags: [PORTFOLIO_CACHE_TAG, "skills"], revalidate: 3600 }
 );
 

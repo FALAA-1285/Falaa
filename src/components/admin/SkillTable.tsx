@@ -50,6 +50,8 @@ const PRESET_ICONS = [
   "tensorflow.svg",
   "pytorch.svg",
   "scikitlearn.svg",
+  "vercel.svg",
+  "n8n.svg",
 ];
 
 const PRESET_CATEGORIES = PRESET_SKILL_CATEGORIES;

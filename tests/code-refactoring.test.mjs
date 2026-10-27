@@ -35,7 +35,8 @@ describe("PHASE 3 - CODE REFACTORING: Single Source of Truth & DRY Validation", 
       assert.equal(getCategoryPriority("Basis Data"), 4);
       assert.equal(getCategoryPriority("SQL"), 4);
 
-      // 5. Tools & Machine Learning
+      // 5. Tools & Others
+      assert.equal(getCategoryPriority("Tools & Others"), 5);
       assert.equal(getCategoryPriority("Tools & Machine Learning"), 5);
       assert.equal(getCategoryPriority("Tools"), 5);
       assert.equal(getCategoryPriority("machine learning"), 5);
@@ -49,7 +50,7 @@ describe("PHASE 3 - CODE REFACTORING: Single Source of Truth & DRY Validation", 
 
     it("orders categories via compareCategories deterministically", () => {
       const categories = [
-        "Tools & Machine Learning",
+        "Tools & Others",
         "Frontend",
         "Other Category",
         "Programming Languages",
@@ -63,7 +64,7 @@ describe("PHASE 3 - CODE REFACTORING: Single Source of Truth & DRY Validation", 
         "Frontend",
         "Backend",
         "Databases",
-        "Tools & Machine Learning",
+        "Tools & Others",
         "Other Category",
       ]);
     });

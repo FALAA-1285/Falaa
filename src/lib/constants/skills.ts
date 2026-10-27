@@ -37,7 +37,7 @@ export const SKILL_CATEGORY_DEFINITIONS: readonly SkillCategoryDefinition[] = [
   },
   {
     id: "tools",
-    label: "Tools & Machine Learning",
+    label: "Tools & Others",
     priority: 5,
     aliases: ["tool", "machine learning", "alat", "devops"],
   },

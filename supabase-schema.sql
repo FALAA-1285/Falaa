@@ -640,7 +640,7 @@ ON CONFLICT (id) DO UPDATE SET
 INSERT INTO public.skills (id, category, name, icon, order_index)
 VALUES (
   19,
-  'Tools & Machine Learning',
+  'Tools & Others',
   'Git',
   'git.svg',
   18
@@ -653,7 +653,7 @@ ON CONFLICT (id) DO UPDATE SET
 INSERT INTO public.skills (id, category, name, icon, order_index)
 VALUES (
   20,
-  'Tools & Machine Learning',
+  'Tools & Others',
   'GitHub',
   'github.svg',
   19
@@ -666,7 +666,7 @@ ON CONFLICT (id) DO UPDATE SET
 INSERT INTO public.skills (id, category, name, icon, order_index)
 VALUES (
   21,
-  'Tools & Machine Learning',
+  'Tools & Others',
   'Figma',
   'figma.svg',
   20
@@ -679,7 +679,7 @@ ON CONFLICT (id) DO UPDATE SET
 INSERT INTO public.skills (id, category, name, icon, order_index)
 VALUES (
   22,
-  'Tools & Machine Learning',
+  'Tools & Others',
   'VS Code',
   'vscode.svg',
   21
@@ -692,7 +692,7 @@ ON CONFLICT (id) DO UPDATE SET
 INSERT INTO public.skills (id, category, name, icon, order_index)
 VALUES (
   23,
-  'Tools & Machine Learning',
+  'Tools & Others',
   'OpenCV',
   'opencv.svg',
   22
@@ -705,7 +705,7 @@ ON CONFLICT (id) DO UPDATE SET
 INSERT INTO public.skills (id, category, name, icon, order_index)
 VALUES (
   24,
-  'Tools & Machine Learning',
+  'Tools & Others',
   'TensorFlow',
   'tensorflow.svg',
   23
@@ -718,7 +718,7 @@ ON CONFLICT (id) DO UPDATE SET
 INSERT INTO public.skills (id, category, name, icon, order_index)
 VALUES (
   25,
-  'Tools & Machine Learning',
+  'Tools & Others',
   'PyTorch',
   'pytorch.svg',
   24
@@ -731,10 +731,36 @@ ON CONFLICT (id) DO UPDATE SET
 INSERT INTO public.skills (id, category, name, icon, order_index)
 VALUES (
   26,
-  'Tools & Machine Learning',
+  'Tools & Others',
   'Scikit-Learn',
   'scikitlearn.svg',
   25
+)
+ON CONFLICT (id) DO UPDATE SET
+  category = EXCLUDED.category,
+  name = EXCLUDED.name,
+  icon = EXCLUDED.icon,
+  order_index = EXCLUDED.order_index;
+INSERT INTO public.skills (id, category, name, icon, order_index)
+VALUES (
+  27,
+  'Tools & Others',
+  'Vercel',
+  'vercel.svg',
+  26
+)
+ON CONFLICT (id) DO UPDATE SET
+  category = EXCLUDED.category,
+  name = EXCLUDED.name,
+  icon = EXCLUDED.icon,
+  order_index = EXCLUDED.order_index;
+INSERT INTO public.skills (id, category, name, icon, order_index)
+VALUES (
+  28,
+  'Tools & Others',
+  'n8n',
+  'n8n.svg',
+  27
 )
 ON CONFLICT (id) DO UPDATE SET
   category = EXCLUDED.category,
