@@ -2,7 +2,7 @@
 
 import React, { useEffect } from "react";
 import Lenis from "lenis";
-import { setLenisInstance, scrollToTarget } from "@/lib/scroll";
+import { setLenisInstance, scrollToTarget, scrollToTop } from "@/lib/scroll";
 
 export default function SmoothScrollProvider({
   children,
@@ -30,11 +30,16 @@ export default function SmoothScrollProvider({
       if (!target) return;
 
       const href = target.getAttribute("href");
+      if (href === "#" || href === "#top") {
+        e.preventDefault();
+        scrollToTop();
+        return;
+      }
       if (href && href.startsWith("#") && href.length > 1) {
         const element = document.querySelector(href);
         if (element) {
           e.preventDefault();
-          scrollToTarget(href, { offset: -80, duration: 1.8 });
+          scrollToTarget(href, { offset: -80 });
         }
       }
     };

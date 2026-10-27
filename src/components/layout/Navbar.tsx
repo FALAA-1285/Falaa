@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { Menu, X } from "lucide-react";
 import { PersonalInfo } from "@/types/portfolio";
-import { scrollToTarget } from "@/lib/scroll";
+import { scrollToTarget, scrollToTop } from "@/lib/scroll";
 
 const NAV_LINKS = [
   { name: "About", href: "#about" },
@@ -33,6 +33,14 @@ export default function Navbar({ profile }: { profile?: PersonalInfo }) {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  const handleBrandClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    if (window.location.pathname === "/" || window.location.pathname === "") {
+      e.preventDefault();
+      setMobileMenuOpen(false);
+      scrollToTop();
+    }
+  };
+
   const handleNavClick = (
     e: React.MouseEvent<HTMLAnchorElement>,
     href: string
@@ -40,7 +48,7 @@ export default function Navbar({ profile }: { profile?: PersonalInfo }) {
     if (href.startsWith("#")) {
       e.preventDefault();
       setMobileMenuOpen(false);
-      scrollToTarget(href, { offset: -80, duration: 1.8 });
+      scrollToTarget(href, { offset: -80 });
     }
   };
 
@@ -54,7 +62,8 @@ export default function Navbar({ profile }: { profile?: PersonalInfo }) {
         {/* Brand */}
         <Link
           href="/"
-          className="text-2xl font-medium tracking-tight text-black hover:text-black/70 transition-colors"
+          onClick={handleBrandClick}
+          className="text-2xl font-medium tracking-tight text-black hover:text-black/70 transition-colors cursor-pointer"
         >
           {displayName} · Portfolio
         </Link>
