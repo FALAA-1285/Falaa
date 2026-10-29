@@ -30,7 +30,10 @@ export default function Footer({ profile }: { profile?: PersonalInfo }) {
 
   // Pick initial random index on client mount to avoid hydration mismatch
   useEffect(() => {
-    setActiveGifIndex(Math.floor(Math.random() * EASTER_EGG_GIFS.length));
+    const timer = setTimeout(() => {
+      setActiveGifIndex(Math.floor(Math.random() * EASTER_EGG_GIFS.length));
+    }, 0);
+    return () => clearTimeout(timer);
   }, []);
 
   // Tracking state for strictly holding at footer before allowing force scroll

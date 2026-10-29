@@ -9,6 +9,7 @@ import Skills from "@/components/features/Skills";
 import Contact from "@/components/features/Contact";
 import Footer from "@/components/layout/Footer";
 import SmoothScrollProvider from "@/components/layout/SmoothScrollProvider";
+import LoadingScreen from "@/components/ui/LoadingScreen";
 import {
   getCachedProjects,
   getCachedExperiences,
@@ -54,14 +55,11 @@ async function PortfolioDynamicContent() {
 export default function Home() {
   return (
     <main className="min-h-screen bg-white">
+      {/* Cinematic preloader & loading screen for first-time / page visitors */}
+      <LoadingScreen />
+
       <SmoothScrollProvider>
-        <Suspense
-          fallback={
-            <div className="min-h-screen bg-white flex items-center justify-center text-sm text-neutral-400">
-              Memuat portofolio...
-            </div>
-          }
-        >
+        <Suspense fallback={null}>
           <PortfolioDynamicContent />
         </Suspense>
       </SmoothScrollProvider>
