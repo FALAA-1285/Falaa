@@ -31,7 +31,7 @@ export default function Projects({ initialProjects = [] }: ProjectsProps) {
               >
                 <div className="block">
                   {/* Media Container with aspect-[4/3] */}
-                  <div className="relative aspect-[4/3] overflow-hidden bg-gray-100 rounded-md">
+                  <div className="relative aspect-[4/3] overflow-hidden bg-gray-100">
                     <Image
                       src={safeImage}
                       alt={project.title}
