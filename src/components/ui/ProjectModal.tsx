@@ -75,7 +75,7 @@ export default function ProjectModal({ project, onClose }: ProjectModalProps) {
 
         {/* Content */}
         <div className="p-6 space-y-6">
-          <div className="relative aspect-[16/10] w-full rounded-xl overflow-hidden bg-neutral-50 border border-neutral-200">
+          <div className="relative aspect-[16/10] w-full overflow-hidden bg-neutral-50 border border-neutral-200">
             <Image
               src={safeImage}
               alt={project.title}
