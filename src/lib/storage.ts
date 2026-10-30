@@ -15,10 +15,24 @@ export interface StorageUploadResult {
   storageProvider: "supabase" | "local";
 }
 
+/** Human-readable reason for a failed Supabase Storage upload, by HTTP status. */
+function describeStorageFailure(status: number, bucketName: string): string {
+  if (status === 404) {
+    return `Bucket penyimpanan "${bucketName}" tidak ditemukan di Supabase Storage.`;
+  }
+  if (status === 400 || status === 401 || status === 403) {
+    return "Supabase Storage menolak kunci akses. Periksa SUPABASE_SERVICE_ROLE_KEY di server.";
+  }
+  if (status === 413) {
+    return "Ukuran berkas melebihi batas bucket Supabase Storage.";
+  }
+  return `Supabase Storage gagal menyimpan berkas (status ${status}).`;
+}
+
 /**
- * Upload a binary asset to persistent object storage (Supabase Storage),
- * with graceful fallback to local public directory for local development.
- * Designed for serverless environments (Vercel, AWS Lambda) without read-only filesystem crashes.
+ * Upload a binary asset to persistent object storage (Supabase Storage).
+ * The local public/ directory is used only outside serverless hosts (local development);
+ * on Vercel the filesystem is read-only and anything written there would not persist.
  */
 export async function uploadToStorage(
   options: StorageUploadOptions
@@ -36,7 +50,9 @@ export async function uploadToStorage(
   const bucketName =
     process.env.SUPABASE_STORAGE_BUCKET || "portfolio-assets";
 
-  // 1. Cloud Persistent Storage: Supabase Storage via REST API (Zero external SDK required)
+  // 1. Cloud Persistent Storage: Supabase Storage via REST API (Zero external SDK required).
+  // When configured, failures are reported instead of silently writing a local file that the
+  // deployed site would never be able to serve.
   if (supabaseUrl && serviceKey) {
     try {
       const cleanBaseUrl = supabaseUrl
@@ -57,24 +73,43 @@ export async function uploadToStorage(
 
       if (!res.ok) {
         const errorText = await res.text();
-        console.warn(
-          `[STORAGE ADVISORY] Supabase Storage upload returned status ${res.status}: ${errorText}. Falling back to local storage if available.`
-        );
-      } else {
-        const publicUrl = `${cleanBaseUrl}/storage/v1/object/public/${bucketName}/${objectPath}`;
+        console.error(`[STORAGE ERROR] Supabase Storage upload returned status ${res.status}: ${errorText}`);
         return {
-          success: true,
-          url: publicUrl,
+          success: false,
+          error: describeStorageFailure(res.status, bucketName),
           storageProvider: "supabase",
         };
       }
+
+      return {
+        success: true,
+        url: `${cleanBaseUrl}/storage/v1/object/public/${bucketName}/${objectPath}`,
+        storageProvider: "supabase",
+      };
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : String(err);
-      console.warn(`[STORAGE ERROR] Cloud upload error: ${msg}. Falling back to local.`);
+      console.error("[STORAGE ERROR] Cloud upload error:", err instanceof Error ? err.message : err);
+      return {
+        success: false,
+        error: "Supabase Storage tidak bisa dihubungi. Coba lagi sebentar lagi.",
+        storageProvider: "supabase",
+      };
     }
   }
 
-  // 2. Local File System Fallback (For local development in Laragon / Node.js)
+  // 2. Serverless hosts have a read-only filesystem: local fallback cannot work there.
+  if (process.env.VERCEL) {
+    console.error(
+      "[STORAGE ERROR] Upload attempted on Vercel without SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY configured."
+    );
+    return {
+      success: false,
+      error:
+        "Upload gambar belum aktif di server ini: penyimpanan cloud (Supabase Storage) belum dikonfigurasi. Sementara, tempel URL gambar.",
+      storageProvider: "local",
+    };
+  }
+
+  // 3. Local File System Fallback (For local development in Laragon / Node.js)
   try {
     const uploadDir = path.join(process.cwd(), "public", folder);
     await fs.mkdir(uploadDir, { recursive: true });

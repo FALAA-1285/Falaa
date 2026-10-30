@@ -45,6 +45,16 @@ const securityHeaders = [
 const nextConfig: NextConfig = {
   cacheComponents: true,
   partialPrefetching: true,
+  images: {
+    // Images uploaded from the admin panel are served from Supabase Storage public buckets.
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "*.supabase.co",
+        pathname: "/storage/v1/object/public/**",
+      },
+    ],
+  },
   turbopack: {
     rules: {
       "*.css": {
