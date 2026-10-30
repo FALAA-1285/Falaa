@@ -23,7 +23,7 @@ const MIME_EXTENSION_MAP: Record<string, string[]> = {
 };
 
 const ALLOWED_MIME_TYPES = Object.keys(MIME_EXTENSION_MAP);
-const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+const MAX_FILE_SIZE = 4 * 1024 * 1024; // 4MB (Vercel request body limit is 4.5MB)
 
 export async function uploadImageAction(
   formData: FormData
@@ -50,7 +50,7 @@ export async function uploadImageAction(
   if (file.size > MAX_FILE_SIZE) {
     return {
       success: false,
-      error: "Ukuran file terlalu besar. Maksimum diperbolehkan adalah 5MB.",
+      error: "Ukuran file terlalu besar. Maksimum diperbolehkan adalah 4MB.",
     };
   }
 

@@ -5,6 +5,8 @@ import Image from "next/image";
 import { uploadImageAction } from "@/actions/admin/upload";
 import { isSafeImageUrl, sanitizeImageUrl } from "@/lib/security";
 
+const MAX_FILE_SIZE = 4 * 1024 * 1024;
+
 interface ImageUploaderProps {
   value: string;
   onChange: (url: string) => void;
@@ -19,6 +21,11 @@ export default function ImageUploader({ value, onChange, error }: ImageUploaderP
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    if (file.size > MAX_FILE_SIZE) {
+      setUploadError("Ukuran file terlalu besar. Maksimum diperbolehkan adalah 4MB.");
+      if (fileInputRef.current) fileInputRef.current.value = "";
+      return;
+    }
 
     setIsUploading(true);
     setUploadError(null);
@@ -83,7 +90,7 @@ export default function ImageUploader({ value, onChange, error }: ImageUploaderP
               Hapus
             </button>
           )}
-          <span className="adm-faint">PNG, JPEG, WEBP, atau GIF. Maksimal 5 MB.</span>
+          <span className="adm-faint">PNG, JPEG, WEBP, atau GIF. Maksimal 4 MB.</span>
         </div>
 
         <div className="adm-field">

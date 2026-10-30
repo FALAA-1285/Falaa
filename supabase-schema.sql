@@ -164,7 +164,7 @@ ON CONFLICT (id) DO UPDATE SET
   cta_sub = EXCLUDED.cta_sub,
   cta_button_text = EXCLUDED.cta_button_text;
 
--- Seed Projects (6 items)
+-- Seed Projects (8 items)
 INSERT INTO public.projects (id, title, category, tagline, description, image, tags, github_url, live_url, features, metrics, order_index)
 VALUES (
   'academic-portal',
@@ -347,6 +347,34 @@ VALUES (
   '["End-to-end interactive mobile flow: livestock catalog, joint-share pooling, and checkout","Comprehensive animal health specs, weight metrics, and certified breeder origin verification","Transparent distribution tracking with automated photo/video slaughter documentation","High-fidelity design system with responsive layouts, accessible typography, and smooth micro-interactions"]'::jsonb,
   'Interactive prototype with 20+ responsive screens and seamless user flows',
   6
+)
+ON CONFLICT (id) DO UPDATE SET
+  title = EXCLUDED.title,
+  category = EXCLUDED.category,
+  tagline = EXCLUDED.tagline,
+  description = EXCLUDED.description,
+  image = EXCLUDED.image,
+  tags = EXCLUDED.tags,
+  github_url = EXCLUDED.github_url,
+  live_url = EXCLUDED.live_url,
+  features = EXCLUDED.features,
+  metrics = EXCLUDED.metrics,
+  order_index = EXCLUDED.order_index;
+
+INSERT INTO public.projects (id, title, category, tagline, description, image, tags, github_url, live_url, features, metrics, order_index)
+VALUES (
+  'inlet-lab',
+  'InLET - Information & Learning Engineering Technology Lab Website',
+  'Web & Fullstack',
+  'Research Lab Portal with Integrated Lab Services',
+  'A web portal for the Information and Learning Engineering Technology (InLET) research lab at Politeknik Negeri Malang, built as a PBL project. It showcases the lab''s research pillars, products, partners, team members, news, and gallery, and integrates day-to-day lab services such as tool loans, attendance, and a digital guestbook, all managed through an admin panel.',
+  '/projects/inlet-lab.svg',
+  '["PHP","JavaScript","Web Development","Admin Panel","Vercel"]'::jsonb,
+  '',
+  'https://pblinlet.vercel.app/',
+  '["Research showcase covering 4 pillars: Information Engineering, Learning Engineering, Information Technology, and Learning Technology","Product catalog for lab research outputs such as VIAT Map, PseudoLearn, and Codeasy","Integrated lab services: tool loan, attendance, and digital guestbook","Admin panel for managing members, news, products, partners, and gallery content"]'::jsonb,
+  '4 research pillars, 5 showcased products, and 3 integrated lab services',
+  5
 )
 ON CONFLICT (id) DO UPDATE SET
   title = EXCLUDED.title,

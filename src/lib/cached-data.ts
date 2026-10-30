@@ -13,7 +13,7 @@ export const PORTFOLIO_CACHE_TAG = "portfolio-data";
  */
 export const getCachedProjects = unstable_cache(
   async () => getProjects(),
-  ["portfolio-projects-cache"],
+  ["portfolio-projects-cache-v2"],
   { tags: [PORTFOLIO_CACHE_TAG, "projects"], revalidate: 3600 }
 );
 

@@ -171,6 +171,26 @@ export const DEFAULT_PROJECTS: Project[] = [
     metrics: "Interactive prototype with 20+ responsive screens and seamless user flows",
     order_index: 6,
   },
+  {
+    id: "inlet-lab",
+    title: "InLET - Information & Learning Engineering Technology Lab Website",
+    category: "Web & Fullstack",
+    tagline: "Research Lab Portal with Integrated Lab Services",
+    description:
+      "A web portal for the Information and Learning Engineering Technology (InLET) research lab at Politeknik Negeri Malang, built as a PBL project. It showcases the lab's research pillars, products, partners, team members, news, and gallery, and integrates day-to-day lab services such as tool loans, attendance, and a digital guestbook, all managed through an admin panel.",
+    image: "/projects/inlet-lab.svg",
+    tags: ["PHP", "JavaScript", "Web Development", "Admin Panel", "Vercel"],
+    githubUrl: "",
+    liveUrl: "https://pblinlet.vercel.app/",
+    features: [
+      "Research showcase covering 4 pillars: Information Engineering, Learning Engineering, Information Technology, and Learning Technology",
+      "Product catalog for lab research outputs such as VIAT Map, PseudoLearn, and Codeasy",
+      "Integrated lab services: tool loan, attendance, and digital guestbook",
+      "Admin panel for managing members, news, products, partners, and gallery content",
+    ],
+    metrics: "4 research pillars, 5 showcased products, and 3 integrated lab services",
+    order_index: 5,
+  },
 ];
 
 export const DEFAULT_EXPERIENCES: ExperienceItem[] = [

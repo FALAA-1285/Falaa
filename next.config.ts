@@ -45,6 +45,13 @@ const securityHeaders = [
 const nextConfig: NextConfig = {
   cacheComponents: true,
   partialPrefetching: true,
+  experimental: {
+    serverActions: {
+      // Admin image uploads go through a Server Action (default limit 1MB). Vercel caps
+      // function request bodies at 4.5MB, so 4MB files plus multipart overhead must fit.
+      bodySizeLimit: "4.5mb",
+    },
+  },
   images: {
     // Images uploaded from the admin panel are served from Supabase Storage public buckets.
     remotePatterns: [
