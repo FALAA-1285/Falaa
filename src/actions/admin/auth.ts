@@ -3,11 +3,7 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { loginSchema, type LoginFormData } from "@/lib/schemas/auth";
-import {
-  signAdminToken,
-  ADMIN_COOKIE_NAME,
-  getAdminSession,
-} from "@/lib/auth";
+import { signAdminToken, ADMIN_COOKIE_NAME } from "@/lib/auth";
 import { validateAdminCredentials } from "@/lib/auth-credentials";
 import { rateLimiter, getClientIp } from "@/lib/rate-limit";
 
@@ -99,11 +95,4 @@ export async function logoutAction(): Promise<void> {
   const cookieStore = await cookies();
   cookieStore.delete(ADMIN_COOKIE_NAME);
   redirect("/admin/login");
-}
-
-/**
- * Server Action to verify active session
- */
-export async function getCurrentAdmin() {
-  return await getAdminSession();
 }

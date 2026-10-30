@@ -7,10 +7,14 @@ export const testCookieStore = {
   clear: () => store.clear(),
 };
 
+// Tests may add or override request headers (e.g. to simulate spoofed proxy headers).
+export const testHeaderOverrides = new Map();
+
 export async function headers() {
   return new Headers({
     "x-forwarded-for": "127.0.0.1",
     "user-agent": "NodeTestRunner/1.0",
+    ...Object.fromEntries(testHeaderOverrides),
   });
 }
 

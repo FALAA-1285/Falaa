@@ -2,20 +2,8 @@
 
 import { revalidatePath } from "next/cache";
 import { getAdminSession } from "@/lib/auth";
-import { getMessages, toggleMessageRead, deleteMessage } from "@/lib/db";
+import { toggleMessageRead, deleteMessage } from "@/lib/db";
 import { sanitizeActionError } from "@/lib/security";
-import type { ContactMessage } from "@/types/portfolio";
-
-export async function getMessagesAction(
-  limit: number = 100,
-  offset: number = 0
-): Promise<ContactMessage[]> {
-  const session = await getAdminSession();
-  if (!session || session.role !== "ADMIN") {
-    return [];
-  }
-  return await getMessages(limit, offset);
-}
 
 export async function toggleMessageReadAction(
   id: number,
@@ -27,10 +15,13 @@ export async function toggleMessageReadAction(
   }
 
   try {
-    const success = await toggleMessageRead(id, isRead);
+    const updated = await toggleMessageRead(id, isRead === true);
+    if (!updated) {
+      return { success: false, error: "Pesan tidak ditemukan." };
+    }
     revalidatePath("/admin");
     revalidatePath("/admin/messages");
-    return { success };
+    return { success: true };
   } catch (error: unknown) {
     return { success: false, error: sanitizeActionError(error, "Gagal mengubah status pesan.") };
   }
@@ -46,9 +37,12 @@ export async function deleteMessageAction(
 
   try {
     const deleted = await deleteMessage(id);
+    if (!deleted) {
+      return { success: false, error: "Pesan tidak ditemukan." };
+    }
     revalidatePath("/admin");
     revalidatePath("/admin/messages");
-    return { success: deleted };
+    return { success: true };
   } catch (error: unknown) {
     return { success: false, error: sanitizeActionError(error, "Gagal menghapus pesan.") };
   }

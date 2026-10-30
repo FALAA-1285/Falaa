@@ -357,7 +357,7 @@ describe("PHASE 7 - AUTOMATED TESTING: Auth, RBAC, CRUD & Critical Business Logi
   /* 5. PUBLIC CONTACT FORM SECURITY & RATE LIMITING                            */
   /* -------------------------------------------------------------------------- */
   describe("Public Contact Form Submission & Rate Limiting", () => {
-    it("submits valid contact message successfully", async () => {
+    it("submits valid contact message successfully", { skip: !process.env.TEST_DATABASE_URL && "TEST_DATABASE_URL not set" }, async () => {
       rateLimiter.reset("contact-form:127.0.0.1");
 
       const validMessage = {

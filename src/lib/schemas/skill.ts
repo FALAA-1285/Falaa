@@ -10,7 +10,7 @@ function isSafeIconName(icon: string): boolean {
   return hasAllowedImageExt || isPlainIdentifier;
 }
 
-export const skillSchema = z.object({
+const skillFields = {
   name: z
     .string()
     .trim()
@@ -28,15 +28,22 @@ export const skillSchema = z.object({
     .max(100, "Nama file icon maksimal 100 karakter.")
     .refine(isSafeIconName, {
       message: "Nama berkas icon tidak valid atau mengandung karakter tidak aman.",
-    })
-    .default("nextjs.svg"),
+    }),
   order_index: z
     .number()
     .int("Order index harus berupa bilangan bulat.")
-    .default(0),
+    .min(0, "Order index tidak boleh negatif."),
+};
+
+export const skillSchema = z.object({
+  ...skillFields,
+  icon: skillFields.icon.default("nextjs.svg"),
+  order_index: skillFields.order_index.default(0),
 });
 
-export const updateSkillSchema = skillSchema.partial();
+// Built from the raw fields, not skillSchema.partial(): Zod 4 still applies .default()
+// inside optional fields, which would overwrite stored values (e.g. reset order_index to 0).
+export const updateSkillSchema = z.object(skillFields).partial();
 
 export type SkillInput = z.infer<typeof skillSchema>;
 export type UpdateSkillInput = z.infer<typeof updateSkillSchema>;

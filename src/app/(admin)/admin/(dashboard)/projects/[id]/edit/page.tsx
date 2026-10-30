@@ -3,12 +3,14 @@ import Link from "next/link";
 import { ArrowLeft, AlertCircle } from "lucide-react";
 import { getProjectById } from "@/lib/db";
 import ProjectForm from "@/components/admin/ProjectForm";
+import { requireAdminSession } from "@/lib/auth";
 
 interface EditProjectPageProps {
   params: Promise<{ id: string }>;
 }
 
 async function EditProjectContent({ params }: EditProjectPageProps) {
+  await requireAdminSession();
   const { id } = await params;
   const project = await getProjectById(id);
 

@@ -50,16 +50,7 @@ describe("PHASE 4 - FUNCTIONAL IMPROVEMENTS: Reordering Mechanism & Order Confli
   });
 
   describe("Reordering Database Logic (End-to-End if DATABASE_URL available)", () => {
-    it("performs atomic transactional updates of order_index in PostgreSQL", async () => {
-      const fs = await import("fs");
-      const path = await import("path");
-      const envPath = path.resolve(process.cwd(), ".env.local");
-      if (!fs.existsSync(envPath)) return;
-
-      const envContent = fs.readFileSync(envPath, "utf8");
-      const match = envContent.match(/DATABASE_URL=["']?([^"'\r\n]+)["']?/);
-      if (!match) return;
-
+    it("performs atomic transactional updates of order_index in PostgreSQL", { skip: !process.env.TEST_DATABASE_URL && "TEST_DATABASE_URL not set" }, async () => {
       const { reorderProjects, getProjects } = await import("@/lib/db/projects");
 
       const currentProjects = await getProjects();

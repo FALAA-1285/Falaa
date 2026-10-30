@@ -64,9 +64,10 @@ async function main() {
     console.log(`  - projects     : ${projectsCount} row(s)`);
     console.log(`  - skills       : ${skillsCount} row(s)`);
 
-    // If schema is already populated, do not overwrite or duplicate
-    if (profileCount > 0 && projectsCount > 0 && skillsCount > 0) {
-      console.log("\n✅ Database already contains initial data. No seeding needed.");
+    // The seed uses ON CONFLICT ... DO UPDATE, so re-running it would overwrite content edited
+    // through the CMS. Only seed a database that has never been initialized (no profile row).
+    if (profileCount > 0) {
+      console.log("\n✅ Database already initialized. Seeding skipped to preserve existing content.");
       console.log("✨ Database initialization complete!");
       return;
     }
@@ -82,7 +83,17 @@ async function main() {
       const markerIndex = fullSql.indexOf(seedMarker);
       if (markerIndex !== -1) {
         const seedSql = fullSql.slice(markerIndex);
-        await pool.query(seedSql);
+        const client = await pool.connect();
+        try {
+          await client.query("BEGIN");
+          await client.query(seedSql);
+          await client.query("COMMIT");
+        } catch (seedErr) {
+          await client.query("ROLLBACK");
+          throw seedErr;
+        } finally {
+          client.release();
+        }
         console.log("✅ Initial seed data applied successfully!");
       }
     }

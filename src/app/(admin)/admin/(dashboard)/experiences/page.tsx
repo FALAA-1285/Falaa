@@ -1,8 +1,10 @@
 import React, { Suspense } from "react";
 import { getExperiences } from "@/lib/db";
 import ExperienceTable from "@/components/admin/ExperienceTable";
+import { requireAdminSession } from "@/lib/auth";
 
 async function ExperiencesContent() {
+  await requireAdminSession();
   const experiences = await getExperiences();
   return <ExperienceTable initialExperiences={experiences} />;
 }

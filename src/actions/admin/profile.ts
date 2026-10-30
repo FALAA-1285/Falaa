@@ -3,14 +3,10 @@
 import { revalidatePath } from "next/cache";
 import { getAdminSession } from "@/lib/auth";
 import { invalidatePortfolioCache } from "@/lib/cached-data";
-import { getProfileInfo, updateProfileInfo } from "@/lib/db";
+import { updateProfileInfo } from "@/lib/db";
 import { profileSchema } from "@/lib/schemas/profile";
 import { sanitizeUrl, sanitizeActionError } from "@/lib/security";
 import type { PersonalInfo } from "@/types/portfolio";
-
-export async function getProfileInfoAction(): Promise<PersonalInfo> {
-  return await getProfileInfo();
-}
 
 export async function updateProfileInfoAction(
   data: PersonalInfo

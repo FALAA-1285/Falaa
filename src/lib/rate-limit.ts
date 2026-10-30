@@ -114,10 +114,13 @@ export async function getClientIp(): Promise<string> {
   try {
     const headerList = await headers();
 
-    // 1. Cloudflare connecting IP (tamper-proof when behind Cloudflare)
-    const cfIp = headerList.get("cf-connecting-ip");
-    if (cfIp && isValidIp(cfIp.trim())) {
-      return cfIp.trim();
+    // 1. Cloudflare connecting IP: only tamper-proof when traffic actually passes through
+    // Cloudflare; otherwise any client can set it, so it must be explicitly opted into.
+    if (process.env.TRUST_CLOUDFLARE_IP === "true") {
+      const cfIp = headerList.get("cf-connecting-ip");
+      if (cfIp && isValidIp(cfIp.trim())) {
+        return cfIp.trim();
+      }
     }
 
     // 2. Vercel / Nginx real client IP

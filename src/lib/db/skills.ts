@@ -63,12 +63,14 @@ export async function getSkillsGrouped(): Promise<SkillCategoryGroup[]> {
   return groups;
 }
 
+// $1 is used twice; the explicit ::text cast is required, otherwise Postgres fails with
+// "inconsistent types deduced for parameter $1".
 export async function createSkill(
   skill: { name: string; category: string; icon: string }
 ): Promise<SkillItem> {
   const { rows } = await pool.query(
     `INSERT INTO skills (category, name, icon, order_index)
-     VALUES ($1, $2, $3, (SELECT COALESCE(MAX(order_index), 0) + 1 FROM skills WHERE category = $1))
+     VALUES ($1::text, $2, $3, (SELECT COALESCE(MAX(order_index), 0) + 1 FROM skills WHERE category = $1::text))
      RETURNING id, category, name, icon, order_index`,
     [skill.category, skill.name, skill.icon]
   );
@@ -82,38 +84,23 @@ export async function createSkill(
   };
 }
 
+/**
+ * Update a skill. Fields left `undefined` keep their stored value
+ * (single atomic statement, no read-before-write).
+ */
 export async function updateSkill(
   id: number,
   skill: { name?: string; category?: string; icon?: string; order_index?: number }
 ): Promise<SkillItem> {
-  const isCompletePayload =
-    skill.name !== undefined &&
-    skill.category !== undefined &&
-    skill.icon !== undefined;
-
-  let name = skill.name;
-  let category = skill.category;
-  let icon = skill.icon;
-  let orderIndex = skill.order_index;
-
-  if (!isCompletePayload) {
-    const { rows: currentRows } = await pool.query("SELECT * FROM skills WHERE id = $1", [id]);
-    if (currentRows.length === 0) {
-      throw new Error(`Skill dengan ID '${id}' tidak ditemukan.`);
-    }
-    const curr = currentRows[0];
-    if (name === undefined) name = curr.name;
-    if (category === undefined) category = curr.category;
-    if (icon === undefined) icon = curr.icon;
-    if (orderIndex === undefined) orderIndex = curr.order_index;
-  }
-
   const { rows } = await pool.query(
     `UPDATE skills
-     SET name = $1, category = $2, icon = $3, order_index = COALESCE($4, order_index)
+     SET name = COALESCE($1, name),
+         category = COALESCE($2, category),
+         icon = COALESCE($3, icon),
+         order_index = COALESCE($4, order_index)
      WHERE id = $5
      RETURNING id, category, name, icon, order_index`,
-    [name, category, icon, orderIndex ?? 0, id]
+    [skill.name ?? null, skill.category ?? null, skill.icon ?? null, skill.order_index ?? null, id]
   );
 
   if (rows.length === 0) {

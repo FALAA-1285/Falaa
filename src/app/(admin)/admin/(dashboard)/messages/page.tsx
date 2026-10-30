@@ -1,8 +1,10 @@
 import React, { Suspense } from "react";
 import { getMessages } from "@/lib/db";
 import MessageInbox from "@/components/admin/MessageInbox";
+import { requireAdminSession } from "@/lib/auth";
 
 async function MessagesContent() {
+  await requireAdminSession();
   const messages = await getMessages();
   return <MessageInbox initialMessages={messages} />;
 }

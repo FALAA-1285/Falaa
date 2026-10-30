@@ -16,8 +16,10 @@ import {
 import { getProjects, getExperiences, getSkills, getMessages } from "@/lib/db";
 import { pool } from "@/lib/db/pool";
 import { isSafeUrl, sanitizeImageUrl } from "@/lib/security";
+import { requireAdminSession } from "@/lib/auth";
 
 async function DashboardContent() {
+  await requireAdminSession();
   let isDbConnected = true;
   try {
     await pool.query("SELECT 1");

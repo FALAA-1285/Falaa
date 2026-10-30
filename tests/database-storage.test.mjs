@@ -43,18 +43,10 @@ describe("PHASE 2 - DATABASE & STORAGE: Architecture & Migration Verification", 
   });
 
   describe("Live PostgreSQL Indexes & RLS Verification", () => {
-    it("verifies live secondary indexes and RLS in PostgreSQL if DATABASE_URL is available", async () => {
-      const envPath = path.resolve(process.cwd(), ".env.local");
-      if (!fs.existsSync(envPath)) return;
-
-      const envContent = fs.readFileSync(envPath, "utf8");
-      const match = envContent.match(/DATABASE_URL=["']?([^"'\r\n]+)["']?/);
-      if (!match) return;
-
+    it("verifies live secondary indexes and RLS in PostgreSQL", { skip: !process.env.TEST_DATABASE_URL && "TEST_DATABASE_URL not set" }, async () => {
       const { Pool } = await import("pg");
       const pool = new Pool({
-        connectionString: match[1],
-        ssl: { rejectUnauthorized: false },
+        connectionString: process.env.TEST_DATABASE_URL,
         connectionTimeoutMillis: 10000,
       });
 

@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const experienceSchema = z.object({
+const experienceFields = {
   period: z
     .string()
     .trim()
@@ -19,13 +19,11 @@ export const experienceSchema = z.object({
   location: z
     .string()
     .trim()
-    .max(100, "Lokasi maksimal 100 karakter.")
-    .default("Malang, Indonesia"),
+    .max(100, "Lokasi maksimal 100 karakter."),
   type: z
     .string()
     .trim()
-    .max(50, "Tipe pengalaman maksimal 50 karakter.")
-    .default("Work"),
+    .max(50, "Tipe pengalaman maksimal 50 karakter."),
   description: z
     .string()
     .trim()
@@ -33,14 +31,24 @@ export const experienceSchema = z.object({
     .max(2000, "Deskripsi maksimal 2000 karakter."),
   highlights: z
     .array(z.string().trim().min(1, "Highlight tidak boleh berupa string kosong."))
-    .default([]),
+    .max(20, "Maksimal 20 highlight."),
   order_index: z
     .number()
     .int("Order index harus berupa bilangan bulat.")
-    .default(0),
+    .min(0, "Order index tidak boleh negatif."),
+};
+
+export const experienceSchema = z.object({
+  ...experienceFields,
+  location: experienceFields.location.default("Malang, Indonesia"),
+  type: experienceFields.type.default("Work"),
+  highlights: experienceFields.highlights.default([]),
+  order_index: experienceFields.order_index.default(0),
 });
 
-export const updateExperienceSchema = experienceSchema.partial();
+// Built from the raw fields, not experienceSchema.partial(): Zod 4 still applies .default()
+// inside optional fields, which would overwrite stored values (e.g. reset order_index to 0).
+export const updateExperienceSchema = z.object(experienceFields).partial();
 
 export type ExperienceInput = z.infer<typeof experienceSchema>;
 export type UpdateExperienceInput = z.infer<typeof updateExperienceSchema>;

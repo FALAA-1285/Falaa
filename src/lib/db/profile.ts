@@ -1,4 +1,5 @@
 import { pool } from "./pool";
+import { parseJsonArray } from "./json";
 import type { PersonalInfo } from "@/types/portfolio";
 import { DEFAULT_PERSONAL_INFO } from "@/lib/constants";
 
@@ -96,6 +97,6 @@ export async function updateProfileInfo(info: PersonalInfo): Promise<PersonalInf
   const r = rows[0];
   return {
     ...r,
-    aboutTags: Array.isArray(r.aboutTags) ? r.aboutTags : JSON.parse(r.aboutTags || "[]"),
+    aboutTags: parseJsonArray(r.aboutTags),
   } as PersonalInfo;
 }

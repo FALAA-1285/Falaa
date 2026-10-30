@@ -5,22 +5,12 @@ import { getAdminSession } from "@/lib/auth";
 import { invalidatePortfolioCache } from "@/lib/cached-data";
 import { sanitizeActionError } from "@/lib/security";
 import {
-  getExperiences,
-  getExperienceById,
   createExperience,
   updateExperience,
   deleteExperience,
 } from "@/lib/db";
 import type { ExperienceItem } from "@/types/portfolio";
 import { experienceSchema, updateExperienceSchema, type ExperienceInput, type UpdateExperienceInput } from "@/lib/schemas/experience";
-
-export async function getExperiencesAction(): Promise<ExperienceItem[]> {
-  return await getExperiences();
-}
-
-export async function getExperienceByIdAction(id: number): Promise<ExperienceItem | null> {
-  return await getExperienceById(id);
-}
 
 export async function createExperienceAction(
   data: ExperienceInput | Omit<ExperienceItem, "id">

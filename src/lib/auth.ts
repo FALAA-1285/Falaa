@@ -1,5 +1,7 @@
+import { cache } from "react";
 import { SignJWT, jwtVerify } from "jose";
 import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 
 export function resolveJwtSecret(): Uint8Array {
   const secret = process.env.ADMIN_JWT_SECRET;
@@ -66,3 +68,16 @@ export async function getAdminSession(): Promise<AdminPayload | null> {
   if (!token) return null;
   return await verifyAdminToken(token);
 }
+
+/**
+ * Data Access Layer guard for admin Server Components. proxy.ts only performs an optimistic
+ * redirect; this re-verifies the session next to the data and redirects to login otherwise.
+ * Memoized per render pass with React cache().
+ */
+export const requireAdminSession = cache(async (): Promise<AdminPayload> => {
+  const session = await getAdminSession();
+  if (!session) {
+    redirect("/admin/login");
+  }
+  return session;
+});

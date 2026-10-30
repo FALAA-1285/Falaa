@@ -5,22 +5,12 @@ import { getAdminSession } from "@/lib/auth";
 import { invalidatePortfolioCache } from "@/lib/cached-data";
 import { sanitizeActionError } from "@/lib/security";
 import {
-  getSkills,
-  getSkillsGrouped,
   createSkill,
   updateSkill,
   deleteSkill,
 } from "@/lib/db";
-import type { SkillItem, SkillCategoryGroup } from "@/types/skills";
+import type { SkillItem } from "@/types/skills";
 import { skillSchema, updateSkillSchema, type SkillInput, type UpdateSkillInput } from "@/lib/schemas/skill";
-
-export async function getSkillsAction(): Promise<SkillItem[]> {
-  return await getSkills();
-}
-
-export async function getSkillsGroupedAction(): Promise<SkillCategoryGroup[]> {
-  return await getSkillsGrouped();
-}
 
 export async function createSkillAction(
   data: SkillInput | { name: string; category: string; icon: string }

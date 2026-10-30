@@ -9,8 +9,6 @@ import {
   createProject,
   updateProject,
   deleteProject,
-  getProjects,
-  getProjectById,
 } from "@/lib/db";
 import type { Project } from "@/types/portfolio";
 
@@ -18,6 +16,20 @@ export interface ProjectActionResult {
   success: boolean;
   project?: Project;
   error?: string;
+}
+
+/**
+ * Sanitize validated form data into a full project record. Empty optional fields become ""
+ * (not undefined) so an update clears them instead of keeping the previous value.
+ */
+function toSafeProject(data: ProjectFormData): Project {
+  return {
+    ...data,
+    image: sanitizeImageUrl(data.image),
+    githubUrl: sanitizeUrl(data.githubUrl ?? ""),
+    liveUrl: sanitizeUrl(data.liveUrl ?? ""),
+    metrics: data.metrics ?? "",
+  };
 }
 
 /**
@@ -37,12 +49,7 @@ export async function createProjectAction(
     return { success: false, error: errorMsg };
   }
 
-  const safeData: Project = {
-    ...parsed.data,
-    image: sanitizeImageUrl(parsed.data.image),
-    githubUrl: parsed.data.githubUrl ? sanitizeUrl(parsed.data.githubUrl) : undefined,
-    liveUrl: parsed.data.liveUrl ? sanitizeUrl(parsed.data.liveUrl) : undefined,
-  };
+  const safeData = toSafeProject(parsed.data);
 
   try {
     const newProject = await createProject(safeData);
@@ -77,20 +84,15 @@ export async function updateProjectAction(
     return { success: false, error: errorMsg };
   }
 
-  const safeData: Project = {
-    ...parsed.data,
-    image: sanitizeImageUrl(parsed.data.image),
-    githubUrl: parsed.data.githubUrl ? sanitizeUrl(parsed.data.githubUrl) : undefined,
-    liveUrl: parsed.data.liveUrl ? sanitizeUrl(parsed.data.liveUrl) : undefined,
-  };
+  const safeData = toSafeProject(parsed.data);
 
   try {
     const updated = await updateProject(id, safeData);
     revalidatePath("/");
     revalidatePath("/admin");
     revalidatePath("/admin/projects");
-    invalidatePortfolioCache();
     revalidatePath(`/admin/projects/${id}/edit`);
+    invalidatePortfolioCache();
     return { success: true, project: updated };
   } catch (error: unknown) {
     return {
@@ -127,18 +129,4 @@ export async function deleteProjectAction(
       error: sanitizeActionError(error, "Gagal menghapus project."),
     };
   }
-}
-
-/**
- * Server Action: Read all projects (Server Action helper)
- */
-export async function getProjectsAction(): Promise<Project[]> {
-  return await getProjects();
-}
-
-/**
- * Server Action: Read project by ID
- */
-export async function getProjectByIdAction(id: string): Promise<Project | null> {
-  return await getProjectById(id);
 }

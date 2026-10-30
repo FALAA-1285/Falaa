@@ -1,35 +1,42 @@
 import { pool } from "./pool";
+import { parseJsonArray } from "./json";
 import type { Project } from "@/types/portfolio";
 import { DEFAULT_PROJECTS } from "@/lib/constants";
+
+const PROJECT_COLUMNS = `id, title, category, tagline, description, image, tags,
+       github_url as "githubUrl", live_url as "liveUrl", features, metrics, order_index,
+       created_at, updated_at`;
+
+function mapProjectRow(r: Record<string, unknown>): Project {
+  return {
+    id: r.id as string,
+    title: r.title as string,
+    category: r.category as string,
+    tagline: r.tagline as string,
+    description: r.description as string,
+    image: r.image as string,
+    tags: parseJsonArray(r.tags),
+    githubUrl: (r.githubUrl as string) || undefined,
+    liveUrl: (r.liveUrl as string) || undefined,
+    features: parseJsonArray(r.features),
+    metrics: (r.metrics as string) || undefined,
+    order_index: r.order_index as number,
+    created_at: r.created_at as string | undefined,
+    updated_at: r.updated_at as string | undefined,
+  };
+}
 
 export async function getProjects(): Promise<Project[]> {
   try {
     const { rows } = await pool.query(
-      `SELECT id, title, category, tagline, description, image, tags,
-              github_url as "githubUrl", live_url as "liveUrl", features, metrics, order_index,
-              created_at, updated_at
+      `SELECT ${PROJECT_COLUMNS}
        FROM projects
        ORDER BY order_index ASC, created_at DESC`
     );
     if (rows.length === 0) {
       return DEFAULT_PROJECTS;
     }
-    return rows.map((r) => ({
-      id: r.id,
-      title: r.title,
-      category: r.category,
-      tagline: r.tagline,
-      description: r.description,
-      image: r.image,
-      tags: Array.isArray(r.tags) ? r.tags : JSON.parse(r.tags || "[]"),
-      githubUrl: r.githubUrl || undefined,
-      liveUrl: r.liveUrl || undefined,
-      features: Array.isArray(r.features) ? r.features : JSON.parse(r.features || "[]"),
-      metrics: r.metrics || undefined,
-      order_index: r.order_index,
-      created_at: r.created_at,
-      updated_at: r.updated_at,
-    }));
+    return rows.map(mapProjectRow);
   } catch (error) {
     console.error("Error reading projects from PostgreSQL:", error);
     return DEFAULT_PROJECTS;
@@ -39,31 +46,12 @@ export async function getProjects(): Promise<Project[]> {
 export async function getProjectById(id: string): Promise<Project | null> {
   try {
     const { rows } = await pool.query(
-      `SELECT id, title, category, tagline, description, image, tags,
-              github_url as "githubUrl", live_url as "liveUrl", features, metrics, order_index,
-              created_at, updated_at
+      `SELECT ${PROJECT_COLUMNS}
        FROM projects
        WHERE id = $1`,
       [id]
     );
-    if (rows.length === 0) return null;
-    const r = rows[0];
-    return {
-      id: r.id,
-      title: r.title,
-      category: r.category,
-      tagline: r.tagline,
-      description: r.description,
-      image: r.image,
-      tags: Array.isArray(r.tags) ? r.tags : JSON.parse(r.tags || "[]"),
-      githubUrl: r.githubUrl || undefined,
-      liveUrl: r.liveUrl || undefined,
-      features: Array.isArray(r.features) ? r.features : JSON.parse(r.features || "[]"),
-      metrics: r.metrics || undefined,
-      order_index: r.order_index,
-      created_at: r.created_at,
-      updated_at: r.updated_at,
-    };
+    return rows.length === 0 ? null : mapProjectRow(rows[0]);
   } catch (error) {
     console.error(`Error reading project '${id}' from PostgreSQL:`, error);
     return null;
@@ -74,9 +62,7 @@ export async function createProject(p: Project): Promise<Project> {
   const { rows } = await pool.query(
     `INSERT INTO projects (id, title, category, tagline, description, image, tags, github_url, live_url, features, metrics, order_index)
      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, (SELECT COALESCE(MAX(order_index), 0) + 1 FROM projects))
-     RETURNING id, title, category, tagline, description, image, tags,
-               github_url as "githubUrl", live_url as "liveUrl", features, metrics, order_index,
-               created_at, updated_at`,
+     RETURNING ${PROJECT_COLUMNS}`,
     [
       p.id,
       p.title,
@@ -91,87 +77,45 @@ export async function createProject(p: Project): Promise<Project> {
       p.metrics || "",
     ]
   );
-  const r = rows[0];
-  return {
-    id: r.id,
-    title: r.title,
-    category: r.category,
-    tagline: r.tagline,
-    description: r.description,
-    image: r.image,
-    tags: Array.isArray(r.tags) ? r.tags : JSON.parse(r.tags || "[]"),
-    githubUrl: r.githubUrl || undefined,
-    liveUrl: r.liveUrl || undefined,
-    features: Array.isArray(r.features) ? r.features : JSON.parse(r.features || "[]"),
-    metrics: r.metrics || undefined,
-    order_index: r.order_index,
-  };
+  return mapProjectRow(rows[0]);
 }
 
+/**
+ * Update a project. Fields left `undefined` keep their stored value (single atomic statement,
+ * no read-before-write). Pass an empty string to clear githubUrl / liveUrl / metrics.
+ */
 export async function updateProject(
   id: string,
   p: Partial<Project>
 ): Promise<Project> {
-  const isCompletePayload =
-    p.title !== undefined &&
-    p.category !== undefined &&
-    p.tagline !== undefined &&
-    p.description !== undefined &&
-    p.image !== undefined &&
-    p.tags !== undefined;
-
-  let updatedTitle = p.title;
-  let updatedCategory = p.category;
-  let updatedTagline = p.tagline;
-  let updatedDescription = p.description;
-  let updatedImage = p.image;
-  let updatedTags = p.tags !== undefined ? JSON.stringify(p.tags) : undefined;
-  let updatedGithub = p.githubUrl !== undefined ? p.githubUrl : "";
-  let updatedLive = p.liveUrl !== undefined ? p.liveUrl : "";
-  let updatedFeatures = p.features !== undefined ? JSON.stringify(p.features) : undefined;
-  let updatedMetrics = p.metrics !== undefined ? p.metrics : "";
-  let updatedOrderIndex = p.order_index;
-
-  // Only query existing record when partial fields are missing
-  if (!isCompletePayload) {
-    const current = await getProjectById(id);
-    if (!current) {
-      throw new Error(`Project dengan ID '${id}' tidak ditemukan.`);
-    }
-    if (updatedTitle === undefined) updatedTitle = current.title;
-    if (updatedCategory === undefined) updatedCategory = current.category;
-    if (updatedTagline === undefined) updatedTagline = current.tagline;
-    if (updatedDescription === undefined) updatedDescription = current.description;
-    if (updatedImage === undefined) updatedImage = current.image;
-    if (updatedTags === undefined) updatedTags = JSON.stringify(current.tags);
-    if (p.githubUrl === undefined) updatedGithub = current.githubUrl || "";
-    if (p.liveUrl === undefined) updatedLive = current.liveUrl || "";
-    if (updatedFeatures === undefined) updatedFeatures = JSON.stringify(current.features);
-    if (p.metrics === undefined) updatedMetrics = current.metrics || "";
-    if (updatedOrderIndex === undefined) updatedOrderIndex = current.order_index ?? 0;
-  }
-
   const { rows } = await pool.query(
     `UPDATE projects
-     SET title = $1, category = $2, tagline = $3, description = $4,
-         image = $5, tags = $6, github_url = $7, live_url = $8,
-         features = $9, metrics = $10, order_index = COALESCE($11, order_index), updated_at = CURRENT_TIMESTAMP
+     SET title = COALESCE($1, title),
+         category = COALESCE($2, category),
+         tagline = COALESCE($3, tagline),
+         description = COALESCE($4, description),
+         image = COALESCE($5, image),
+         tags = COALESCE($6::jsonb, tags),
+         github_url = COALESCE($7, github_url),
+         live_url = COALESCE($8, live_url),
+         features = COALESCE($9::jsonb, features),
+         metrics = COALESCE($10, metrics),
+         order_index = COALESCE($11, order_index),
+         updated_at = CURRENT_TIMESTAMP
      WHERE id = $12
-     RETURNING id, title, category, tagline, description, image, tags,
-               github_url as "githubUrl", live_url as "liveUrl", features, metrics, order_index,
-               created_at, updated_at`,
+     RETURNING ${PROJECT_COLUMNS}`,
     [
-      updatedTitle,
-      updatedCategory,
-      updatedTagline,
-      updatedDescription,
-      updatedImage,
-      updatedTags,
-      updatedGithub,
-      updatedLive,
-      updatedFeatures,
-      updatedMetrics,
-      updatedOrderIndex ?? 0,
+      p.title ?? null,
+      p.category ?? null,
+      p.tagline ?? null,
+      p.description ?? null,
+      p.image ?? null,
+      p.tags !== undefined ? JSON.stringify(p.tags) : null,
+      p.githubUrl ?? null,
+      p.liveUrl ?? null,
+      p.features !== undefined ? JSON.stringify(p.features) : null,
+      p.metrics ?? null,
+      p.order_index ?? null,
       id,
     ]
   );
@@ -179,22 +123,7 @@ export async function updateProject(
   if (rows.length === 0) {
     throw new Error(`Project dengan ID '${id}' tidak ditemukan.`);
   }
-
-  const r = rows[0];
-  return {
-    id: r.id,
-    title: r.title,
-    category: r.category,
-    tagline: r.tagline,
-    description: r.description,
-    image: r.image,
-    tags: Array.isArray(r.tags) ? r.tags : JSON.parse(r.tags || "[]"),
-    githubUrl: r.githubUrl || undefined,
-    liveUrl: r.liveUrl || undefined,
-    features: Array.isArray(r.features) ? r.features : JSON.parse(r.features || "[]"),
-    metrics: r.metrics || undefined,
-    order_index: r.order_index,
-  };
+  return mapProjectRow(rows[0]);
 }
 
 export async function deleteProject(id: string): Promise<boolean> {
