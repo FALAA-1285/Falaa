@@ -3,6 +3,7 @@
 import path from "path";
 import { getAdminSession } from "@/lib/auth";
 import { uploadToStorage } from "@/lib/storage";
+import { validateImageBufferMagicBytes } from "@/lib/security";
 
 export interface UploadActionResult {
   success: boolean;
@@ -56,6 +57,15 @@ export async function uploadImageAction(
   try {
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
+
+    // 2.5 Verify Magic Bytes (File Signatures) to prevent MIME spoofing
+    const magicVerification = validateImageBufferMagicBytes(buffer, file.type);
+    if (!magicVerification.valid) {
+      return {
+        success: false,
+        error: "Konten berkas tidak valid atau tidak sesuai dengan format gambar yang dipilih.",
+      };
+    }
 
     // 3. Strict extension matching against MIME whitelist
     const allowedExts = MIME_EXTENSION_MAP[file.type];

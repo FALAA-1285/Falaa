@@ -190,3 +190,101 @@ export function createSafeMailtoUrl(
   const queryString = params.toString();
   return `mailto:${cleanEmail}${queryString ? `?${queryString}` : ""}`;
 }
+
+/**
+ * Validate that raw binary bytes of an uploaded image strictly match its claimed MIME type.
+ * Inspects header magic numbers to prevent MIME-spoofing and disguised executable scripts.
+ */
+export function validateImageBufferMagicBytes(
+  buffer: Buffer,
+  claimedMime: string
+): { valid: boolean; detectedFormat?: string } {
+  if (!buffer || buffer.length < 12) {
+    return { valid: false };
+  }
+
+  // PNG: 89 50 4E 47 0D 0A 1A 0A
+  const isPng =
+    buffer[0] === 0x89 &&
+    buffer[1] === 0x50 &&
+    buffer[2] === 0x4e &&
+    buffer[3] === 0x47 &&
+    buffer[4] === 0x0d &&
+    buffer[5] === 0x0a &&
+    buffer[6] === 0x1a &&
+    buffer[7] === 0x0a;
+
+  // JPEG: FF D8 FF
+  const isJpeg = buffer[0] === 0xff && buffer[1] === 0xd8 && buffer[2] === 0xff;
+
+  // GIF: GIF87a or GIF89a (47 49 46 38)
+  const isGif =
+    buffer[0] === 0x47 &&
+    buffer[1] === 0x49 &&
+    buffer[2] === 0x46 &&
+    buffer[3] === 0x38;
+
+  // WEBP: "RIFF" at 0..3 and "WEBP" at 8..11
+  const isWebp =
+    buffer[0] === 0x52 &&
+    buffer[1] === 0x49 &&
+    buffer[2] === 0x46 &&
+    buffer[3] === 0x46 &&
+    buffer[8] === 0x57 &&
+    buffer[9] === 0x45 &&
+    buffer[10] === 0x42 &&
+    buffer[11] === 0x50;
+
+  let detectedFormat: string | undefined;
+  if (isPng) detectedFormat = "image/png";
+  else if (isJpeg) detectedFormat = "image/jpeg";
+  else if (isGif) detectedFormat = "image/gif";
+  else if (isWebp) detectedFormat = "image/webp";
+
+  if (!detectedFormat) {
+    return { valid: false };
+  }
+
+  return { valid: detectedFormat === claimedMime, detectedFormat };
+}
+
+/**
+ * Safely sanitizes database and server action errors to prevent sensitive system leakage.
+ * Logs full diagnostic detail server-side while providing clean, actionable localized messages.
+ */
+export function sanitizeActionError(error: unknown, defaultMessage: string): string {
+  if (error instanceof Error) {
+    const pgError = error as { code?: string };
+    if (pgError.code === "23505") {
+      return "Data dengan ID atau entri tersebut sudah terdaftar dalam sistem.";
+    }
+    if (pgError.code === "23503") {
+      return "Operasi gagal karena data yang direferensikan tidak ditemukan.";
+    }
+    if (pgError.code === "23514") {
+      return "Data melanggar batasan validasi integritas database.";
+    }
+    if (
+      pgError.code === "ECONNREFUSED" ||
+      pgError.code === "ETIMEDOUT" ||
+      pgError.code === "57P01"
+    ) {
+      return "Koneksi ke database sedang terganggu. Silakan coba kembali sesaat lagi.";
+    }
+
+    // Preserve expected safe business errors
+    if (
+      error.message.startsWith("Project dengan ID") ||
+      error.message.startsWith("Pengalaman dengan ID") ||
+      error.message.startsWith("Skill dengan ID") ||
+      error.message.startsWith("Akses ditolak") ||
+      error.message.startsWith("Daftar ID") ||
+      error.message.startsWith("Terdapat duplikasi ID")
+    ) {
+      return error.message;
+    }
+  }
+
+  console.error("[INTERNAL SERVER ACTION ERROR]:", error);
+  return defaultMessage;
+}

@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { projectSchema, type ProjectFormData } from "@/lib/schemas/project";
 import { getAdminSession } from "@/lib/auth";
 import { invalidatePortfolioCache } from "@/lib/cached-data";
-import { sanitizeUrl, sanitizeImageUrl } from "@/lib/security";
+import { sanitizeUrl, sanitizeImageUrl, sanitizeActionError } from "@/lib/security";
 import {
   createProject,
   updateProject,
@@ -52,10 +52,9 @@ export async function createProjectAction(
     invalidatePortfolioCache();
     return { success: true, project: newProject };
   } catch (error: unknown) {
-    const errorMsg = error instanceof Error ? error.message : "Gagal membuat project baru.";
     return {
       success: false,
-      error: errorMsg,
+      error: sanitizeActionError(error, "Gagal membuat project baru."),
     };
   }
 }
@@ -94,10 +93,9 @@ export async function updateProjectAction(
     revalidatePath(`/admin/projects/${id}/edit`);
     return { success: true, project: updated };
   } catch (error: unknown) {
-    const errorMsg = error instanceof Error ? error.message : "Gagal memperbarui project.";
     return {
       success: false,
-      error: errorMsg,
+      error: sanitizeActionError(error, "Gagal memperbarui project."),
     };
   }
 }
@@ -124,10 +122,9 @@ export async function deleteProjectAction(
     invalidatePortfolioCache();
     return { success: true };
   } catch (error: unknown) {
-    const errorMsg = error instanceof Error ? error.message : "Gagal menghapus project.";
     return {
       success: false,
-      error: errorMsg,
+      error: sanitizeActionError(error, "Gagal menghapus project."),
     };
   }
 }

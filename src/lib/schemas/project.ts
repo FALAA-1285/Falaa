@@ -6,6 +6,7 @@ export const CATEGORIES = [
   "Web & Fullstack",
   "Mobile",
   "Machine Learning & Tools",
+  "UI/UX Desain",
 ] as const;
 
 export const projectSchema = z.object({

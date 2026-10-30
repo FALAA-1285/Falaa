@@ -25,17 +25,23 @@ export async function uploadToStorage(
 ): Promise<StorageUploadResult> {
   const { buffer, contentType, filename, folder = "uploads" } = options;
 
-  const supabaseUrl = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseUrl =
+    process.env.SUPABASE_URL ||
+    process.env.NEXT_PUBLIC_SUPABASE_URL ||
+    process.env.SUPABASE_STORAGE_URL;
   const serviceKey =
     process.env.SUPABASE_SERVICE_ROLE_KEY ||
     process.env.SUPABASE_ANON_KEY ||
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-  const bucketName = process.env.SUPABASE_STORAGE_BUCKET || "portfolio-assets";
+  const bucketName =
+    process.env.SUPABASE_STORAGE_BUCKET || "portfolio-assets";
 
   // 1. Cloud Persistent Storage: Supabase Storage via REST API (Zero external SDK required)
   if (supabaseUrl && serviceKey) {
     try {
-      const cleanBaseUrl = supabaseUrl.replace(/\/+$/, "");
+      const cleanBaseUrl = supabaseUrl
+        .replace(/\/+$/, "")
+        .replace(/\/storage\/v1\/?$/, "");
       const objectPath = folder ? `${folder}/${filename}` : filename;
       const uploadEndpoint = `${cleanBaseUrl}/storage/v1/object/${bucketName}/${objectPath}`;
 
@@ -88,7 +94,10 @@ export async function uploadToStorage(
     console.error("[STORAGE FATAL] Local storage write failed:", errorMsg);
     return {
       success: false,
-      error: "Sistem penyimpanan gagal menyimpan berkas gambar.",
+      error:
+        process.env.NODE_ENV === "development"
+          ? `Sistem penyimpanan lokal gagal: ${errorMsg}`
+          : "Sistem penyimpanan gagal menyimpan berkas gambar.",
       storageProvider: "local",
     };
   }

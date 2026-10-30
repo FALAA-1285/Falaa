@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { getAdminSession } from "@/lib/auth";
 import { invalidatePortfolioCache } from "@/lib/cached-data";
+import { sanitizeActionError } from "@/lib/security";
 import {
   getSkills,
   getSkillsGrouped,
@@ -43,8 +44,7 @@ export async function createSkillAction(
     invalidatePortfolioCache();
     return { success: true, skill: created };
   } catch (error: unknown) {
-    const errorMsg = error instanceof Error ? error.message : "Gagal membuat skill.";
-    return { success: false, error: errorMsg };
+    return { success: false, error: sanitizeActionError(error, "Gagal membuat skill.") };
   }
 }
 
@@ -71,8 +71,7 @@ export async function updateSkillAction(
     invalidatePortfolioCache();
     return { success: true, skill: updated };
   } catch (error: unknown) {
-    const errorMsg = error instanceof Error ? error.message : "Gagal memperbarui skill.";
-    return { success: false, error: errorMsg };
+    return { success: false, error: sanitizeActionError(error, "Gagal memperbarui skill.") };
   }
 }
 
@@ -95,7 +94,6 @@ export async function deleteSkillAction(
     invalidatePortfolioCache();
     return { success: true };
   } catch (error: unknown) {
-    const errorMsg = error instanceof Error ? error.message : "Gagal menghapus skill.";
-    return { success: false, error: errorMsg };
+    return { success: false, error: sanitizeActionError(error, "Gagal menghapus skill.") };
   }
 }

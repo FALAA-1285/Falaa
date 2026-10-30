@@ -1,7 +1,7 @@
 export interface Project {
   id: string;
   title: string;
-  category: "Web & Fullstack" | "Mobile" | "Machine Learning & Tools" | string;
+  category: "Web & Fullstack" | "Mobile" | "Machine Learning & Tools" | "UI/UX Desain" | "UI/UX Design" | string;
   tagline: string;
   description: string;
   image: string;

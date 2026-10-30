@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { getAdminSession } from "@/lib/auth";
 import { invalidatePortfolioCache } from "@/lib/cached-data";
+import { sanitizeActionError } from "@/lib/security";
 import {
   getExperiences,
   getExperienceById,
@@ -43,8 +44,7 @@ export async function createExperienceAction(
     invalidatePortfolioCache();
     return { success: true, experience: created };
   } catch (error: unknown) {
-    const errorMsg = error instanceof Error ? error.message : "Gagal membuat pengalaman.";
-    return { success: false, error: errorMsg };
+    return { success: false, error: sanitizeActionError(error, "Gagal membuat pengalaman.") };
   }
 }
 
@@ -71,8 +71,7 @@ export async function updateExperienceAction(
     invalidatePortfolioCache();
     return { success: true, experience: updated };
   } catch (error: unknown) {
-    const errorMsg = error instanceof Error ? error.message : "Gagal memperbarui pengalaman.";
-    return { success: false, error: errorMsg };
+    return { success: false, error: sanitizeActionError(error, "Gagal memperbarui pengalaman.") };
   }
 }
 
@@ -95,7 +94,6 @@ export async function deleteExperienceAction(
     invalidatePortfolioCache();
     return { success: true };
   } catch (error: unknown) {
-    const errorMsg = error instanceof Error ? error.message : "Gagal menghapus pengalaman.";
-    return { success: false, error: errorMsg };
+    return { success: false, error: sanitizeActionError(error, "Gagal menghapus pengalaman.") };
   }
 }

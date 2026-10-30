@@ -86,23 +86,40 @@ export async function updateSkill(
   id: number,
   skill: { name?: string; category?: string; icon?: string; order_index?: number }
 ): Promise<SkillItem> {
-  const { rows: currentRows } = await pool.query("SELECT * FROM skills WHERE id = $1", [id]);
-  if (currentRows.length === 0) {
-    throw new Error(`Skill dengan ID '${id}' tidak ditemukan.`);
+  const isCompletePayload =
+    skill.name !== undefined &&
+    skill.category !== undefined &&
+    skill.icon !== undefined;
+
+  let name = skill.name;
+  let category = skill.category;
+  let icon = skill.icon;
+  let orderIndex = skill.order_index;
+
+  if (!isCompletePayload) {
+    const { rows: currentRows } = await pool.query("SELECT * FROM skills WHERE id = $1", [id]);
+    if (currentRows.length === 0) {
+      throw new Error(`Skill dengan ID '${id}' tidak ditemukan.`);
+    }
+    const curr = currentRows[0];
+    if (name === undefined) name = curr.name;
+    if (category === undefined) category = curr.category;
+    if (icon === undefined) icon = curr.icon;
+    if (orderIndex === undefined) orderIndex = curr.order_index;
   }
-  const curr = currentRows[0];
-  const name = skill.name ?? curr.name;
-  const category = skill.category ?? curr.category;
-  const icon = skill.icon ?? curr.icon;
-  const orderIndex = skill.order_index !== undefined ? skill.order_index : curr.order_index;
 
   const { rows } = await pool.query(
     `UPDATE skills
-     SET name = $1, category = $2, icon = $3, order_index = $4
+     SET name = $1, category = $2, icon = $3, order_index = COALESCE($4, order_index)
      WHERE id = $5
      RETURNING id, category, name, icon, order_index`,
-    [name, category, icon, orderIndex, id]
+    [name, category, icon, orderIndex ?? 0, id]
   );
+
+  if (rows.length === 0) {
+    throw new Error(`Skill dengan ID '${id}' tidak ditemukan.`);
+  }
+
   const r = rows[0];
   return {
     id: r.id,
@@ -119,20 +136,25 @@ export async function deleteSkill(id: number): Promise<boolean> {
 }
 
 /**
- * Persistently update the display order for skills in a single database transaction.
- * Guarantees zero duplicate order conflicts.
+ * Persistently update the display order for skills in a high-performance single batch query.
+ * Guarantees zero duplicate order conflicts and eliminates N roundtrip network latency.
  */
 export async function reorderSkills(orderedIds: number[]): Promise<boolean> {
   if (!orderedIds || orderedIds.length === 0) return true;
   const client = await pool.connect();
   try {
     await client.query("BEGIN");
-    for (let index = 0; index < orderedIds.length; index++) {
-      await client.query(
-        "UPDATE skills SET order_index = $1 WHERE id = $2",
-        [index, orderedIds[index]]
-      );
-    }
+    const orderIndices = orderedIds.map((_, index) => index);
+    await client.query(
+      `UPDATE skills AS s
+       SET order_index = v.new_order
+       FROM (
+         SELECT unnest($1::int[]) AS id,
+                unnest($2::int[]) AS new_order
+       ) AS v
+       WHERE s.id = v.id`,
+      [orderedIds, orderIndices]
+    );
     await client.query("COMMIT");
     return true;
   } catch (err) {

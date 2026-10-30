@@ -3,14 +3,18 @@
 import { revalidatePath } from "next/cache";
 import { getAdminSession } from "@/lib/auth";
 import { getMessages, toggleMessageRead, deleteMessage } from "@/lib/db";
+import { sanitizeActionError } from "@/lib/security";
 import type { ContactMessage } from "@/types/portfolio";
 
-export async function getMessagesAction(): Promise<ContactMessage[]> {
+export async function getMessagesAction(
+  limit: number = 100,
+  offset: number = 0
+): Promise<ContactMessage[]> {
   const session = await getAdminSession();
   if (!session || session.role !== "ADMIN") {
     return [];
   }
-  return await getMessages();
+  return await getMessages(limit, offset);
 }
 
 export async function toggleMessageReadAction(
@@ -28,8 +32,7 @@ export async function toggleMessageReadAction(
     revalidatePath("/admin/messages");
     return { success };
   } catch (error: unknown) {
-    const errorMsg = error instanceof Error ? error.message : "Gagal mengubah status pesan.";
-    return { success: false, error: errorMsg };
+    return { success: false, error: sanitizeActionError(error, "Gagal mengubah status pesan.") };
   }
 }
 
@@ -47,7 +50,6 @@ export async function deleteMessageAction(
     revalidatePath("/admin/messages");
     return { success: deleted };
   } catch (error: unknown) {
-    const errorMsg = error instanceof Error ? error.message : "Gagal menghapus pesan.";
-    return { success: false, error: errorMsg };
+    return { success: false, error: sanitizeActionError(error, "Gagal menghapus pesan.") };
   }
 }

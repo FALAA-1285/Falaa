@@ -5,7 +5,7 @@ import { getAdminSession } from "@/lib/auth";
 import { invalidatePortfolioCache } from "@/lib/cached-data";
 import { getProfileInfo, updateProfileInfo } from "@/lib/db";
 import { profileSchema } from "@/lib/schemas/profile";
-import { sanitizeUrl } from "@/lib/security";
+import { sanitizeUrl, sanitizeActionError } from "@/lib/security";
 import type { PersonalInfo } from "@/types/portfolio";
 
 export async function getProfileInfoAction(): Promise<PersonalInfo> {
@@ -49,7 +49,6 @@ export async function updateProfileInfoAction(
     invalidatePortfolioCache();
     return { success: true, profile: updated };
   } catch (error: unknown) {
-    const errorMsg = error instanceof Error ? error.message : "Gagal memperbarui profil.";
-    return { success: false, error: errorMsg };
+    return { success: false, error: sanitizeActionError(error, "Gagal memperbarui profil.") };
   }
 }

@@ -38,7 +38,8 @@ export default function ProjectModal({ project, onClose }: ProjectModalProps) {
 
   if (!project) return null;
 
-  const safeGithubUrl = isSafeUrl(project.githubUrl) ? project.githubUrl : null;
+  const isUiUx = project.category?.toLowerCase().includes("ui/ux");
+  const safeGithubUrl = !isUiUx && isSafeUrl(project.githubUrl) ? project.githubUrl : null;
   const safeLiveUrl = isSafeUrl(project.liveUrl) ? project.liveUrl : null;
   const safeImage = sanitizeImageUrl(project.image);
 
@@ -74,13 +75,13 @@ export default function ProjectModal({ project, onClose }: ProjectModalProps) {
 
         {/* Content */}
         <div className="p-6 space-y-6">
-          <div className="relative aspect-[16/10] w-full rounded-xl overflow-hidden bg-neutral-900 border border-neutral-200">
+          <div className="relative aspect-[16/10] w-full rounded-xl overflow-hidden bg-neutral-50 border border-neutral-200">
             <Image
               src={safeImage}
               alt={project.title}
               fill
               sizes="(max-width: 768px) 100vw, 672px"
-              className="object-contain"
+              className="object-cover w-full h-full"
               unoptimized={safeImage.endsWith(".svg")}
             />
           </div>
@@ -140,7 +141,7 @@ export default function ProjectModal({ project, onClose }: ProjectModalProps) {
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full border border-black/20 text-black text-xs font-medium hover:bg-neutral-50 transition-colors active:scale-95 cursor-pointer"
               >
-                <span>Preview</span>
+                <span>{safeLiveUrl.includes("figma.com") ? "Figma Prototype" : "Preview"}</span>
                 <ExternalLink className="w-3.5 h-3.5" />
               </a>
             )}

@@ -47,6 +47,21 @@ export async function loginAction(
 
   const { email, password } = parsed.data;
 
+  // Account-level brute-force defense: Max 10 attempts per 15 minutes across all IPs
+  const emailRateLimitKey = `admin-login-target:${email.trim().toLowerCase()}`;
+  const emailRateCheck = rateLimiter.check(emailRateLimitKey, {
+    windowMs: 15 * 60 * 1000,
+    maxRequests: 10,
+  });
+
+  if (!emailRateCheck.allowed) {
+    const minutesLeft = Math.max(1, Math.ceil(emailRateCheck.retryAfterSeconds / 60));
+    return {
+      success: false,
+      error: `Terlalu banyak percobaan login pada akun ini. Akun dikunci sementara. Silakan coba kembali dalam ${minutesLeft} menit.`,
+    };
+  }
+
   const isValid = validateAdminCredentials(email, password);
   if (!isValid) {
     return {
@@ -55,8 +70,9 @@ export async function loginAction(
     };
   }
 
-  // On successful login, clear the rate limit counter for this IP
+  // On successful login, clear the rate limit counter for this IP and account
   rateLimiter.reset(rateLimitKey);
+  rateLimiter.reset(emailRateLimitKey);
 
   // Generate Admin JWT
   const token = await signAdminToken({

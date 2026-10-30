@@ -37,7 +37,7 @@ export default function Projects({ initialProjects = [] }: ProjectsProps) {
                       alt={project.title}
                       fill
                       sizes="(max-width: 768px) 100vw, 50vw"
-                      className="object-cover w-full h-full transition-transform duration-500 group-hover:scale-105"
+                      className="object-cover w-full h-full"
                       unoptimized={safeImage.endsWith(".svg")}
                     />
                   </div>

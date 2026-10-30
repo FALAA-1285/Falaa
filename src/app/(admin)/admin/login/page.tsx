@@ -30,7 +30,20 @@ export default function AdminLoginPage() {
     try {
       const res = await loginAction(data);
       if (res.success) {
-        router.push("/admin");
+        const searchParams =
+          typeof window !== "undefined"
+            ? new URLSearchParams(window.location.search)
+            : null;
+        const rawCallback = searchParams?.get("callbackUrl");
+        // Strict Open Redirect Prevention: Must start with /admin and not contain protocol or double slashes
+        const isSafeCallback =
+          rawCallback &&
+          rawCallback.startsWith("/admin") &&
+          !rawCallback.startsWith("//") &&
+          !rawCallback.includes(":");
+        const destination = isSafeCallback ? rawCallback : "/admin";
+
+        router.push(destination);
         router.refresh();
       } else {
         setErrorMessage(res.error || "Gagal masuk. Periksa kembali email dan password.");

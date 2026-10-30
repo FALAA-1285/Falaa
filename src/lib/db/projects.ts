@@ -112,28 +112,50 @@ export async function updateProject(
   id: string,
   p: Partial<Project>
 ): Promise<Project> {
-  const current = await getProjectById(id);
-  if (!current) {
-    throw new Error(`Project dengan ID '${id}' tidak ditemukan.`);
-  }
+  const isCompletePayload =
+    p.title !== undefined &&
+    p.category !== undefined &&
+    p.tagline !== undefined &&
+    p.description !== undefined &&
+    p.image !== undefined &&
+    p.tags !== undefined;
 
-  const updatedTitle = p.title !== undefined ? p.title : current.title;
-  const updatedCategory = p.category !== undefined ? p.category : current.category;
-  const updatedTagline = p.tagline !== undefined ? p.tagline : current.tagline;
-  const updatedDescription = p.description !== undefined ? p.description : current.description;
-  const updatedImage = p.image !== undefined ? p.image : current.image;
-  const updatedTags = p.tags !== undefined ? JSON.stringify(p.tags) : JSON.stringify(current.tags);
-  const updatedGithub = p.githubUrl !== undefined ? p.githubUrl : (current.githubUrl || "");
-  const updatedLive = p.liveUrl !== undefined ? p.liveUrl : (current.liveUrl || "");
-  const updatedFeatures = p.features !== undefined ? JSON.stringify(p.features) : JSON.stringify(current.features);
-  const updatedMetrics = p.metrics !== undefined ? p.metrics : (current.metrics || "");
-  const updatedOrderIndex = p.order_index !== undefined ? p.order_index : (current.order_index ?? 0);
+  let updatedTitle = p.title;
+  let updatedCategory = p.category;
+  let updatedTagline = p.tagline;
+  let updatedDescription = p.description;
+  let updatedImage = p.image;
+  let updatedTags = p.tags !== undefined ? JSON.stringify(p.tags) : undefined;
+  let updatedGithub = p.githubUrl !== undefined ? p.githubUrl : "";
+  let updatedLive = p.liveUrl !== undefined ? p.liveUrl : "";
+  let updatedFeatures = p.features !== undefined ? JSON.stringify(p.features) : undefined;
+  let updatedMetrics = p.metrics !== undefined ? p.metrics : "";
+  let updatedOrderIndex = p.order_index;
+
+  // Only query existing record when partial fields are missing
+  if (!isCompletePayload) {
+    const current = await getProjectById(id);
+    if (!current) {
+      throw new Error(`Project dengan ID '${id}' tidak ditemukan.`);
+    }
+    if (updatedTitle === undefined) updatedTitle = current.title;
+    if (updatedCategory === undefined) updatedCategory = current.category;
+    if (updatedTagline === undefined) updatedTagline = current.tagline;
+    if (updatedDescription === undefined) updatedDescription = current.description;
+    if (updatedImage === undefined) updatedImage = current.image;
+    if (updatedTags === undefined) updatedTags = JSON.stringify(current.tags);
+    if (p.githubUrl === undefined) updatedGithub = current.githubUrl || "";
+    if (p.liveUrl === undefined) updatedLive = current.liveUrl || "";
+    if (updatedFeatures === undefined) updatedFeatures = JSON.stringify(current.features);
+    if (p.metrics === undefined) updatedMetrics = current.metrics || "";
+    if (updatedOrderIndex === undefined) updatedOrderIndex = current.order_index ?? 0;
+  }
 
   const { rows } = await pool.query(
     `UPDATE projects
      SET title = $1, category = $2, tagline = $3, description = $4,
          image = $5, tags = $6, github_url = $7, live_url = $8,
-         features = $9, metrics = $10, order_index = $11, updated_at = CURRENT_TIMESTAMP
+         features = $9, metrics = $10, order_index = COALESCE($11, order_index), updated_at = CURRENT_TIMESTAMP
      WHERE id = $12
      RETURNING id, title, category, tagline, description, image, tags,
                github_url as "githubUrl", live_url as "liveUrl", features, metrics, order_index,
@@ -149,10 +171,14 @@ export async function updateProject(
       updatedLive,
       updatedFeatures,
       updatedMetrics,
-      updatedOrderIndex,
+      updatedOrderIndex ?? 0,
       id,
     ]
   );
+
+  if (rows.length === 0) {
+    throw new Error(`Project dengan ID '${id}' tidak ditemukan.`);
+  }
 
   const r = rows[0];
   return {
@@ -177,20 +203,26 @@ export async function deleteProject(id: string): Promise<boolean> {
 }
 
 /**
- * Persistently update the display order for projects in a single database transaction.
- * Guarantees zero duplicate order conflicts.
+ * Persistently update the display order for projects in a high-performance single batch query.
+ * Guarantees zero duplicate order conflicts and eliminates N roundtrip network latency.
  */
 export async function reorderProjects(orderedIds: string[]): Promise<boolean> {
   if (!orderedIds || orderedIds.length === 0) return true;
   const client = await pool.connect();
   try {
     await client.query("BEGIN");
-    for (let index = 0; index < orderedIds.length; index++) {
-      await client.query(
-        "UPDATE projects SET order_index = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2",
-        [index, orderedIds[index]]
-      );
-    }
+    const orderIndices = orderedIds.map((_, index) => index);
+    await client.query(
+      `UPDATE projects AS p
+       SET order_index = v.new_order,
+           updated_at = CURRENT_TIMESTAMP
+       FROM (
+         SELECT unnest($1::text[]) AS id,
+                unnest($2::int[]) AS new_order
+       ) AS v
+       WHERE p.id = v.id`,
+      [orderedIds, orderIndices]
+    );
     await client.query("COMMIT");
     return true;
   } catch (err) {

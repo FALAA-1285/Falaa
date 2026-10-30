@@ -150,6 +150,27 @@ export const DEFAULT_PROJECTS: Project[] = [
     metrics: "Capable of handling 5,000+ requests per second",
     order_index: 5,
   },
+  {
+    id: "kurban-app",
+    title: "KurbanApp - Mobile Qurban & Distribution Platform",
+    category: "UI/UX Desain",
+    tagline: "Interactive Mobile UI/UX Prototype for Digital Qurban & Distribution",
+    description:
+      "An end-to-end mobile application UI/UX design and interactive prototype created in Figma. KurbanApp streamlines Islamic sacrificial animal (Qurban) ordering, joint-share pooling (1/7 cow portion), real-time logistics tracking, and verified transparent distribution reports for donors during Eid al-Adha.",
+    image: "/projects/kurban-app-cover.webp",
+    tags: ["Figma", "UI/UX Design", "Mobile App", "Prototyping", "Design System"],
+    githubUrl: "",
+    liveUrl:
+      "https://www.figma.com/proto/GQakrFddjVu5ITv7hbJOxk/KurbanApp?node-id=64-2&t=ZoAmdsx4RgdGaux2-1&scaling=scale-down&content-scaling=fixed&page-id=3%3A32&starting-point-node-id=64%3A2",
+    features: [
+      "End-to-end interactive mobile flow: livestock catalog, joint-share pooling, and checkout",
+      "Comprehensive animal health specs, weight metrics, and certified breeder origin verification",
+      "Transparent distribution tracking with automated photo/video slaughter documentation",
+      "High-fidelity design system with responsive layouts, accessible typography, and smooth micro-interactions",
+    ],
+    metrics: "Interactive prototype with 20+ responsive screens and seamless user flows",
+    order_index: 6,
+  },
 ];
 
 export const DEFAULT_EXPERIENCES: ExperienceItem[] = [

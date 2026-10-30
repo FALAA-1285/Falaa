@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { getAdminSession } from "@/lib/auth";
 import { invalidatePortfolioCache } from "@/lib/cached-data";
+import { sanitizeActionError } from "@/lib/security";
 import {
   reorderProjects,
   reorderExperiences,
@@ -44,9 +45,7 @@ export async function reorderProjectsAction(
     invalidatePortfolioCache();
     return { success: true };
   } catch (error: unknown) {
-    const errorMsg =
-      error instanceof Error ? error.message : "Gagal memperbarui urutan proyek.";
-    return { success: false, error: errorMsg };
+    return { success: false, error: sanitizeActionError(error, "Gagal memperbarui urutan proyek.") };
   }
 }
 
@@ -78,9 +77,7 @@ export async function reorderExperiencesAction(
     invalidatePortfolioCache();
     return { success: true };
   } catch (error: unknown) {
-    const errorMsg =
-      error instanceof Error ? error.message : "Gagal memperbarui urutan pengalaman.";
-    return { success: false, error: errorMsg };
+    return { success: false, error: sanitizeActionError(error, "Gagal memperbarui urutan pengalaman.") };
   }
 }
 
@@ -112,8 +109,6 @@ export async function reorderSkillsAction(
     invalidatePortfolioCache();
     return { success: true };
   } catch (error: unknown) {
-    const errorMsg =
-      error instanceof Error ? error.message : "Gagal memperbarui urutan skill.";
-    return { success: false, error: errorMsg };
+    return { success: false, error: sanitizeActionError(error, "Gagal memperbarui urutan skill.") };
   }
 }
