@@ -1,21 +1,8 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import {
-  Briefcase,
-  Plus,
-  Edit,
-  Trash2,
-  Calendar,
-  MapPin,
-  X,
-  Loader2,
-  AlertCircle,
-  Building,
-  ArrowUp,
-  ArrowDown,
-} from "lucide-react";
+import { ArrowUp, ArrowDown, Pencil, Trash2 } from "lucide-react";
 import { ExperienceItem } from "@/types/portfolio";
 import {
   createExperienceAction,
@@ -23,455 +10,329 @@ import {
   deleteExperienceAction,
 } from "@/actions/admin/experiences";
 import { reorderExperiencesAction } from "@/actions/admin/reorder";
+import Dialog, { ConfirmDialog } from "./Dialog";
+import Field from "./Field";
+import PageHead from "./PageHead";
+
+const EXPERIENCE_TYPES = [
+  "Academic Degree",
+  "Work / Internship",
+  "Freelance & Projects",
+  "Research & Development",
+];
+
+interface FormState {
+  period: string;
+  role: string;
+  organization: string;
+  location: string;
+  type: string;
+  description: string;
+  highlights: string;
+}
+
+const EMPTY_FORM: FormState = {
+  period: "",
+  role: "",
+  organization: "",
+  location: "Malang, Indonesia",
+  type: EXPERIENCE_TYPES[0],
+  description: "",
+  highlights: "",
+};
 
 interface ExperienceTableProps {
   initialExperiences: ExperienceItem[];
 }
 
-export default function ExperienceTable({
-  initialExperiences,
-}: ExperienceTableProps) {
+export default function ExperienceTable({ initialExperiences }: ExperienceTableProps) {
   const router = useRouter();
   const [experiences, setExperiences] = useState<ExperienceItem[]>(initialExperiences);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingItem, setEditingItem] = useState<ExperienceItem | null>(null);
-
-  // Form State
-  const [period, setPeriod] = useState("");
-  const [role, setRole] = useState("");
-  const [organization, setOrganization] = useState("");
-  const [location, setLocation] = useState("");
-  const [type, setType] = useState("Academic Degree");
-  const [description, setDescription] = useState("");
-  const [highlightsText, setHighlightsText] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [formError, setFormError] = useState<string | null>(null);
-
-  // Deletion state
-  const [isDeleting, setIsDeleting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [isReordering, setIsReordering] = useState(false);
 
-  const handleMove = async (expId: number, direction: "up" | "down") => {
-    const currentIndex = experiences.findIndex((e) => e.id === expId);
-    if (currentIndex === -1) return;
-    if (direction === "up" && currentIndex === 0) return;
-    if (direction === "down" && currentIndex === experiences.length - 1) return;
+  const [editing, setEditing] = useState<ExperienceItem | null>(null);
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [form, setForm] = useState<FormState>(EMPTY_FORM);
+  const [formError, setFormError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-    const targetIndex = direction === "up" ? currentIndex - 1 : currentIndex + 1;
+  const [deleteTarget, setDeleteTarget] = useState<ExperienceItem | null>(null);
+  const [isDeleting, startDelete] = useTransition();
+
+  const update = (key: keyof FormState) => (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+  ) => setForm((prev) => ({ ...prev, [key]: e.target.value }));
+
+  const openForm = (item: ExperienceItem | null) => {
+    setEditing(item);
+    setForm(
+      item
+        ? {
+            period: item.period,
+            role: item.role,
+            organization: item.organization,
+            location: item.location || "",
+            type: item.type,
+            description: item.description,
+            highlights: (item.highlights || []).join("\n"),
+          }
+        : EMPTY_FORM
+    );
+    setFormError(null);
+    setIsFormOpen(true);
+  };
+
+  const handleMove = async (index: number, direction: -1 | 1) => {
+    const target = index + direction;
+    if (target < 0 || target >= experiences.length) return;
+
+    const previous = experiences;
     const updated = [...experiences];
-    const [moved] = updated.splice(currentIndex, 1);
-    updated.splice(targetIndex, 0, moved);
-
-    const reordered = updated.map((e, idx) => ({ ...e, order_index: idx }));
-    setExperiences(reordered);
+    [updated[index], updated[target]] = [updated[target], updated[index]];
+    setExperiences(updated);
     setIsReordering(true);
+    setError(null);
 
     try {
-      const orderedIds = reordered.map((e) => e.id!).filter(Boolean);
-      const res = await reorderExperiencesAction(orderedIds);
+      const res = await reorderExperiencesAction(updated.map((e) => e.id!).filter(Boolean));
       if (!res.success) {
-        alert(res.error || "Gagal mengubah urutan pengalaman.");
-        setExperiences(experiences);
+        setExperiences(previous);
+        setError(res.error || "Urutan pengalaman gagal disimpan.");
       } else {
         router.refresh();
       }
     } catch {
-      alert("Terjadi kesalahan koneksi saat menyimpan urutan.");
-      setExperiences(experiences);
+      setExperiences(previous);
+      setError("Urutan pengalaman gagal disimpan. Periksa koneksi lalu coba lagi.");
     } finally {
       setIsReordering(false);
     }
   };
 
-  const openCreateModal = () => {
-    setEditingItem(null);
-    setPeriod("");
-    setRole("");
-    setOrganization("");
-    setLocation("Malang, Indonesia");
-    setType("Academic Degree");
-    setDescription("");
-    setHighlightsText("");
-    setFormError(null);
-    setIsModalOpen(true);
-  };
-
-  const openEditModal = (item: ExperienceItem) => {
-    setEditingItem(item);
-    setPeriod(item.period);
-    setRole(item.role);
-    setOrganization(item.organization);
-    setLocation(item.location || "");
-    setType(item.type);
-    setDescription(item.description);
-    setHighlightsText(item.highlights ? item.highlights.join("\n") : "");
-    setFormError(null);
-    setIsModalOpen(true);
-  };
-
-  const handleFormSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.SubmitEvent<HTMLFormElement>) => {
     e.preventDefault();
     setFormError(null);
     setIsSubmitting(true);
 
-    const highlights = highlightsText
-      .split("\n")
-      .map((h) => h.trim())
-      .filter(Boolean);
+    const payload = {
+      ...form,
+      highlights: form.highlights
+        .split("\n")
+        .map((h) => h.trim())
+        .filter(Boolean),
+    };
 
     try {
-      if (editingItem && editingItem.id) {
-        const res = await updateExperienceAction(editingItem.id, {
-          period,
-          role,
-          organization,
-          location,
-          type,
-          description,
-          highlights,
-        });
+      const res = editing?.id
+        ? await updateExperienceAction(editing.id, payload)
+        : await createExperienceAction(payload);
 
-        if (res.success && res.experience) {
-          setExperiences((prev) =>
-            prev.map((e) => (e.id === editingItem.id ? res.experience! : e))
-          );
-          setIsModalOpen(false);
-          router.refresh();
-        } else {
-          setFormError(res.error || "Gagal memperbarui pengalaman.");
-        }
+      if (res.success && res.experience) {
+        const saved = res.experience;
+        setExperiences((prev) =>
+          editing?.id ? prev.map((x) => (x.id === editing.id ? saved : x)) : [...prev, saved]
+        );
+        setIsFormOpen(false);
+        router.refresh();
       } else {
-        const res = await createExperienceAction({
-          period,
-          role,
-          organization,
-          location,
-          type,
-          description,
-          highlights,
-        });
-
-        if (res.success && res.experience) {
-          setExperiences((prev) => [...prev, res.experience!]);
-          setIsModalOpen(false);
-          router.refresh();
-        } else {
-          setFormError(res.error || "Gagal menambahkan pengalaman.");
-        }
+        setFormError(res.error || "Pengalaman gagal disimpan.");
       }
     } catch {
-      setFormError("Terjadi kesalahan saat memproses data.");
+      setFormError("Pengalaman gagal disimpan. Periksa koneksi lalu coba lagi.");
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const handleDelete = async (id: number) => {
-    if (!confirm("Apakah Anda yakin ingin menghapus pengalaman ini?")) return;
-    setIsDeleting(true);
-    try {
+  const confirmDelete = () => {
+    const id = deleteTarget?.id;
+    if (!id) return;
+    startDelete(async () => {
       const res = await deleteExperienceAction(id);
+      setDeleteTarget(null);
       if (res.success) {
-        setExperiences((prev) => prev.filter((e) => e.id !== id));
+        setExperiences((prev) => prev.filter((x) => x.id !== id));
         router.refresh();
       } else {
-        alert(res.error || "Gagal menghapus pengalaman.");
+        setError(res.error || "Pengalaman gagal dihapus.");
       }
-    } catch {
-      alert("Terjadi kesalahan saat menghapus data.");
-    } finally {
-      setIsDeleting(false);
-    }
+    });
   };
 
+  // Offer the presets plus every type already used, so existing entries keep their value.
+  const typeOptions = Array.from(
+    new Set([...EXPERIENCE_TYPES, ...experiences.map((x) => x.type), form.type].filter(Boolean))
+  );
+
   return (
-    <div className="space-y-6">
-      {/* Top Action Header */}
-      <div className="bg-white p-5 rounded-2xl border border-neutral-200 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h2 className="text-lg font-bold text-neutral-900 tracking-tight flex items-center gap-2">
-            <Briefcase className="w-5 h-5 text-black" />
-            <span>Manajemen Riwayat Pengalaman</span>
-          </h2>
-          <p className="text-xs text-neutral-500 font-medium mt-0.5">
-            Kelola rekam jejak akademik, magang, pekerjaan, dan proyek independen di portofolio.
-          </p>
-        </div>
+    <>
+      <PageHead
+        title="Pengalaman"
+        lede="Riwayat pendidikan dan pekerjaan, tampil berurutan di situs."
+        action={
+          <button type="button" className="adm-btn adm-btn-primary" onClick={() => openForm(null)}>
+            Tambah pengalaman
+          </button>
+        }
+      />
 
-        <button
-          onClick={openCreateModal}
-          className="inline-flex items-center gap-2 bg-black hover:bg-neutral-800 active:scale-[0.99] text-white text-xs font-bold px-4 py-2.5 rounded-xl transition shadow-xs cursor-pointer"
-        >
-          <Plus className="w-4 h-4" />
-          <span>Tambah Pengalaman Baru</span>
-        </button>
-      </div>
+      {error && <div className="adm-notice adm-notice-error mb-4">{error}</div>}
 
-      {/* Experience Cards / Timeline View */}
-      <div className="space-y-4">
+      <div className="adm-panel">
         {experiences.length === 0 ? (
-          <div className="bg-white p-12 rounded-2xl border border-neutral-200 text-center text-neutral-400">
-            <Briefcase className="w-10 h-10 mx-auto text-neutral-300 mb-2 stroke-[1.5]" />
-            <p className="text-sm font-semibold text-neutral-700">Belum ada data pengalaman</p>
-            <p className="text-xs text-neutral-400 mt-1">Klik tombol &quot;Tambah Pengalaman Baru&quot; di atas untuk menambahkan.</p>
+          <div className="adm-section adm-meta">
+            Belum ada riwayat. Tambahkan pendidikan atau pekerjaan pertama kamu.
           </div>
         ) : (
-          experiences.map((item, idx) => (
-            <div
-              key={item.id ?? idx}
-              className="bg-white p-6 rounded-2xl border border-neutral-200 shadow-xs hover:border-black/40 transition-all relative overflow-hidden"
-            >
-              {/* Subtle black silhouette card watermark */}
-              <div className="absolute right-0 top-0 bottom-0 w-28 bg-gradient-to-l from-neutral-100/50 to-transparent pointer-events-none" />
+          experiences.map((item, index) => (
+            <div key={item.id ?? index} className="adm-row items-start">
+              <div className="flex flex-col pt-0.5">
+                <button
+                  type="button"
+                  className="adm-icon-btn adm-icon-btn-sm"
+                  onClick={() => handleMove(index, -1)}
+                  disabled={index === 0 || isReordering}
+                  aria-label={`Naikkan ${item.role}`}
+                >
+                  <ArrowUp className="w-3.5 h-3.5" />
+                </button>
+                <button
+                  type="button"
+                  className="adm-icon-btn adm-icon-btn-sm"
+                  onClick={() => handleMove(index, 1)}
+                  disabled={index === experiences.length - 1 || isReordering}
+                  aria-label={`Turunkan ${item.role}`}
+                >
+                  <ArrowDown className="w-3.5 h-3.5" />
+                </button>
+              </div>
 
-              <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 relative z-10">
-                <div className="space-y-2 max-w-3xl">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-black text-white text-[11px] font-bold">
-                      <Calendar className="w-3 h-3" />
-                      {item.period}
-                    </span>
-                    <span className="px-2.5 py-1 rounded-md bg-neutral-100 text-neutral-800 text-[11px] font-semibold border border-neutral-200">
-                      {item.type}
-                    </span>
-                    {item.location && (
-                      <span className="inline-flex items-center gap-1 text-[11px] text-neutral-500 font-medium">
-                        <MapPin className="w-3 h-3 text-neutral-400" />
-                        {item.location}
-                      </span>
-                    )}
-                  </div>
+              <span className="adm-meta w-32 shrink-0 hidden sm:block pt-px">{item.period}</span>
 
-                  <h3 className="text-base sm:text-lg font-bold text-neutral-900 tracking-tight">
-                    {item.role}
-                  </h3>
+              <div className="min-w-0 flex-1">
+                <p className="font-medium">{item.role}</p>
+                <p className="adm-meta">
+                  {item.organization}
+                  {item.location ? `, ${item.location}` : ""}
+                </p>
+                <p className="adm-faint sm:hidden">{item.period}</p>
+                <p className="adm-meta mt-1.5 line-clamp-2 max-w-[70ch]">{item.description}</p>
+              </div>
 
-                  <div className="text-xs sm:text-sm font-semibold text-neutral-700 flex items-center gap-1.5">
-                    <Building className="w-3.5 h-3.5 text-neutral-500" />
-                    <span>{item.organization}</span>
-                  </div>
+              <span className="adm-faint shrink-0 hidden md:block pt-px">{item.type}</span>
 
-                  <p className="text-xs sm:text-sm text-neutral-600 leading-relaxed pt-1">
-                    {item.description}
-                  </p>
-
-                  {item.highlights && item.highlights.length > 0 && (
-                    <div className="pt-2">
-                      <span className="text-[11px] font-bold text-neutral-700 uppercase tracking-wider block mb-1">
-                        Poin Sorotan (Highlights):
-                      </span>
-                      <ul className="space-y-1 text-xs text-neutral-600 list-disc list-inside">
-                        {item.highlights.map((h, i) => (
-                          <li key={i}>{h}</li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-                </div>
-
-                {/* Action Buttons */}
-                <div className="flex items-center sm:flex-col gap-1.5 shrink-0">
-                  <div className="flex sm:flex-col gap-1 items-center">
-                    <button
-                      onClick={() => handleMove(item.id!, "up")}
-                      disabled={idx === 0 || isReordering}
-                      className="p-1.5 rounded-lg border border-neutral-200 bg-neutral-50 hover:bg-neutral-100 disabled:opacity-30 disabled:hover:bg-neutral-50 text-neutral-600 transition cursor-pointer"
-                      title="Pindahkan ke atas"
-                    >
-                      <ArrowUp className="w-3.5 h-3.5" />
-                    </button>
-                    <button
-                      onClick={() => handleMove(item.id!, "down")}
-                      disabled={idx === experiences.length - 1 || isReordering}
-                      className="p-1.5 rounded-lg border border-neutral-200 bg-neutral-50 hover:bg-neutral-100 disabled:opacity-30 disabled:hover:bg-neutral-50 text-neutral-600 transition cursor-pointer"
-                      title="Pindahkan ke bawah"
-                    >
-                      <ArrowDown className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
-
+              <div className="flex shrink-0">
+                <button
+                  type="button"
+                  className="adm-icon-btn"
+                  onClick={() => openForm(item)}
+                  aria-label={`Edit ${item.role}`}
+                >
+                  <Pencil className="w-4 h-4" />
+                </button>
+                {item.id && (
                   <button
-                    onClick={() => openEditModal(item)}
-                    className="p-2 rounded-xl bg-neutral-100 hover:bg-black hover:text-white text-neutral-800 border border-neutral-200 transition-all text-xs font-semibold flex items-center gap-1.5 shadow-xs cursor-pointer"
-                    title="Edit Pengalaman"
+                    type="button"
+                    className="adm-icon-btn adm-icon-btn-danger"
+                    onClick={() => setDeleteTarget(item)}
+                    aria-label={`Hapus ${item.role}`}
                   >
-                    <Edit className="w-3.5 h-3.5" />
-                    <span className="sm:hidden">Edit</span>
+                    <Trash2 className="w-4 h-4" />
                   </button>
-
-                  {item.id && (
-                    <button
-                      onClick={() => handleDelete(item.id!)}
-                      disabled={isDeleting}
-                      className="p-2 rounded-xl bg-neutral-100 hover:bg-red-600 hover:text-white text-neutral-600 border border-neutral-200 transition-all text-xs font-semibold flex items-center gap-1.5 shadow-xs cursor-pointer"
-                      title="Hapus Pengalaman"
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                      <span className="sm:hidden">Hapus</span>
-                    </button>
-                  )}
-                </div>
+                )}
               </div>
             </div>
           ))
         )}
       </div>
 
-      {/* Create / Edit Modal */}
-      {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-fade-in">
-          <div className="bg-white rounded-2xl border border-neutral-200 max-w-2xl w-full p-6 sm:p-8 shadow-2xl relative max-h-[90vh] overflow-y-auto">
-            <button
-              onClick={() => setIsModalOpen(false)}
-              className="absolute top-5 right-5 text-neutral-400 hover:text-black p-1 rounded-lg transition"
-            >
-              <X className="w-5 h-5" />
-            </button>
+      <Dialog
+        open={isFormOpen}
+        title={editing ? "Edit pengalaman" : "Pengalaman baru"}
+        onClose={() => setIsFormOpen(false)}
+        width={600}
+      >
+        <form onSubmit={handleSubmit} className="space-y-4">
+          {formError && <div className="adm-notice adm-notice-error">{formError}</div>}
 
-            <h3 className="text-lg font-bold text-neutral-900 mb-1">
-              {editingItem ? "Edit Pengalaman" : "Tambah Pengalaman Baru"}
-            </h3>
-            <p className="text-xs text-neutral-500 mb-6">
-              Data yang Anda simpan akan langsung diperbarui di website.
-            </p>
-
-            {formError && (
-              <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-xl text-xs flex items-center gap-2">
-                <AlertCircle className="w-4 h-4 text-red-500 shrink-0" />
-                <span>{formError}</span>
-              </div>
-            )}
-
-            <form onSubmit={handleFormSubmit} className="space-y-4">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-bold text-neutral-700 uppercase tracking-wider mb-1.5">
-                    Periode (Waktu) *
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    value={period}
-                    onChange={(e) => setPeriod(e.target.value)}
-                    placeholder="Contoh: 2023 - Present"
-                    className="w-full px-3.5 py-2.5 bg-neutral-50 border border-neutral-300 rounded-xl text-xs sm:text-sm text-neutral-900 focus:outline-none focus:border-black focus:ring-1 focus:ring-black"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold text-neutral-700 uppercase tracking-wider mb-1.5">
-                    Kategori / Tipe *
-                  </label>
-                  <select
-                    value={type}
-                    onChange={(e) => setType(e.target.value)}
-                    className="w-full px-3.5 py-2.5 bg-neutral-50 border border-neutral-300 rounded-xl text-xs sm:text-sm text-neutral-900 focus:outline-none focus:border-black focus:ring-1 focus:ring-black"
-                  >
-                    <option value="Academic Degree">Academic Degree</option>
-                    <option value="Freelance & Projects">Freelance & Projects</option>
-                    <option value="Research & Development">Research & Development</option>
-                    <option value="Work / Internship">Work / Internship</option>
-                  </select>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-bold text-neutral-700 uppercase tracking-wider mb-1.5">
-                    Peran / Posisi (Role) *
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    value={role}
-                    onChange={(e) => setRole(e.target.value)}
-                    placeholder="Contoh: Information Technology Undergraduate"
-                    className="w-full px-3.5 py-2.5 bg-neutral-50 border border-neutral-300 rounded-xl text-xs sm:text-sm text-neutral-900 focus:outline-none focus:border-black focus:ring-1 focus:ring-black"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold text-neutral-700 uppercase tracking-wider mb-1.5">
-                    Organisasi / Instansi *
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    value={organization}
-                    onChange={(e) => setOrganization(e.target.value)}
-                    placeholder="Contoh: Politeknik Negeri Malang"
-                    className="w-full px-3.5 py-2.5 bg-neutral-50 border border-neutral-300 rounded-xl text-xs sm:text-sm text-neutral-900 focus:outline-none focus:border-black focus:ring-1 focus:ring-black"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-neutral-700 uppercase tracking-wider mb-1.5">
-                  Lokasi
-                </label>
-                <input
-                  type="text"
-                  value={location}
-                  onChange={(e) => setLocation(e.target.value)}
-                  placeholder="Contoh: Malang, East Java, Indonesia"
-                  className="w-full px-3.5 py-2.5 bg-neutral-50 border border-neutral-300 rounded-xl text-xs sm:text-sm text-neutral-900 focus:outline-none focus:border-black focus:ring-1 focus:ring-black"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-neutral-700 uppercase tracking-wider mb-1.5">
-                  Deskripsi Pengalaman *
-                </label>
-                <textarea
-                  required
-                  rows={3}
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  placeholder="Ringkasan tugas, aktivitas, atau kontribusi utama..."
-                  className="w-full px-3.5 py-2.5 bg-neutral-50 border border-neutral-300 rounded-xl text-xs sm:text-sm text-neutral-900 focus:outline-none focus:border-black focus:ring-1 focus:ring-black resize-none"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-neutral-700 uppercase tracking-wider mb-1.5">
-                  Poin Sorotan (1 baris per poin)
-                </label>
-                <textarea
-                  rows={3}
-                  value={highlightsText}
-                  onChange={(e) => setHighlightsText(e.target.value)}
-                  placeholder="Masukkan poin sorotan, pisahkan dengan baris baru..."
-                  className="w-full px-3.5 py-2.5 bg-neutral-50 border border-neutral-300 rounded-xl text-xs sm:text-sm text-neutral-900 focus:outline-none focus:border-black focus:ring-1 focus:ring-black resize-none font-sans"
-                />
-              </div>
-
-              <div className="flex items-center justify-end gap-3 pt-3 border-t border-neutral-200">
-                <button
-                  type="button"
-                  onClick={() => setIsModalOpen(false)}
-                  className="px-4 py-2.5 rounded-xl border border-neutral-300 text-xs font-bold text-neutral-700 hover:bg-neutral-100 transition cursor-pointer"
-                >
-                  Batal
-                </button>
-                <button
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-black hover:bg-neutral-800 text-white text-xs font-bold transition shadow-xs cursor-pointer disabled:opacity-50"
-                >
-                  {isSubmitting ? (
-                    <>
-                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                      <span>Menyimpan...</span>
-                    </>
-                  ) : (
-                    <span>{editingItem ? "Perbarui Pengalaman" : "Simpan Pengalaman"}</span>
-                  )}
-                </button>
-              </div>
-            </form>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <Field label="Peran" htmlFor="exp-role">
+              <input id="exp-role" required className="adm-input" value={form.role} onChange={update("role")} />
+            </Field>
+            <Field label="Organisasi" htmlFor="exp-org">
+              <input
+                id="exp-org"
+                required
+                className="adm-input"
+                value={form.organization}
+                onChange={update("organization")}
+              />
+            </Field>
+            <Field label="Periode" htmlFor="exp-period" hint="Contoh: 2023 – sekarang">
+              <input id="exp-period" required className="adm-input" value={form.period} onChange={update("period")} />
+            </Field>
+            <Field label="Jenis" htmlFor="exp-type">
+              <select id="exp-type" className="adm-input" value={form.type} onChange={update("type")}>
+                {typeOptions.map((t) => (
+                  <option key={t} value={t}>
+                    {t}
+                  </option>
+                ))}
+              </select>
+            </Field>
           </div>
-        </div>
-      )}
-    </div>
+
+          <Field label="Lokasi" htmlFor="exp-location" optional>
+            <input id="exp-location" className="adm-input" value={form.location} onChange={update("location")} />
+          </Field>
+
+          <Field label="Deskripsi" htmlFor="exp-desc">
+            <textarea
+              id="exp-desc"
+              required
+              rows={3}
+              className="adm-input"
+              value={form.description}
+              onChange={update("description")}
+            />
+          </Field>
+
+          <Field label="Poin penting" htmlFor="exp-highlights" optional hint="Satu poin per baris.">
+            <textarea
+              id="exp-highlights"
+              rows={4}
+              className="adm-input"
+              value={form.highlights}
+              onChange={update("highlights")}
+            />
+          </Field>
+
+          <div className="flex justify-end gap-2 pt-1">
+            <button type="button" className="adm-btn adm-btn-quiet" onClick={() => setIsFormOpen(false)}>
+              Batal
+            </button>
+            <button type="submit" className="adm-btn adm-btn-primary" disabled={isSubmitting}>
+              {isSubmitting ? "Menyimpan…" : editing ? "Simpan perubahan" : "Simpan pengalaman"}
+            </button>
+          </div>
+        </form>
+      </Dialog>
+
+      <ConfirmDialog
+        open={deleteTarget !== null}
+        title="Hapus pengalaman?"
+        message={
+          <>
+            <strong style={{ color: "var(--ink)" }}>{deleteTarget?.role}</strong> di{" "}
+            {deleteTarget?.organization} akan dihapus dari situs.
+          </>
+        }
+        confirmLabel="Hapus pengalaman"
+        pending={isDeleting}
+        onConfirm={confirmDelete}
+        onClose={() => setDeleteTarget(null)}
+      />
+    </>
   );
 }

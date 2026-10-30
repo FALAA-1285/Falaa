@@ -57,3 +57,13 @@ export async function deleteMessage(id: number): Promise<boolean> {
   const result = await pool.query("DELETE FROM messages WHERE id = $1", [id]);
   return (result.rowCount ?? 0) > 0;
 }
+
+export async function countUnreadMessages(): Promise<number> {
+  try {
+    const { rows } = await pool.query("SELECT count(*)::int AS n FROM messages WHERE is_read = FALSE");
+    return rows[0]?.n ?? 0;
+  } catch (error) {
+    console.error("Error counting unread messages in PostgreSQL:", error);
+    return 0;
+  }
+}

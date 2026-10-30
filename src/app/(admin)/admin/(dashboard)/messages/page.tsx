@@ -3,22 +3,26 @@ import { getMessages } from "@/lib/db";
 import MessageInbox from "@/components/admin/MessageInbox";
 import { requireAdminSession } from "@/lib/auth";
 
-async function MessagesContent() {
-  await requireAdminSession();
-  const messages = await getMessages();
-  return <MessageInbox initialMessages={messages} />;
+interface MessagesPageProps {
+  searchParams: Promise<{ m?: string }>;
 }
 
-export default function AdminMessagesPage() {
+async function MessagesContent({ searchParams }: MessagesPageProps) {
+  await requireAdminSession();
+  const [messages, { m }] = await Promise.all([getMessages(), searchParams]);
+  const selectedId = Number(m);
   return (
-    <Suspense
-      fallback={
-        <div className="bg-white rounded-2xl border border-neutral-200 p-8 text-center text-xs text-neutral-400 font-medium">
-          Memuat pesan masuk...
-        </div>
-      }
-    >
-      <MessagesContent />
+    <MessageInbox
+      initialMessages={messages}
+      initialSelectedId={Number.isInteger(selectedId) && selectedId > 0 ? selectedId : undefined}
+    />
+  );
+}
+
+export default function AdminMessagesPage(props: MessagesPageProps) {
+  return (
+    <Suspense fallback={<p className="adm-meta">Memuat pesan…</p>}>
+      <MessagesContent {...props} />
     </Suspense>
   );
 }

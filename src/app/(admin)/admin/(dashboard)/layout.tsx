@@ -1,38 +1,35 @@
 import React, { Suspense } from "react";
 import AdminSidebar from "@/components/admin/AdminSidebar";
-import AdminHeader from "@/components/admin/AdminHeader";
 import { AdminNavProvider } from "@/components/admin/AdminNavContext";
+import { getAdminSession } from "@/lib/auth";
+import { countUnreadMessages } from "@/lib/db";
 
-export default function DashboardLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+async function UnreadCount() {
+  if (!(await getAdminSession())) return null;
+  const unread = await countUnreadMessages();
+  return unread > 0 ? (
+    <span className="adm-count" aria-label={`${unread} belum dibaca`}>
+      {unread}
+    </span>
+  ) : null;
+}
+
+export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   return (
     <AdminNavProvider>
-      <div className="flex min-h-screen bg-neutral-100 font-sans">
-        {/* Responsive Admin Sidebar (Desktop sticky sidebar + Mobile slide-over drawer) */}
-        <Suspense
-          fallback={
-            <aside className="hidden lg:flex w-64 bg-neutral-50 text-neutral-900 border-r border-neutral-200 h-screen sticky top-0 shrink-0" />
-          }
-        >
-          <AdminSidebar />
-        </Suspense>
-
-        {/* Main Content Area */}
-        <div className="flex-1 flex flex-col min-w-0">
-          <Suspense
-            fallback={
-              <header className="h-16 bg-white border-b border-neutral-200" />
+      <div className="lg:flex min-h-screen">
+        <Suspense fallback={<aside className="hidden lg:block w-56 shrink-0" />}>
+          <AdminSidebar
+            unreadSlot={
+              <Suspense fallback={null}>
+                <UnreadCount />
+              </Suspense>
             }
-          >
-            <AdminHeader />
-          </Suspense>
-          <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl w-full mx-auto min-w-0">
-            {children}
-          </main>
-        </div>
+          />
+        </Suspense>
+        <main className="flex-1 min-w-0 px-4 py-6 sm:px-8 lg:px-10 lg:py-10">
+          <div className="max-w-5xl">{children}</div>
+        </main>
       </div>
     </AdminNavProvider>
   );

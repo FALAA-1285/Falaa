@@ -11,13 +11,7 @@ async function ExperiencesContent() {
 
 export default function AdminExperiencesPage() {
   return (
-    <Suspense
-      fallback={
-        <div className="bg-white rounded-2xl border border-neutral-200 p-8 text-center text-xs text-neutral-400 font-medium">
-          Memuat data riwayat pengalaman...
-        </div>
-      }
-    >
+    <Suspense fallback={<p className="adm-meta">Memuat pengalaman…</p>}>
       <ExperiencesContent />
     </Suspense>
   );

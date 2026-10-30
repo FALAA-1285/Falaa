@@ -1,309 +1,197 @@
 "use client";
 
-import React, { useState } from "react";
+import { useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  Loader2,
-  Save,
-  ArrowLeft,
-  Plus,
-  Trash2,
-  X,
-  CheckCircle,
-} from "lucide-react";
-import Link from "next/link";
+import { X } from "lucide-react";
 import { Project } from "@/types/portfolio";
-import {
-  projectSchema,
-  ProjectFormData,
-  CATEGORIES,
-} from "@/lib/schemas/project";
-import {
-  createProjectAction,
-  updateProjectAction,
-} from "@/actions/admin/projects";
+import { projectSchema, ProjectFormData, CATEGORIES } from "@/lib/schemas/project";
+import { createProjectAction, updateProjectAction } from "@/actions/admin/projects";
 import ImageUploader from "./ImageUploader";
+import Field from "./Field";
 
 interface ProjectFormProps {
   initialData?: Project;
   isEdit?: boolean;
 }
 
-export default function ProjectForm({
-  initialData,
-  isEdit = false,
-}: ProjectFormProps) {
+function toSlug(value: string): string {
+  return value
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
+export default function ProjectForm({ initialData, isEdit = false }: ProjectFormProps) {
   const router = useRouter();
   const [serverError, setServerError] = useState<string | null>(null);
-  const [successMsg, setSuccessMsg] = useState<string | null>(null);
   const [tagInput, setTagInput] = useState("");
-
-  const defaultValues: ProjectFormData = {
-    id: initialData?.id || "",
-    title: initialData?.title || "",
-    category: (initialData?.category as ProjectFormData["category"]) || "Web & Fullstack",
-    tagline: initialData?.tagline || "",
-    description: initialData?.description || "",
-    image: initialData?.image || "",
-    tags: initialData?.tags || ["Next.js", "TypeScript"],
-    features: initialData?.features || [
-      "Fitur unggulan 1",
-      "Fitur unggulan 2",
-    ],
-    githubUrl: initialData?.githubUrl || "https://github.com/FALAA-1285",
-    liveUrl: initialData?.liveUrl || "",
-    metrics: initialData?.metrics || "",
-  };
+  const [slugTouched, setSlugTouched] = useState(isEdit);
 
   const {
     register,
     handleSubmit,
     setValue,
-    getValues,
     control,
     formState: { errors, isSubmitting },
   } = useForm<ProjectFormData>({
     resolver: zodResolver(projectSchema),
-    defaultValues,
+    defaultValues: {
+      id: initialData?.id || "",
+      title: initialData?.title || "",
+      category: (initialData?.category as ProjectFormData["category"]) || CATEGORIES[0],
+      tagline: initialData?.tagline || "",
+      description: initialData?.description || "",
+      image: initialData?.image || "",
+      tags: initialData?.tags || [],
+      features: initialData?.features?.length ? initialData.features : [""],
+      githubUrl: initialData?.githubUrl || "",
+      liveUrl: initialData?.liveUrl || "",
+      metrics: initialData?.metrics || "",
+    },
   });
 
-  const currentImage = useWatch({ control, name: "image" });
-  const currentTags = useWatch({ control, name: "tags" }) || [];
-  const currentFeatures = useWatch({ control, name: "features" }) || [];
+  const image = useWatch({ control, name: "image" });
+  const tags = useWatch({ control, name: "tags" }) || [];
+  const features = useWatch({ control, name: "features" }) || [];
 
-  // Auto-slug generation from title in create mode
-  const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const titleVal = e.target.value;
-    setValue("title", titleVal, { shouldValidate: true });
-    const currentId = getValues("id");
-    if (!isEdit && (!currentId || currentId === "")) {
-      const generatedSlug = titleVal
-        .toLowerCase()
-        .replace(/[^a-z0-9]+/g, "-")
-        .replace(/^-+|-+$/g, "");
-      setValue("id", generatedSlug, { shouldValidate: true });
-    }
-  };
+  const titleField = register("title");
 
-  // Tag Management
   const addTag = () => {
     const trimmed = tagInput.trim();
-    if (trimmed && !currentTags.includes(trimmed)) {
-      setValue("tags", [...currentTags, trimmed], { shouldValidate: true });
-      setTagInput("");
+    if (trimmed && !tags.includes(trimmed)) {
+      setValue("tags", [...tags, trimmed], { shouldValidate: true });
     }
+    setTagInput("");
   };
 
-  const removeTag = (indexToRemove: number) => {
-    const updated = currentTags.filter((_, idx) => idx !== indexToRemove);
-    setValue("tags", updated, { shouldValidate: true });
-  };
+  const setFeatures = (next: string[]) => setValue("features", next, { shouldValidate: true });
 
-  // Feature Points Management
-  const addFeature = () => {
-    setValue("features", [...currentFeatures, ""], { shouldValidate: true });
-  };
-
-  const updateFeature = (index: number, value: string) => {
-    const updated = [...currentFeatures];
-    updated[index] = value;
-    setValue("features", updated, { shouldValidate: true });
-  };
-
-  const removeFeature = (index: number) => {
-    if (currentFeatures.length <= 1) return;
-    const updated = currentFeatures.filter((_, idx) => idx !== index);
-    setValue("features", updated, { shouldValidate: true });
-  };
-
-  // Submit Handler
   const onSubmit = async (data: ProjectFormData) => {
     setServerError(null);
-    setSuccessMsg(null);
+    const features = data.features.map((f) => f.trim()).filter(Boolean);
+    if (features.length === 0) {
+      setServerError("Isi minimal satu fitur utama.");
+      return;
+    }
+    const payload = { ...data, features };
 
     try {
-      if (isEdit && initialData) {
-        const result = await updateProjectAction(initialData.id, data);
-        if (result.success) {
-          setSuccessMsg("Project berhasil diperbarui!");
-          setTimeout(() => {
-            router.push("/admin/projects");
-            router.refresh();
-          }, 800);
-        } else {
-          setServerError(result.error || "Gagal memperbarui project.");
-        }
+      const result =
+        isEdit && initialData
+          ? await updateProjectAction(initialData.id, payload)
+          : await createProjectAction(payload);
+
+      if (result.success) {
+        router.push("/admin/projects");
+        router.refresh();
       } else {
-        const result = await createProjectAction(data);
-        if (result.success) {
-          setSuccessMsg("Project baru berhasil ditambahkan!");
-          setTimeout(() => {
-            router.push("/admin/projects");
-            router.refresh();
-          }, 800);
-        } else {
-          setServerError(result.error || "Gagal membuat project.");
-        }
+        setServerError(result.error || "Project gagal disimpan.");
       }
     } catch {
-      setServerError("Terjadi kesalahan tak terduga saat memproses data.");
+      setServerError("Project gagal disimpan. Periksa koneksi lalu coba lagi.");
     }
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-8 max-w-4xl">
-      {/* Notifications */}
-      {serverError && (
-        <div className="p-4 bg-red-50 border border-red-200 text-red-700 rounded-lg text-sm">
-          {serverError}
-        </div>
-      )}
+    <form onSubmit={handleSubmit(onSubmit)} noValidate>
+      {serverError && <div className="adm-notice adm-notice-error mb-4">{serverError}</div>}
 
-      {successMsg && (
-        <div className="p-4 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-lg text-sm flex items-center gap-2">
-          <CheckCircle className="w-5 h-5 text-emerald-600" />
-          <span>{successMsg}</span>
-        </div>
-      )}
-
-      {/* Basic Info Section */}
-      <div className="bg-white p-6 rounded-lg border border-neutral-200 shadow-sm space-y-6">
-        <h2 className="text-base font-semibold text-neutral-900 border-b border-neutral-100 pb-3">
-          Informasi Utama
-        </h2>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Title */}
-          <div>
-            <label className="block text-xs font-semibold text-neutral-700 uppercase tracking-wider mb-1.5">
-              Judul Project <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="text"
-              {...register("title")}
-              onChange={handleTitleChange}
-              placeholder="Contoh: Academic Portal Polinema"
-              className="w-full px-3 py-2 text-sm border border-neutral-300 rounded-md focus:outline-none focus:ring-2 focus:ring-black transition"
-            />
-            {errors.title && (
-              <p className="text-xs text-red-600 mt-1">
-                {errors.title.message}
-              </p>
-            )}
-          </div>
-
-          {/* ID / Slug */}
-          <div>
-            <label className="block text-xs font-semibold text-neutral-700 uppercase tracking-wider mb-1.5">
-              Slug / ID Unik <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="text"
-              {...register("id")}
-              disabled={isEdit}
-              placeholder="academic-portal"
-              className={`w-full px-3 py-2 text-sm font-mono border border-neutral-300 rounded-md focus:outline-none focus:ring-2 focus:ring-black transition ${
-                isEdit ? "bg-neutral-100 text-neutral-500 cursor-not-allowed" : ""
-              }`}
-            />
-            {errors.id && (
-              <p className="text-xs text-red-600 mt-1">{errors.id.message}</p>
-            )}
-            {isEdit && (
-              <p className="text-[11px] text-neutral-400 mt-1">
-                ID slug tidak dapat diubah pada mode edit untuk menjaga integritas data.
-              </p>
-            )}
-          </div>
-
-          {/* Category */}
-          <div>
-            <label className="block text-xs font-semibold text-neutral-700 uppercase tracking-wider mb-1.5">
-              Kategori <span className="text-red-500">*</span>
-            </label>
-            <select
-              {...register("category")}
-              className="w-full px-3 py-2 text-sm border border-neutral-300 rounded-md bg-white focus:outline-none focus:ring-2 focus:ring-black transition"
+      <div className="adm-panel">
+        <section className="adm-section space-y-4">
+          <h2 className="adm-h2">Dasar</h2>
+          <div className="grid gap-4 md:grid-cols-2">
+            <Field label="Judul" htmlFor="title" error={errors.title?.message}>
+              <input
+                id="title"
+                className="adm-input"
+                aria-invalid={!!errors.title}
+                {...titleField}
+                onChange={(e) => {
+                  titleField.onChange(e);
+                  if (!slugTouched) setValue("id", toSlug(e.target.value), { shouldValidate: true });
+                }}
+              />
+            </Field>
+            <Field
+              label="Slug"
+              htmlFor="id"
+              error={errors.id?.message}
+              hint={isEdit ? "Slug tidak bisa diubah setelah project dibuat." : "Dipakai sebagai ID project. Dibuat otomatis dari judul."}
             >
-              {CATEGORIES.map((cat) => (
-                <option key={cat} value={cat}>
-                  {cat}
-                </option>
-              ))}
-            </select>
-            {errors.category && (
-              <p className="text-xs text-red-600 mt-1">
-                {errors.category.message}
-              </p>
-            )}
+              <input
+                id="id"
+                className="adm-input"
+                readOnly={isEdit}
+                aria-invalid={!!errors.id}
+                {...register("id", { onChange: () => setSlugTouched(true) })}
+              />
+            </Field>
+            <Field label="Kategori" htmlFor="category" error={errors.category?.message}>
+              <select id="category" className="adm-input" {...register("category")}>
+                {CATEGORIES.map((cat) => (
+                  <option key={cat} value={cat}>
+                    {cat}
+                  </option>
+                ))}
+              </select>
+            </Field>
+            <Field label="Tagline" htmlFor="tagline" error={errors.tagline?.message} hint="Satu kalimat di bawah judul.">
+              <input id="tagline" className="adm-input" aria-invalid={!!errors.tagline} {...register("tagline")} />
+            </Field>
           </div>
-
-          {/* Tagline */}
-          <div>
-            <label className="block text-xs font-semibold text-neutral-700 uppercase tracking-wider mb-1.5">
-              Tagline Ringkas <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="text"
-              {...register("tagline")}
-              placeholder="Comprehensive Academic Management System"
-              className="w-full px-3 py-2 text-sm border border-neutral-300 rounded-md focus:outline-none focus:ring-2 focus:ring-black transition"
+          <Field label="Deskripsi" htmlFor="description" error={errors.description?.message}>
+            <textarea
+              id="description"
+              rows={5}
+              className="adm-input"
+              aria-invalid={!!errors.description}
+              {...register("description")}
             />
-            {errors.tagline && (
-              <p className="text-xs text-red-600 mt-1">
-                {errors.tagline.message}
-              </p>
-            )}
-          </div>
-        </div>
+          </Field>
+        </section>
 
-        {/* Description */}
-        <div>
-          <label className="block text-xs font-semibold text-neutral-700 uppercase tracking-wider mb-1.5">
-            Deskripsi Lengkap <span className="text-red-500">*</span>
-          </label>
-          <textarea
-            rows={4}
-            {...register("description")}
-            placeholder="Jelaskan gambaran umum, latar belakang, dan arsitektur project..."
-            className="w-full px-3 py-2 text-sm border border-neutral-300 rounded-md focus:outline-none focus:ring-2 focus:ring-black transition"
+        <section className="adm-section space-y-4">
+          <h2 className="adm-h2">Gambar sampul</h2>
+          <ImageUploader
+            value={image}
+            onChange={(url) => setValue("image", url, { shouldValidate: true })}
+            error={errors.image?.message}
           />
-          {errors.description && (
-            <p className="text-xs text-red-600 mt-1">
-              {errors.description.message}
-            </p>
-          )}
-        </div>
-      </div>
+        </section>
 
-      {/* Media & Image Upload Section */}
-      <div className="bg-white p-6 rounded-lg border border-neutral-200 shadow-sm space-y-4">
-        <h2 className="text-base font-semibold text-neutral-900 border-b border-neutral-100 pb-3">
-          Media Gambar
-        </h2>
-        <ImageUploader
-          value={currentImage}
-          onChange={(url) => setValue("image", url, { shouldValidate: true })}
-          error={errors.image?.message}
-        />
-      </div>
+        <section className="adm-section space-y-4">
+          <h2 className="adm-h2">Teknologi dan fitur</h2>
 
-      {/* Tech Tags & Key Features */}
-      <div className="bg-white p-6 rounded-lg border border-neutral-200 shadow-sm space-y-6">
-        <h2 className="text-base font-semibold text-neutral-900 border-b border-neutral-100 pb-3">
-          Teknologi & Fitur Utama
-        </h2>
-
-        {/* Tags */}
-        <div>
-          <label className="block text-xs font-semibold text-neutral-700 uppercase tracking-wider mb-1.5">
-            Teknologi (Tags) <span className="text-red-500">*</span>
-          </label>
-          <div className="flex gap-2">
+          <Field
+            label="Teknologi"
+            htmlFor="tag-input"
+            error={errors.tags?.message}
+            hint="Tekan Enter untuk menambahkan."
+          >
+            {tags.length > 0 && (
+              <div className="flex flex-wrap gap-1.5">
+                {tags.map((tag, idx) => (
+                  <span key={tag} className="adm-chip">
+                    {tag}
+                    <button
+                      type="button"
+                      onClick={() => setValue("tags", tags.filter((_, i) => i !== idx), { shouldValidate: true })}
+                      className="cursor-pointer"
+                      style={{ color: "var(--faint)" }}
+                      aria-label={`Hapus ${tag}`}
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
+                  </span>
+                ))}
+              </div>
+            )}
             <input
-              type="text"
+              id="tag-input"
+              className="adm-input md:max-w-sm"
               value={tagInput}
               onChange={(e) => setTagInput(e.target.value)}
               onKeyDown={(e) => {
@@ -312,167 +200,78 @@ export default function ProjectForm({
                   addTag();
                 }
               }}
-              placeholder="Ketik teknologi lalu tekan Tambah (contoh: Next.js, Laravel, Python)"
-              className="flex-1 px-3 py-2 text-sm border border-neutral-300 rounded-md focus:outline-none focus:ring-2 focus:ring-black transition"
+              placeholder="Tambah teknologi"
             />
-            <button
-              type="button"
-              onClick={addTag}
-              className="px-4 py-2 bg-neutral-900 text-white rounded-md text-xs font-medium hover:bg-black transition"
-            >
-              Tambah Tag
+          </Field>
+
+          <Field label="Fitur utama" error={errors.features?.message ?? errors.features?.[0]?.message}>
+            <div className="space-y-2">
+              {features.map((feat, idx) => (
+                <div key={idx} className="flex gap-2">
+                  <input
+                    className="adm-input"
+                    value={feat}
+                    aria-label={`Fitur ${idx + 1}`}
+                    onChange={(e) => setFeatures(features.map((f, i) => (i === idx ? e.target.value : f)))}
+                  />
+                  <button
+                    type="button"
+                    className="adm-icon-btn adm-icon-btn-danger shrink-0 self-center"
+                    onClick={() => setFeatures(features.filter((_, i) => i !== idx))}
+                    disabled={features.length <= 1}
+                    aria-label={`Hapus fitur ${idx + 1}`}
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+              ))}
+            </div>
+            <button type="button" className="adm-btn self-start" onClick={() => setFeatures([...features, ""])}>
+              Tambah fitur
             </button>
-          </div>
+          </Field>
+        </section>
 
-          <div className="flex flex-wrap gap-1.5 mt-2.5">
-            {currentTags.map((tag, idx) => (
-              <span
-                key={idx}
-                className="inline-flex items-center gap-1.5 text-xs bg-neutral-100 border border-neutral-200 text-neutral-800 px-2.5 py-1 rounded-md"
-              >
-                <span>{tag}</span>
-                <button
-                  type="button"
-                  onClick={() => removeTag(idx)}
-                  className="text-neutral-400 hover:text-red-600 transition"
-                >
-                  <X className="w-3 h-3" />
-                </button>
-              </span>
-            ))}
+        <section className="adm-section space-y-4">
+          <h2 className="adm-h2">Tautan</h2>
+          <div className="grid gap-4 md:grid-cols-2">
+            <Field label="Repositori GitHub" htmlFor="githubUrl" optional error={errors.githubUrl?.message}>
+              <input
+                id="githubUrl"
+                className="adm-input"
+                placeholder="https://github.com/FALAA-1285/…"
+                aria-invalid={!!errors.githubUrl}
+                {...register("githubUrl")}
+              />
+            </Field>
+            <Field label="Demo" htmlFor="liveUrl" optional error={errors.liveUrl?.message}>
+              <input
+                id="liveUrl"
+                className="adm-input"
+                placeholder="https://"
+                aria-invalid={!!errors.liveUrl}
+                {...register("liveUrl")}
+              />
+            </Field>
           </div>
-          {errors.tags && (
-            <p className="text-xs text-red-600 mt-1">{errors.tags.message}</p>
-          )}
-        </div>
-
-        {/* Features Points */}
-        <div>
-          <div className="flex items-center justify-between mb-2">
-            <label className="block text-xs font-semibold text-neutral-700 uppercase tracking-wider">
-              Poin-Poin Fitur Utama <span className="text-red-500">*</span>
-            </label>
-            <button
-              type="button"
-              onClick={addFeature}
-              className="inline-flex items-center gap-1 text-xs text-neutral-700 hover:text-black font-medium transition"
-            >
-              <Plus className="w-3.5 h-3.5" />
-              <span>Tambah Poin</span>
-            </button>
-          </div>
-
-          <div className="space-y-2">
-            {currentFeatures.map((feat, idx) => (
-              <div key={idx} className="flex items-center gap-2">
-                <input
-                  type="text"
-                  value={feat}
-                  onChange={(e) => updateFeature(idx, e.target.value)}
-                  placeholder={`Fitur poin #${idx + 1}`}
-                  className="flex-1 px-3 py-2 text-sm border border-neutral-300 rounded-md focus:outline-none focus:ring-2 focus:ring-black transition"
-                />
-                <button
-                  type="button"
-                  onClick={() => removeFeature(idx)}
-                  disabled={currentFeatures.length <= 1}
-                  className="p-2 text-neutral-400 hover:text-red-600 disabled:opacity-30 disabled:cursor-not-allowed transition"
-                  title="Hapus poin"
-                >
-                  <Trash2 className="w-4 h-4" />
-                </button>
-              </div>
-            ))}
-          </div>
-          {errors.features && (
-            <p className="text-xs text-red-600 mt-1">
-              {errors.features.message}
-            </p>
-          )}
-        </div>
+          <Field
+            label="Hasil yang terukur"
+            htmlFor="metrics"
+            optional
+            error={errors.metrics?.message}
+            hint="Contoh: waktu registrasi turun 40%."
+          >
+            <input id="metrics" className="adm-input" {...register("metrics")} />
+          </Field>
+        </section>
       </div>
 
-      {/* External Links & Metrics */}
-      <div className="bg-white p-6 rounded-lg border border-neutral-200 shadow-sm space-y-6">
-        <h2 className="text-base font-semibold text-neutral-900 border-b border-neutral-100 pb-3">
-          Tautan & Metrik
-        </h2>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div>
-            <label className="block text-xs font-semibold text-neutral-700 uppercase tracking-wider mb-1.5">
-              URL Repository GitHub
-            </label>
-            <input
-              type="text"
-              {...register("githubUrl")}
-              placeholder="https://github.com/FALAA-1285/..."
-              className="w-full px-3 py-2 text-sm border border-neutral-300 rounded-md focus:outline-none focus:ring-2 focus:ring-black transition"
-            />
-            {errors.githubUrl && (
-              <p className="text-xs text-red-600 mt-1">
-                {errors.githubUrl.message}
-              </p>
-            )}
-          </div>
-
-          <div>
-            <label className="block text-xs font-semibold text-neutral-700 uppercase tracking-wider mb-1.5">
-              URL Live Demo (Opsional)
-            </label>
-            <input
-              type="text"
-              {...register("liveUrl")}
-              placeholder="https://..."
-              className="w-full px-3 py-2 text-sm border border-neutral-300 rounded-md focus:outline-none focus:ring-2 focus:ring-black transition"
-            />
-            {errors.liveUrl && (
-              <p className="text-xs text-red-600 mt-1">
-                {errors.liveUrl.message}
-              </p>
-            )}
-          </div>
-        </div>
-
-        <div>
-          <label className="block text-xs font-semibold text-neutral-700 uppercase tracking-wider mb-1.5">
-            Metrik / Pencapaian Kinerja (Opsional)
-          </label>
-          <input
-            type="text"
-            {...register("metrics")}
-            placeholder="Contoh: Reduced course registration processing time by 40%"
-            className="w-full px-3 py-2 text-sm border border-neutral-300 rounded-md focus:outline-none focus:ring-2 focus:ring-black transition"
-          />
-          {errors.metrics && (
-            <p className="text-xs text-red-600 mt-1">
-              {errors.metrics.message}
-            </p>
-          )}
-        </div>
-      </div>
-
-      {/* Form Submission Bar */}
-      <div className="flex flex-col-reverse sm:flex-row gap-3 sm:items-center sm:justify-between pt-4 border-t border-neutral-200">
-        <Link
-          href="/admin/projects"
-          className="inline-flex items-center justify-center gap-1.5 text-sm font-medium text-neutral-600 hover:text-black py-2 sm:py-0 transition"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          <span>Kembali ke Daftar</span>
+      <div className="flex items-center justify-end gap-2 mt-5">
+        <Link href="/admin/projects" className="adm-btn adm-btn-quiet">
+          Batal
         </Link>
-
-        <button
-          type="submit"
-          disabled={isSubmitting}
-          className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-black hover:bg-neutral-800 text-white px-6 py-2.5 rounded-md text-sm font-medium transition shadow-sm disabled:opacity-50 cursor-pointer"
-        >
-          {isSubmitting ? (
-            <Loader2 className="w-4 h-4 animate-spin" />
-          ) : (
-            <Save className="w-4 h-4" />
-          )}
-          <span>{isEdit ? "Simpan Perubahan" : "Publikasikan Project"}</span>
+        <button type="submit" disabled={isSubmitting} className="adm-btn adm-btn-primary">
+          {isSubmitting ? "Menyimpan…" : isEdit ? "Simpan perubahan" : "Simpan project"}
         </button>
       </div>
     </form>

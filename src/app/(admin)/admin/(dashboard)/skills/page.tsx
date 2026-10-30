@@ -11,13 +11,7 @@ async function SkillsContent() {
 
 export default function AdminSkillsPage() {
   return (
-    <Suspense
-      fallback={
-        <div className="bg-white rounded-2xl border border-neutral-200 p-8 text-center text-xs text-neutral-400 font-medium">
-          Memuat data technical skills...
-        </div>
-      }
-    >
+    <Suspense fallback={<p className="adm-meta">Memuat skill…</p>}>
       <SkillsContent />
     </Suspense>
   );
