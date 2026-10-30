@@ -35,13 +35,16 @@ describe("uploadToStorage on serverless hosts", () => {
     process.env.SUPABASE_SERVICE_ROLE_KEY = "test-key";
     process.env.SUPABASE_STORAGE_BUCKET = "portfolio-assets";
     let calledUrl = "";
-    globalThis.fetch = async (url) => {
+    let headers = {};
+    globalThis.fetch = async (url, init) => {
       calledUrl = String(url);
+      headers = init.headers;
       return new Response("{}", { status: 200 });
     };
     const res = await uploadToStorage(file);
     assert.equal(res.success, true);
     assert.equal(calledUrl, "https://ref.supabase.co/storage/v1/object/portfolio-assets/uploads/a.png");
+    assert.equal(headers.apikey, "test-key", "sb_secret_ keys must be sent in the apikey header");
     assert.equal(res.url, "https://ref.supabase.co/storage/v1/object/public/portfolio-assets/uploads/a.png");
   });
 });

@@ -64,6 +64,9 @@ export async function uploadToStorage(
       const res = await fetch(uploadEndpoint, {
         method: "POST",
         headers: {
+          // New sb_secret_ keys are not JWTs: the gateway only accepts them via the apikey
+          // header (it then derives Authorization). Legacy service_role JWTs work either way.
+          apikey: serviceKey,
           Authorization: `Bearer ${serviceKey}`,
           "Content-Type": contentType,
           "x-upsert": "true",
