@@ -5,7 +5,7 @@ import { createMessage } from "@/lib/db";
 import { rateLimiter, getClientIp } from "@/lib/rate-limit";
 import { contactFormSchema, type ContactFormData } from "@/lib/schemas/contact";
 
-export { contactFormSchema, type ContactFormData };
+export type { ContactFormData };
 
 export async function sendContactMessageAction(
   rawInput: ContactFormData

@@ -44,7 +44,8 @@ export default function Contact({ profile }: { profile?: PersonalInfo }) {
       } else {
         setError(res.error || "Gagal mengirim pesan.");
       }
-    } catch {
+    } catch (err) {
+      console.error("Gagal mengirim pesan:", err);
       setError("Terjadi kesalahan saat mengirim pesan. Silakan coba lagi.");
     } finally {
       setIsSubmitting(false);
