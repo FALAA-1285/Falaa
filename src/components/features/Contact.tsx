@@ -67,8 +67,8 @@ export default function Contact({ profile }: { profile?: PersonalInfo }) {
       <div className="container mx-auto px-4 max-w-4xl">
         {/* Seamlessly Integrated Card matching the Portfolio Design DNA */}
         <div className="relative rounded-[2rem] sm:rounded-[2.5rem] p-8 sm:p-16 md:p-20 border border-black/10 bg-[#FAFAFA] shadow-[0_10px_40px_-15px_rgba(0,0,0,0.04)] overflow-hidden text-center flex flex-col items-center justify-center transition-all duration-300">
-          {/* Subtle Giant Typography Watermark Echoing Hero & Skills */}
-          <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none overflow-hidden -z-0">
+          {/* Subtle Giant Typography Watermark - Anchored behind the header title matching Skills section */}
+          <div className="absolute top-8 sm:top-12 md:top-16 inset-x-0 flex items-center justify-center pointer-events-none select-none overflow-hidden -z-0">
             <span className="text-[5.5rem] sm:text-[9.5rem] md:text-[13rem] font-extrabold text-black/[0.03] tracking-widest uppercase whitespace-nowrap">
               CONNECT
             </span>
@@ -90,9 +90,11 @@ export default function Contact({ profile }: { profile?: PersonalInfo }) {
               onClick={() => setShowForm(!showForm)}
               className="inline-flex items-center gap-2.5 px-8 sm:px-10 py-3.5 sm:py-4 bg-black hover:bg-neutral-800 text-white font-medium rounded-full text-sm sm:text-base shadow-sm hover:shadow-lg transition-all duration-200 active:scale-95 cursor-pointer group"
             >
-              <span>{showForm ? "Tutup Formulir" : ctaButtonText}</span>
+              <span className="text-white group-hover:text-white font-medium">
+                {showForm ? "Tutup Formulir" : ctaButtonText}
+              </span>
               <ChevronDown
-                className={`w-4 h-4 transition-transform duration-300 ${
+                className={`w-4 h-4 text-white transition-transform duration-300 ${
                   showForm ? "rotate-180" : "group-hover:translate-y-0.5"
                 }`}
               />
@@ -183,7 +185,7 @@ export default function Contact({ profile }: { profile?: PersonalInfo }) {
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-xs font-semibold text-black/70 uppercase tracking-wider mb-1.5">
+                    <label className="block text-xs font-semibold text-black/80 uppercase tracking-wider mb-1.5">
                       Nama Anda *
                     </label>
                     <input
@@ -192,12 +194,12 @@ export default function Contact({ profile }: { profile?: PersonalInfo }) {
                       value={formData.name}
                       onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                       placeholder="e.g. John Doe"
-                      className="w-full px-4 py-2.5 bg-white border border-black/10 rounded-xl text-sm text-black placeholder:text-black/30 focus:outline-none focus:border-black focus:ring-1 focus:ring-black transition"
+                      className="w-full px-4 py-2.5 bg-white border border-black/15 rounded-xl text-sm text-black placeholder:text-black/40 focus:outline-none focus:border-black focus:ring-1 focus:ring-black transition"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-xs font-semibold text-black/70 uppercase tracking-wider mb-1.5">
+                    <label className="block text-xs font-semibold text-black/80 uppercase tracking-wider mb-1.5">
                       Email Anda *
                     </label>
                     <input
@@ -206,13 +208,13 @@ export default function Contact({ profile }: { profile?: PersonalInfo }) {
                       value={formData.email}
                       onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                       placeholder="name@example.com"
-                      className="w-full px-4 py-2.5 bg-white border border-black/10 rounded-xl text-sm text-black placeholder:text-black/30 focus:outline-none focus:border-black focus:ring-1 focus:ring-black transition"
+                      className="w-full px-4 py-2.5 bg-white border border-black/15 rounded-xl text-sm text-black placeholder:text-black/40 focus:outline-none focus:border-black focus:ring-1 focus:ring-black transition"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-black/70 uppercase tracking-wider mb-1.5">
+                  <label className="block text-xs font-semibold text-black/80 uppercase tracking-wider mb-1.5">
                     Subjek
                   </label>
                   <input
@@ -220,12 +222,12 @@ export default function Contact({ profile }: { profile?: PersonalInfo }) {
                     value={formData.subject}
                     onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
                     placeholder="Internship, Freelance, Collaboration..."
-                    className="w-full px-4 py-2.5 bg-white border border-black/10 rounded-xl text-sm text-black placeholder:text-black/30 focus:outline-none focus:border-black focus:ring-1 focus:ring-black transition"
+                    className="w-full px-4 py-2.5 bg-white border border-black/15 rounded-xl text-sm text-black placeholder:text-black/40 focus:outline-none focus:border-black focus:ring-1 focus:ring-black transition"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-black/70 uppercase tracking-wider mb-1.5">
+                  <label className="block text-xs font-semibold text-black/80 uppercase tracking-wider mb-1.5">
                     Pesan *
                   </label>
                   <textarea
@@ -234,7 +236,7 @@ export default function Contact({ profile }: { profile?: PersonalInfo }) {
                     value={formData.message}
                     onChange={(e) => setFormData({ ...formData, message: e.target.value })}
                     placeholder="Tuliskan pesan atau detail peluang Anda..."
-                    className="w-full px-4 py-2.5 bg-white border border-black/10 rounded-xl text-sm text-black placeholder:text-black/30 focus:outline-none focus:border-black focus:ring-1 focus:ring-black transition resize-none"
+                    className="w-full px-4 py-2.5 bg-white border border-black/15 rounded-xl text-sm text-black placeholder:text-black/40 focus:outline-none focus:border-black focus:ring-1 focus:ring-black transition resize-none"
                   />
                 </div>
 
@@ -246,13 +248,13 @@ export default function Contact({ profile }: { profile?: PersonalInfo }) {
                   >
                     {isSubmitting ? (
                       <>
-                        <Loader2 className="w-4 h-4 animate-spin" />
-                        <span>Mengirim...</span>
+                        <Loader2 className="w-4 h-4 animate-spin text-white" />
+                        <span className="text-white">Mengirim...</span>
                       </>
                     ) : (
                       <>
-                        <Send className="w-4 h-4" />
-                        <span>Kirim Pesan</span>
+                        <Send className="w-4 h-4 text-white" />
+                        <span className="text-white">Kirim Pesan</span>
                       </>
                     )}
                   </button>

@@ -83,14 +83,14 @@ body {
   }
 }
 
-/* Skill icon hover color transition - fixed size without enlarging */
-.group:hover img {
+/* Skill icon hover color transition - scoped to skills section so it doesn't affect global buttons */
+#skills .group:hover img {
   filter: grayscale(0%) contrast(100%) brightness(100%) !important;
   opacity: 1 !important;
   transform: none !important;
 }
 
-.group:hover span {
+#skills .group:hover span {
   color: #000000 !important;
 }
 
