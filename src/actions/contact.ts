@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { createMessage } from "@/lib/db";
 import { rateLimiter, getClientIp } from "@/lib/rate-limit";
 import { contactFormSchema, type ContactFormData } from "@/lib/schemas/contact";
+import { sendContactNotificationEmail } from "@/lib/email";
 
 export type { ContactFormData };
 
@@ -54,6 +55,19 @@ export async function sendContactMessageAction(
 
     revalidatePath("/admin");
     revalidatePath("/admin/messages");
+
+    // 5. Asynchronously notify Admin via Gmail/Email (non-blocking for DB insertion)
+    try {
+      await sendContactNotificationEmail({
+        name,
+        email,
+        subject,
+        message,
+      });
+    } catch (emailErr) {
+      console.error("Gagal mengirim email notifikasi ke admin:", emailErr);
+    }
+
     return { success: true };
   } catch (error: unknown) {
     console.error("Error creating contact message in database:", error);
