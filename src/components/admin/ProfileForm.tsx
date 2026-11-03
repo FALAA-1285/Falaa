@@ -86,17 +86,8 @@ export default function ProfileForm({ initialProfile }: ProfileFormProps) {
             <Field label="Nama" htmlFor="profile-name">
               <input {...text("name")} required />
             </Field>
-            <Field label="Handle" htmlFor="profile-handle">
-              <input {...text("handle")} required />
-            </Field>
             <Field label="Profesi" htmlFor="profile-title">
               <input {...text("title")} required />
-            </Field>
-            <Field label="Institusi" htmlFor="profile-institution" optional>
-              <input {...text("institution")} />
-            </Field>
-            <Field label="Lokasi" htmlFor="profile-location" optional>
-              <input {...text("location")} />
             </Field>
             <Field label="Email kontak" htmlFor="profile-email">
               <input {...text("email")} type="email" required />
@@ -117,9 +108,6 @@ export default function ProfileForm({ initialProfile }: ProfileFormProps) {
           </Field>
           <Field label="Paragraf utama" htmlFor="profile-about">
             <textarea {...text("about")} rows={5} required />
-          </Field>
-          <Field label="Paragraf tambahan" htmlFor="profile-aboutSub" optional>
-            <textarea {...text("aboutSub")} rows={3} />
           </Field>
           <Field label="Bidang fokus" htmlFor="profile-tag-input" hint="Tampil sebagai label di bawah paragraf. Tekan Enter untuk menambahkan.">
             {tags.length > 0 && (
@@ -152,9 +140,6 @@ export default function ProfileForm({ initialProfile }: ProfileFormProps) {
                 }
               }}
             />
-          </Field>
-          <Field label="Kutipan" htmlFor="profile-quote" optional>
-            <input {...text("quote")} />
           </Field>
         </section>
 

@@ -106,7 +106,7 @@ export default function AdminSidebar({ unreadSlot }: AdminSidebarProps) {
 
       {isMobileOpen && (
         <div className="lg:hidden fixed inset-0 z-50" role="dialog" aria-modal="true" aria-label="Menu admin">
-          <div className="absolute inset-0" style={{ background: "rgba(24,34,46,.45)" }} onClick={closeMobile} />
+          <div className="absolute inset-0" style={{ background: "var(--overlay)" }} onClick={closeMobile} />
           <aside
             className="absolute inset-y-0 left-0 w-64 max-w-[85vw]"
             style={{ background: "var(--surface)" }}

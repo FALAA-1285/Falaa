@@ -7,11 +7,12 @@ export const profileSchema = z.object({
     .trim()
     .min(2, "Nama minimal 2 karakter")
     .max(100, "Nama maksimal 100 karakter"),
+  // Not edited in the CMS anymore; kept so existing stored values round-trip.
   handle: z
     .string()
     .trim()
-    .min(2, "Handle minimal 2 karakter")
-    .max(50, "Handle maksimal 50 karakter"),
+    .max(50, "Handle maksimal 50 karakter")
+    .default(""),
   title: z
     .string()
     .trim()
