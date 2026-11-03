@@ -15,14 +15,12 @@ import { formatShortDate } from "@/components/admin/format";
 async function DashboardContent() {
   await requireAdminSession();
 
-  let isDbConnected = true;
-  try {
-    await pool.query("SELECT 1");
-  } catch {
-    isDbConnected = false;
-  }
-
-  const [projects, experiences, skills, messages, profile, unreadCount] = await Promise.all([
+  // Run the connectivity probe alongside the data queries instead of before them.
+  const [isDbConnected, projects, experiences, skills, messages, profile, unreadCount] = await Promise.all([
+    pool.query("SELECT 1").then(
+      () => true,
+      () => false
+    ),
     getProjects(),
     getExperiences(),
     getSkills(),

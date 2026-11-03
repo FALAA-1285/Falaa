@@ -44,7 +44,9 @@ export const pool =
   new Pool({
     connectionString,
     max: isNaN(poolSize) ? 5 : poolSize,
-    idleTimeoutMillis: 10000,
+    // Opening a TLS connection to the remote pooler costs ~300ms, far more than a query (~30ms).
+    // Keep idle connections around for a few minutes so admin navigation reuses them.
+    idleTimeoutMillis: 300000,
     connectionTimeoutMillis: 10000,
     ssl: resolveSslConfig(isRemoteDb),
   });
