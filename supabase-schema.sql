@@ -823,6 +823,32 @@ ON CONFLICT (id) DO UPDATE SET
   name = EXCLUDED.name,
   icon = EXCLUDED.icon,
   order_index = EXCLUDED.order_index;
+INSERT INTO public.skills (id, category, name, icon, order_index)
+VALUES (
+  29,
+  'Databases',
+  'DBeaver',
+  'dbeaver.svg',
+  28
+)
+ON CONFLICT (id) DO UPDATE SET
+  category = EXCLUDED.category,
+  name = EXCLUDED.name,
+  icon = EXCLUDED.icon,
+  order_index = EXCLUDED.order_index;
+INSERT INTO public.skills (id, category, name, icon, order_index)
+VALUES (
+  30,
+  'Tools & Others',
+  'Laragon',
+  'laragon.svg',
+  29
+)
+ON CONFLICT (id) DO UPDATE SET
+  category = EXCLUDED.category,
+  name = EXCLUDED.name,
+  icon = EXCLUDED.icon,
+  order_index = EXCLUDED.order_index;
 
 SELECT setval('skills_id_seq', (SELECT COALESCE(MAX(id), 1) FROM public.skills));
 

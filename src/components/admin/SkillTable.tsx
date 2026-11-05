@@ -14,9 +14,9 @@ import PageHead from "./PageHead";
 const PRESET_ICONS = [
   "javascript.svg", "typescript.svg", "php.svg", "python.svg", "java.svg", "dart.svg",
   "html5.svg", "css3.svg", "react.svg", "nextjs.svg", "tailwindcss.svg", "flutter.svg",
-  "laravel.svg", "django.svg", "nodejs.svg", "postgresql.svg", "mysql.svg", "supabase.svg",
+  "laravel.svg", "django.svg", "nodejs.svg", "postgresql.svg", "mysql.svg", "supabase.svg", "dbeaver.svg",
   "git.svg", "github.svg", "figma.svg", "vscode.svg", "opencv.svg", "tensorflow.svg",
-  "pytorch.svg", "scikitlearn.svg", "vercel.svg", "n8n.svg",
+  "pytorch.svg", "scikitlearn.svg", "vercel.svg", "n8n.svg", "laragon.svg",
 ];
 
 const OTHER = "__other__";

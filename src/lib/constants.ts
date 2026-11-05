@@ -259,6 +259,7 @@ export const DEFAULT_SKILLS: SkillItem[] = [
   { id: 16, name: "PostgreSQL", icon: "postgresql.svg", category: "Databases", order_index: 0 },
   { id: 17, name: "MySQL", icon: "mysql.svg", category: "Databases", order_index: 1 },
   { id: 18, name: "Supabase", icon: "supabase.svg", category: "Databases", order_index: 2 },
+  { id: 29, name: "DBeaver", icon: "dbeaver.svg", category: "Databases", order_index: 3 },
   { id: 19, name: "Git", icon: "git.svg", category: "Tools & Others", order_index: 0 },
   { id: 20, name: "GitHub", icon: "github.svg", category: "Tools & Others", order_index: 1 },
   { id: 21, name: "Figma", icon: "figma.svg", category: "Tools & Others", order_index: 2 },
@@ -269,4 +270,5 @@ export const DEFAULT_SKILLS: SkillItem[] = [
   { id: 26, name: "Scikit-Learn", icon: "scikitlearn.svg", category: "Tools & Others", order_index: 7 },
   { id: 27, name: "Vercel", icon: "vercel.svg", category: "Tools & Others", order_index: 8 },
   { id: 28, name: "n8n", icon: "n8n.svg", category: "Tools & Others", order_index: 9 },
+  { id: 30, name: "Laragon", icon: "laragon.svg", category: "Tools & Others", order_index: 10 },
 ];
