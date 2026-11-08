@@ -32,7 +32,7 @@ export default function About({ profile }: { profile?: PersonalInfo }) {
           </h2>
 
           {/* 2. About Bio Description */}
-          <p className="md:text-2xl text-lg text-black/70 mb-8 font-normal leading-relaxed">
+          <p className="md:text-2xl text-lg text-black/70 mb-8 font-normal leading-relaxed whitespace-pre-line">
             {activeProfile.about}
           </p>
 

@@ -88,7 +88,7 @@ export default function ProjectModal({ project, onClose }: ProjectModalProps) {
 
           <div className="space-y-2">
             <h4 className="text-base font-medium text-black">{project.tagline}</h4>
-            <p className="text-black/70 text-sm leading-relaxed">{project.description}</p>
+            <p className="text-black/70 text-sm leading-relaxed whitespace-pre-line">{project.description}</p>
           </div>
 
           {/* Key Features */}

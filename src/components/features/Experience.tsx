@@ -108,7 +108,7 @@ export default function Experience({
                 </h4>
 
                 {item.description && (
-                  <p className="text-black/60 group-hover:text-black/80 max-w-2xl leading-relaxed text-sm sm:text-base transition-colors duration-200 mb-3">
+                  <p className="text-black/60 group-hover:text-black/80 max-w-2xl leading-relaxed text-sm sm:text-base transition-colors duration-200 mb-3 whitespace-pre-line">
                     {item.description}
                   </p>
                 )}
